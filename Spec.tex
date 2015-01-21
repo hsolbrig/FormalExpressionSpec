@@ -11,7 +11,10 @@
 \raggedbottom
 \include{uml_style}
 
+\title{A Declarative Semantics for SNOMED~CT Expression Constraints}
+
 \begin{document}
+\maketitle
 \tableofcontents
 
 \section{Axiomatic Data Types}
@@ -72,6 +75,11 @@ not a member of this set MUST be treated as an error.}
 \item{\textbf{refset}} The reference sets within the context of the substrate whose members are members are concept identifiers (i.e. are in $c$).  While not formally spelled out in this specification, it is assumed that the typical reference set function would be returning a subset of the $refsetId$/$referencedComponentId$ tuples represented in one or more RF2 Refset Distribution tables.
 \end{itemize}
 
+\textbf{Issue:} this is currently the simplest possible kind of Substrate; it represents the DNF form of SNOMED~CT with concepts only
+(i.e., \textit{Expressions} and \textit{Expression Libraries} are not supported).
+
+\textbf{Issue:} this is a \textit{flat} representation (fixed to 1 level of nesting corresponding to role grouping) and does not properly handle Concrete Domains (which almost always involve additional nesting
+
 \paragraph{Open questions:}
 While the Core will not contain cycles, and probably NRC Extensions will not, arbitrary extensions (e.g. as a result of handling Expression libraries) may involve cycles (or at least equivalent concepts).
 \begin{itemize}
@@ -80,6 +88,7 @@ While the Core will not contain cycles, and probably NRC Extensions will not, ar
 could potentially render the transitive closure as logically derived from ($r$).  \textbf{Answer: } If substrate includes postcoordinated expressions then subsumption would need to be calculated. \textbf{Followup: } How does one know whether it includes postcoordinated expressions?  How do we express this decision formally?
 \item Do we want to assert that it is an error to use a non-attribute concept in a attribute position?  If not, should we explicitly include a formal definition of the attribute set? \textbf{Answer: }  Because the ECL doesn't declare this as an error condition, we shouldn't assert in the Z spec.  \textbf{Resolution: } $   a = descs~linkage\_concept $ assertion pulled from the substrate declaration.
 \end{itemize}
+
 \subsection{Substrate Components}
 \paragraph{Quad}
 Relationships in the substrate are represented a 4 element tuples or ``Quads'', which consist of a subject, attribute, target and role group identifier.
