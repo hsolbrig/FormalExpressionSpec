@@ -69,16 +69,16 @@ not a member of this set MUST be treated as an error.}
 \item{\textbf{r}} A set of relationship quads (subject, attribute, target, group)
 \item{\textbf{descs}} The subsumption (ISA) closure from general to specific (descendants)
 \item{\textbf{ancs}}  The subsumption (ISA) closure from specific to general (ancestors)
-\item{\textbf{rs}} The reference sets within the context of the substrate whose members are members are concept identifiers (i.e. are in $c$).  While not formally spelled out in this specification, it is assumed that the typical reference set function would be returning a subset of the $refsetId$/$referencedComponentId$ tuples represented in one or more RF2 Refset Distribution tables.
+\item{\textbf{refset}} The reference sets within the context of the substrate whose members are members are concept identifiers (i.e. are in $c$).  While not formally spelled out in this specification, it is assumed that the typical reference set function would be returning a subset of the $refsetId$/$referencedComponentId$ tuples represented in one or more RF2 Refset Distribution tables.
 \end{itemize}
 
 \paragraph{Open questions:}
+While the Core will not contain cycles, and probably NRC Extensions will not, arbitrary extensions (e.g. as a result of handling Expression libraries) may involve cycles (or at least equivalent concepts).
 \begin{itemize}
-\item While the Core will not contain cycles, and probably NRC Extensions will not, arbitrary extensions (e.g. as a result of handling Expression libraries) may involve cycles (or at least equivalent concepts).
-This raises questions like should descendantsOf (c1) include c1 and c2 if c1 $\equiv$ c2.
+\item \textbf{Resolution: } A reflexive, symmetric equivalence relationship ($equiv$) was added to the substrate.  How it is determined is left unspecified, but a rule was added saying that an equivalent concept can not be a descendant of its equivalence.
 \item Is it correct to interpret the transitive closure directly against the substrate relationships ($r$) set or is there an implication of a reasoner being invoked somewhere, which 
-could potentially render the transitive closure as logically derived from ($r$).  (I'd argue for the former, which is how it is spelled out below.
-\item Do we want to assert that it is an error to use a non-attribute concept in a attribute position?  If not, should we explicitly include a formal definition of the attribute set?
+could potentially render the transitive closure as logically derived from ($r$).  \textbf{Answer: } If substrate includes postcoordinated expressions then subsumption would need to be calculated. \textbf{Followup: } How does one know whether it includes postcoordinated expressions?  How do we express this decision formally?
+\item Do we want to assert that it is an error to use a non-attribute concept in a attribute position?  If not, should we explicitly include a formal definition of the attribute set? \textbf{Answer: }  Because the ECL doesn't declare this as an error condition, we shouldn't assert in the Z spec.  \textbf{Resolution: } $   a = descs~linkage\_concept $ assertion pulled from the substrate declaration.
 \end{itemize}
 \subsection{Substrate Components}
 \paragraph{Quad}
@@ -104,12 +104,14 @@ The formal definition of substrate follows, where c and r are given and the rema
 \begin{enumerate}
 \item All subjects and attributes and targets of type $object$ in $r$  must be members of the set of concepts, $c$.  All attributes are also members of $a$.
 \item The $is_a$ relation is irreflexive.
-\item The $childOf$ relationship is defined as the function from a concept in $c$ to the set of concepts that are the target of $c$ in an $is\_a$ relationship in the $zero\_group$
-\item The $parentOf$ relationship is defined as a function from a concept $c$ to the set of concepts that are the source of of $c$ in an $is\_a$ relationship in the $zero\_group$
-\item The $parentOf$ and $childOf$ relationships are irreflexive.
-\item The ancestors function, $ancs$ is the \emph{irreflexive} transitive closure of the $childOf$ relationship.
-\item The descendants, $descs$ is the  \emph{irreflexive} transitive closure of the inverse of the $parentOf$ relationship. 
-\item The reference set function is a function from  \emph{subset of} $c$ to set of SCTID's in $c$.  \req{An SCTID that is not in the domain of $rs$ cannot appear as the target of a memberOf function}
+\item $childOf$ is a function from a concept in $c$ to the set of concepts that are the source of $c$ in an $is\_a$ relationship in the $zero\_group$
+\item $parentOf$ is a function from a concept $c$ to the set of concepts that are the target of of $c$ in an $is\_a$ relationship in the $zero\_group$
+\item $parentOf$ and $childOf$ are irreflexive.
+\item The $equiv$ relationship is symmetric and reflexive.
+\item The ancestors function, $ancs$ ,is the \emph{irreflexive} transitive closure of the $childOf$ relationship.
+\item The descendants function, $descs$, is the  \emph{irreflexive} transitive closure of the inverse of the $parentOf$ relationship. 
+\item The descendants relationship must not contain any concepts that are declared as equivalent to the root.
+\item The reference set function is a function from  \emph{subset of} $c$ to set of SCTID's in $c$.  A SCTID that is not in the domain of $refset$ cannot appear as the target of a $memberOf$ function
 \end{enumerate}
 \begin{schema}{Substrate}
    c : \power SCTID \\
@@ -118,7 +120,8 @@ The formal definition of substrate follows, where c and r are given and the rema
    a :  \power c \\
    descs : c \fun \power c \\
    ancs : c \fun \power c \\
-   rs : REFSETID \fun \power c \\
+   equiv : c \rel c \\
+   refset : REFSETID \fun \power c \\
 \also
    childOf : c \fun \power c \\
    parentOf : c \fun \power c
@@ -129,11 +132,14 @@ The formal definition of substrate follows, where c and r are given and the rema
     \forall s : c;  d : \power c @ childOf~s = \{d : c | (s, is\_a, d, zero\_group) \in r \} \\
     \forall d : c;  s:  \power c @ parentOf~d = \{s : c | (s, is\_a, d, zero\_group) \in r \}
 \also
+   \forall x : c @ (x \mapsto x) \in equiv \\
+   \forall x_1, x_2 : c @ x_1 \mapsto x_2 \in equiv \iff x_2 \mapsto x_1 \in equiv
+\also
    descs = childOf \plus \\
    ancs = parentOf \plus \\
-   a = descs~linkage\_concept
+   \forall r: equiv @ first~r \in \dom descs \implies second~r \notin descs~r
 \also
-    \dom rs \subseteq c 
+    \dom refset \subseteq c 
 \end{schema}
 
 
@@ -234,12 +240,10 @@ The interpretation of  \spec{simpleExpressionConstraint} is the application of a
 operator to the interpretation of \spec{focusConcept}, which returns a set of SCTID's or an error.
 The interpretation of an error is the error.
 
-\spec{exclusionIndicator} is ignored on the assumption that it is to be represented as the added
-binary difference operator.
 
 \begin{verbatim}
 simpleExpressionConstraint =  
-     [exclusionIndicator] [constraintOperator ] focusConcept
+     [constraintOperator ] focusConcept
 \end{verbatim}
 
 
@@ -260,54 +264,138 @@ i\_simpleExpressionConstraint~ss~sec =  \\
 
 
 \subsection{compoundExpressionConstraint}
-$compoundExpressionConstraint$ is interpreted as a sequence of $simpleExpressionConstraint$ interpretations
-joined by compound operators.  The sequence is interpreted from left to right
+The interpretation of a $compoundExpressionConstraint$ is the interpretation of its corresponding component.
 \begin{verbatim}
-compoundExpressionConstraint = simpleExpressionConstraint 
-       1*( compoundOperator simpleExpressionConstraint) /
+compoundExpressionConstraint = conjunctionExpressionConstraint |
+       disjunctionExpressionConstraint | exclusionExpressionConstraint |
         "(" compoundExpressionConstraint ")"
 \end{verbatim}
 
 \begin{zed}
-compoundOperator ::= conjunction | disjunction | difference \\
-compoundEntry \defs [op: compoundOperator; cons: simpleExpressionConstraint] \\
-compoundExpressionConstraint == simpleExpressionConstraint \cross \\
-\t2 \seq (compoundEntry) \\
+compoundExpressionConstraint ::= \\
+\t2 cecConj \ldata conjunctionExpressionConstraint \rdata | \\
+\t2 cecDisj \ldata disjunctionExpressionConstraint \rdata | \\
+\t2 cecExc \ldata exclusionExpressionConstraint \rdata 
 \end{zed}
 
 \begin{gendef}
    i\_compoundExpressionConstraint : \\
-\t1 Substrate \fun compoundExpressionConstraint \fun Result \\
+\t2 Substrate \pfun compoundExpressionConstraint \pfun Result
 \where
-   \forall ss : Substrate; cec : compoundExpressionConstraint @ \\
-    i\_compoundExpressionConstraint~ss~cec = \\
-\t1 nextCEC~ss~(i\_simpleExpressionConstraint~ss~(first~cec))~(second~cec)
+  \forall ss : Substrate; cec : compoundExpressionConstraint @ \\
+ i\_compoundExpressionConstraint~ss~cec = \\
+ \t1 \IF cec \inv cecConj \in conjunctionExpressionConstraint \\
+\t2 \THEN i\_compoundExpressionConstraint~ss~(cecConj \inv cec) \\
+ \t1 \ELSE \IF cec \inv cecDisj \in disjunctionExpressionConstraint \\
+\t2 \THEN i\_compoundExpressionConstraint~ss~(cecDisj \inv cec) \\
+ \t1 \ELSE \IF cec \inv cecExc \in exclusionExpressionConstraint \\
+\t2 \THEN i\_compoundExpressionConstraint~ss~(cecExc \inv cec) \\
+\t1 \ELSE error~ unknownOperation
 \end{gendef}
 
+
+\subsection{conjunctionExpressionConstraint}
+$conjunctionExpressionConstraint$ is interpreted the conjunction (intersection) of the interpretation of two or more
+$subExpressionConstraints$
+\begin{verbatim}
+conjunctionExpressionConstraint = 
+        subExpressionConstraint 1*(conjunction subExpressionConstraint)
+\end{verbatim}
+
+\begin{zed}
+conjunctionExpressionConstraint == subExpressionConstraint \cross \seq(subExpressionConstraint)
+\end{zed}
+
 \begin{gendef}
-   nextCEC : \\
-\t1 Substrate \fun Result \fun \\
-\t2 \seq compoundEntry \fun Result
-\also
-   evalCEC : \\
-\t1 Substrate \fun Result \fun compoundOperator \fun \\
-\t2 simpleExpressionConstraint \fun Result
+    i\_conjunctionExpressionConstraint : \\
+\t2 Substrate \pfun subExpressionConstraint \pfun \seq(subExpressionConstraint) \pfun Result
 \where
-   \forall ss:Substrate; lhs : Result; e :  \seq compoundEntry @ \\
-   nextCEC~ss~lhs~e = \\
-\t1 \IF e = \langle \rangle \THEN lhs \\
-\t1 \ELSE nextCEC~ss~(evalCEC~ss~lhs~(head~e).op~(head~e).cons)~(tail~e) 
-\also
-   \forall ss:Substrate; lhs : Result ; op: compoundOperator; rhs : simpleExpressionConstraint @ \\
-   evalCEC~ss~lhs~op~rhs = \\
-\t1 \IF op = conjunction \\
-\t2 \THEN intersect~~ lhs (i\_simpleExpressionConstraint~ss~rhs) \\
-\t1 \ELSE \IF op = disjunction \\
-\t2 \THEN union~~ lhs (i\_simpleExpressionConstraint~ss~rhs) \\
-\t1 \ELSE \IF op = difference \\
-\t2 \THEN minus~~ lhs (i\_simpleExpressionConstraint~ss~rhs)  \\
-\t2 \ELSE error~ unknownOperation
+   \forall ss : Substrate; sec: subExpressionConstraint ; secs : \seq(subExpressionConstraint@ \\
+i\_conjunctionExpressionConstraint~ss~sec~secs = \\
+\t1 \IF tail~secs = \langle \rangle \THEN \\
+\t2 intersect~~(i\_subExpressionConstraint~ss~sec) \\
+\t3 (i\_subExpressionConstraint~ss~(head~secs)) \\
+\t1 \ELSE \\
+\t2 intersect~~(i\_subExpressionConstraint~ss~sec) \\
+\t3 (i\_conjunctionExpressionConstraint~ss~(head~secs)~(tail~secs))
 \end{gendef}
+
+\subsection{disjunctionExpressionConstraint}
+$disjunctionExpressionConstraint$ is interpreted the disjunction (union) of the interpretation of two or more
+$subExpressionConstraints$
+\begin{verbatim}
+disjunctionExpressionConstraint = 
+      subExpressionConstraint 1*(disjunction subExpressionConstraint)
+\end{verbatim}
+
+\begin{zed}
+disjunctionExpressionConstraint == \\
+\t2 subExpressionConstraint \cross \seq(subExpressionConstraint)
+\end{zed}
+
+\begin{gendef}
+    i\_disjunctionExpressionConstraint : \\
+\t2 Substrate \pfun subExpressionConstraint \pfun \seq(subExpressionConstraint) \pfun Result
+\where
+   \forall ss : Substrate; sec: subExpressionConstraint ; secs : \seq(subExpressionConstraint@ \\
+i\_disjunctionExpressionConstraint~ss~sec~secs = \\
+\t1 \IF tail~secs = \langle \rangle \THEN \\
+\t2 union~~(i\_subExpressionConstraint~ss~sec) \\
+\t3 (i\_subExpressionConstraint~ss~(head~secs)) \\
+\t1 \ELSE \\
+\t2 union~~(i\_subExpressionConstraint~ss~sec) \\
+\t3 (i\_disjunctionExpressionConstraint~ss~(head~secs)~(tail~secs))
+\end{gendef}
+
+\subsection{exclusionExpressionConstraint}
+$exclusionExpressionConstraint$ is interpreted the result of removing the members of the second
+$subExpressionConstraint$ from the first
+\begin{verbatim}
+exclusionExpressionConstraint = 
+      subExpressionConstraint exclusion subExpressionConstraint
+\end{verbatim}
+
+\begin{zed}
+exclusionExpressionConstraint == \\ 
+\t2subExpressionConstraint \cross subExpressionConstraint
+\end{zed}
+
+\begin{gendef}
+    i\_exclusionExpressionConstraint : \\
+\t2 Substrate \pfun subExpressionConstraint \pfun subExpressionConstraint \pfun Result
+\where
+   \forall ss : Substrate; sec1, sec2: subExpressionConstraint @ \\
+i\_exclusionExpressionConstraint~ss~sec1~sec2 = \\
+\t1~ minus~~ (i\_subExpressionConstraint~ss~sec1)~ (i\_subExpressionConstraint~ss~sec2)
+\end{gendef}
+
+\subsection{subExpressionConstraint}
+$subExpressionConstraint$ is interpreted as the interpretation of either a $simpleExpressionConstraint$
+or a $compoundExpressionConstraint$
+\begin{verbatim}
+subExpressionConstraint =
+      simpleExpressionConstraint | "(" compoundExpressionConstraint ")
+\end{verbatim}
+
+\begin{zed}
+subExpressionConstraint ::= \\
+\t1 secSec \langle simpleExpressionConstraint \rangle | \\
+\t1 secCec \langle compoundExpressionConstraint \rangle
+\end{zed}
+
+\begin{gendef}
+   i\_subExpressionConstraint : \\
+\t2 Substrate \pfun subExpressionConstraint \pfun Result
+\where
+   \forall ss : Substrate; sec : subExpressionConstraint @ \\
+i\_subExpressionConstraint = \\
+ \t1 \IF sec \inv secSec \in simpleExpressionConstraint \\
+\t2 \THEN i\_simpleExpressionConstraint~ss~(secSec \inv sec) \\
+ \t1 \ELSE \IF sec \inv secCec \in compoundExpressionConstraint \\
+\t2 \THEN i\_compoundExpressionConstraint~ss~(secCec \inv sec) \\
+\t1 \ELSE error~ unknownOperation
+\end{gendef}
+
 
 \subsection{refinement}
 \spec{refinement} is the interpretation of one or more \spec{attribute} or \spec{attributeGroup}s joined
@@ -759,18 +847,18 @@ $Result$.  Error conditions are propagated.
 \also
    completeFun : (SCTID \pfun \power SCTID) \fun SCTID \fun \power SCTID \\
 \where
-	\forall ss : Substrate; oco : \optional[constraintOperator]; rs : Result @ \\
-i\_constraintOperator~ss~oco~rs = \\
-\t1 \IF error \inv rs \in ERROR \lor \# oco = 0 \\
-\t2 \THEN rs \\
+	\forall ss : Substrate; oco : \optional[constraintOperator]; refset : Result @ \\
+i\_constraintOperator~ss~oco~refset = \\
+\t1 \IF error \inv refset \in ERROR \lor \# oco = 0 \\
+\t2 \THEN refset \\
 \t1 \ELSE \IF head~oco = descendantOrSelfOf~ \\
-\t2 \THEN v (\bigcup \{id : ids~rs @ completeFun~ss.descs~id \cup \{id\}~\}) \\
+\t2 \THEN v (\bigcup \{id : ids~refset @ completeFun~ss.descs~id \cup \{id\}~\}) \\
 \t1 \ELSE \IF head~oco = descendantOf~ \\
-\t2 \THEN v  (\bigcup \{id : ids~rs @ completeFun~ss.descs~id \setminus \{id\}~\}) \\
+\t2 \THEN v  (\bigcup \{id : ids~refset @ completeFun~ss.descs~id \setminus \{id\}~\}) \\
 \t1 \ELSE \IF head~oco = ancestorOrSelfOf~ \\
-\t2 \THEN  v (\bigcup \{id : ids~rs @ completeFun~ss.ancs~id \cup \{id\}~\}) \\
+\t2 \THEN  v (\bigcup \{id : ids~refset @ completeFun~ss.ancs~id \cup \{id\}~\}) \\
 \t1 \ELSE \IF head~oco = ancestorOf~ \\
-\t2 \THEN v (\bigcup \{id : ids~rs @ completeFun~ ss.ancs~id \setminus \{id\}~\}) \\
+\t2 \THEN v (\bigcup \{id : ids~refset @ completeFun~ ss.ancs~id \setminus \{id\}~\}) \\
 \t1 \ELSE error~ unknownOperation
 \also
    \forall f : (SCTID \pfun \power SCTID); id : SCTID @ completeFun~f~id = \\
@@ -927,13 +1015,13 @@ and returns an aggregation of all of the errors.
 \t1 \ELSE \IF error \inv y \in ERROR \THEN y \\
 \t1 \ELSE v~((v \inv x) \setminus (v \inv y))
 \also
-  \forall rs : \power Result @ bigunion~rs = \\
-\t1 \IF \exists r : rs @ error \inv r \in ERROR \THEN firstError~ rs \\
-\t1 \ELSE v~(\bigcup \{r : rs @ ids~r\})
+  \forall refset : \power Result @ bigunion~refset = \\
+\t1 \IF \exists r : refset @ error \inv r \in ERROR \THEN firstError~ refset \\
+\t1 \ELSE v~(\bigcup \{r : refset @ ids~r\})
 \also
-  \forall rs : \power Result @ bigintersect~rs = \\
-\t1 \IF \exists r : rs @ error \inv r \in ERROR \THEN firstError~ rs \\
-\t1 \ELSE v~(\bigcap \{r : rs @ ids~r\})
+  \forall refset : \power Result @ bigintersect~refset = \\
+\t1 \IF \exists r : refset @ error \inv r \in ERROR \THEN firstError~ refset \\
+\t1 \ELSE v~(\bigcap \{r : refset @ ids~r\})
 \end{gendef}
 
    
