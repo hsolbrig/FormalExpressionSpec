@@ -75,10 +75,10 @@ not a member of this set MUST be treated as an error.}
 \item{\textbf{refset}} The reference sets within the context of the substrate whose members are members are concept identifiers (i.e. are in $c$).  While not formally spelled out in this specification, it is assumed that the typical reference set function would be returning a subset of the $refsetId$/$referencedComponentId$ tuples represented in one or more RF2 Refset Distribution tables.
 \end{itemize}
 
-\textbf{Issue:} this is currently the simplest possible kind of Substrate; it represents the DNF form of SNOMED~CT with concepts only
+\paragraph{Issue:} this is currently the simplest possible kind of Substrate; it represents the DNF form of SNOMED~CT with concepts only
 (i.e., \textit{Expressions} and \textit{Expression Libraries} are not supported).
 
-\textbf{Issue:} this is a \textit{flat} representation (fixed to 1 level of nesting corresponding to role grouping) and does not properly handle Concrete Domains (which almost always involve additional nesting
+\paragraph{Issue:} this is a \textit{flat} representation (fixed to 1 level of nesting corresponding to role grouping) and does not properly handle Concrete Domains (which almost always involve additional nesting
 
 \paragraph{Open questions:}
 While the Core will not contain cycles, and probably NRC Extensions will not, arbitrary extensions (e.g. as a result of handling Expression libraries) may involve cycles (or at least equivalent concepts).
@@ -117,8 +117,8 @@ The formal definition of substrate follows, where c and r are given and the rema
 \item $parentOf$ is a function from a concept $c$ to the set of concepts that are the target of of $c$ in an $is\_a$ relationship in the $zero\_group$
 \item $parentOf$ and $childOf$ are irreflexive.
 \item The $equiv$ relationship is symmetric and reflexive.
-\item The ancestors function, $ancs$ ,is the \emph{irreflexive} transitive closure of the $childOf$ relationship.
-\item The descendants function, $descs$, is the  \emph{irreflexive} transitive closure of the inverse of the $parentOf$ relationship. 
+\item The ancestors function, $ancs$, is the \emph{irreflexive} transitive closure of the $childOf$ relationship.
+\item The descendants function, $descs$, is the  \emph{irreflexive} transitive closure of the $parentOf$ relationship. 
 \item The descendants relationship must not contain any concepts that are declared as equivalent to the root.
 \item The reference set function is a function from  \emph{subset of} $c$ to set of SCTID's in $c$.  A SCTID that is not in the domain of $refset$ cannot appear as the target of a $memberOf$ function
 \end{enumerate}
