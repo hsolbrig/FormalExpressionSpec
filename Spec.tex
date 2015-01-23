@@ -511,7 +511,6 @@ attribute = [cardinality] [reverseFlag] [attributeOperator] attributeName
 attributeGroup = "{" attributeSet "}" 
 attributeSet = attribute [binaryOperator  attributeSet] / "(" attributeSet ")" 
 cardinality = "[" nonNegativeIntegerValue to (nonNegativeIntegerValue / many) "]" 
-constraintOperator = descendantOrSelfOf / descendantOf /  ancestorOrSelfOf / ancestorOf 
 attributeOperator = descendantOrSelfOf / descendantOf 
 comparisonOperator = "=" / "!" ws "=" / 
     ("n"/"N") ("o"/"O") ("t"/"T") ws "=" / "<=" / "<" / ">=" /  ">"
@@ -842,13 +841,13 @@ concreteValue ::= stringValue | integerValue | realValue
 
 
 \subsection{ConstraintOperator}
-
-
-\textbf{Issue:} What is the behavior on a transitive closure that has a cycle?  At the moment we always remove the
-focus concept on $descendantsOf$ and $ancestorsOf$ \\
+\begin{verbatim}
+constraintOperator = 
+         descendantOrSelfOf / descendantOf /  ancestorOrSelfOf / ancestorOf 
+\end{verbatim}
 
 \noindent
-\textbf{Interpretation:}  Apply the substrate forward ($descs$) or reverse ($ancs$) functions to a set of SCTID's in the supplied
+\textbf{Interpretation:}  Apply the substrate descendants ($descs$) or ancestors ($ancs$) function to a set of SCTID's in the supplied
 $Result$.  Error conditions are propagated.
 
 
@@ -883,6 +882,9 @@ i\_constraintOperator~ss~oco~refset = \\
 focusConcept = [memberOf] conceptReference
 \end{verbatim}
 
+\textbf{Interpretation:}  focusConcept is interpreted as the interpretation of conceptReference itself or, if memberOf is specified, the interpretation of the memberOf function
+applied to the conceptReference
+
 \begin{zed}
 focusConcept ::= mo \ldata conceptReference \rdata | cr \ldata conceptReference \rdata
 \end{zed}
@@ -899,6 +901,9 @@ i\_focusConcept~ss~fc = \\
 \t1 \ELSE error~ unknownOperation
 \end{gendef}
 
+\subsubsection{memberOf}
+\textbf{Interpretation:} memberOf is interpreted as application $refset$ function to the conceptReference SCTID or an error if the SCTID isn't in the domain of the $refset$ function.
+
 \begin{gendef}
    i\_memberOf : Substrate \fun conceptReference \fun Result
 \where
@@ -914,8 +919,8 @@ i\_memberOf~ss~cr = \\
 conceptReference = conceptId [ "|" Term "|"]
 conceptId = sctId
 \end{verbatim}
-\textbf{Interpretation:}  conceptReference is interpreted as SCTID if it is in the list of concepts
-in the substrate, otherwise as an error.
+\textbf{Interpretation:}  conceptReference is interpreted as $SCTID$ if it is a member the list of concepts, $c$
+in the substrate, otherwise as an $error$.
 
 \begin{zed}
 [conceptReference]
@@ -930,12 +935,16 @@ in the substrate, otherwise as an error.
 \t1 \ELSE error~ unknownConceptReference
 \end{gendef}
 
-\section{Helper Functions}
+\section{Glue and Helper Functions}
+This section carries various type transformations and error checking functions
+
+\subsection{Types}
 
 \begin{itemize}[noitemsep,nolistsep]
-\item{$Quads$} is either a collection of $Quad$s or an error condition. If $Quad$s, it also carries
+\item \textbf{direction} -- an indicator whether a collection of quads was determined as subject to target ($subjects$) or target to subject ($targets$)
+\item \textbf{Quads} --  a collection of $Quad$s or an error condition. If it is a collection $Quad$s, it also carries
 a direction indicator that determines whether it represents a set of subjects or targets. 
-\item{$IDGroups$} is a map from SCTID's to their passing groups or an error condition
+\item \textbf{IDGroups} -- a map from $SCTID$s to the $GROUP$ they were in when they passed if successful, otherwise an error indication.
 \end{itemize}
 
 \begin{zed}
@@ -945,15 +954,14 @@ Quads ::= qv \ldata \power Quad \cross direction \rdata | qerror \ldata ERROR \r
 IDGroups ::= gv \ldata SCTID \pfun \power GROUP \rdata | gerror \ldata ERROR \rdata
 \end{zed}
 
-\paragraph{Results functions}
-
+\subsection{Result transformations}
 \begin{itemize}[noitemsep,nolistsep]
-\item{$ids$} -- return the set of sctids in a result or the empty set if there is an error
-\item{$qids$} -- return the set of quads in a quads result or an empty set if there is an error
-\item{$qidd$} -- return the direction of a quads result.  Undefined if error
-\item{$gids$} -- return the sctid to group map in an id group or an empty map if there is error
-\item{$gresult$} -- convert a set of quads int a set of id groups
-\item{$result$} -- convert a set of id groups into a simple result.
+\item \textbf{ids} -- return the set of $SCTID$s in a result or the empty set if there is an error
+\item \textbf{qids} -- return the set of $Quads$ in a quads result or an empty set if there is an error
+\item \textbf{qidd} -- return the direction of a $Quads$ result.  Undefined if error
+\item \textbf{gids} -- return the $SCTID$ to group map in an id group or an empty map if there is error
+\item \textbf{gresult} -- convert a set of quads int a set of id groups
+\item \textbf{result} -- convert a set of id groups into a simple result.
 \end{itemize}
 \begin{gendef}
    ids: Result \fun \power SCTID \\
@@ -996,6 +1004,20 @@ IDGroups ::= gv \ldata SCTID \pfun \power GROUP \rdata | gerror \ldata ERROR \rd
 
 \paragraph{}
 Definition of the various functions that are performed on the result type. \\
+\begin{itemize}[noitemsep,nolistsep]
+\item \textbf{firstError} -- take a set of $Result$s with one or more errors and return an aggregation / summary as a $Result$.  (Not fully defined)
+\item \textbf{qfirstError} -- take a set of $Result$s with one or more errors and return an aggregation / summary as a $Quads$ instance. (not fully defined)
+\end{itemize}
+
+\begin{itemize}[noitemsep]
+\item \textbf{union} -- return the union of two $Result$ $SCTID$s or $ERROR$ if either of them have an error.
+\item \textbf{intersect} -- return the intersection of two  $Result$ $SCTID$s or $ERROR$ if either of them have an error.
+\item \textbf{minus} -- return the set of $SCTID$s in the first set of results that are not in the second or $ERROR$ if either of them have an error.
+\item \textbf{bigunion} -- return the union of a set $Result$ $SCTID$s or $ERROR$ if any of the results in the set have an error.
+\item \textbf{bigintersect} -- return the intersection of a set $Result$ $SCTID$s or $ERROR$ if any of the results in the set have an error.
+\end{itemize}
+
+
 $firstError$ is not fully defined -- it takes a set of results with one or more errors
 and returns an aggregation of all of the errors.
 \begin{gendef}
@@ -1019,21 +1041,18 @@ and returns an aggregation of all of the errors.
 \t1 \ELSE \IF error \inv y \in ERROR \THEN y \\
 \t1 \ELSE ok~((ok \inv x) \setminus (ok \inv y))
 \also
-  \forall refset : \power Result @ bigunion~refset = \\
-\t1 \IF \exists r : refset @ error \inv r \in ERROR \THEN firstError~ refset \\
-\t1 \ELSE ok~(\bigcup \{r : refset @ ids~r\})
+  \forall rs : \power Result @ bigunion~rs = \\
+\t1 \IF \exists r : rs @ error \inv r \in ERROR \THEN firstError~ rs \\
+\t1 \ELSE ok~(\bigcup \{r : rs @ ids~r\})
 \also
-  \forall refset : \power Result @ bigintersect~refset = \\
-\t1 \IF \exists r : refset @ error \inv r \in ERROR \THEN firstError~ refset \\
-\t1 \ELSE ok~(\bigcap \{r : refset @ ids~r\})
+  \forall rs : \power Result @ bigintersect~rs = \\
+\t1 \IF \exists r : rs @ error \inv r \in ERROR \THEN firstError~ rs \\
+\t1 \ELSE ok~(\bigcap \{r : rs @ ids~r\})
 \end{gendef}
 
    
 
-
-
-
-\appendix
+\section{Appendix 1}
 Representing optional elements of type $T$.  Representing it as a sequence allows us to
 determine absence by $\#T = 0$ and the value by $head~T$. 
 
@@ -1042,12 +1061,6 @@ determine absence by $\#T = 0$ and the value by $head~T$.
 \end{zed}
 
 \end{document}
-
-
-
-    
-   I
-
 
 
    
