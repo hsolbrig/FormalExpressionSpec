@@ -32,7 +32,6 @@ We also introduce several synonyms for $SCTID$:
 \begin{itemize}[noitemsep]
 \item \textbf{SUBJECT} -- a $SCTID$ that appears in the \emph{sourceId} position of a relationship.
 \item \textbf{ATTRIBUTE} -- a $SCTID$ that appears in the \emph{typeId} position of a relationship.
-\item \textbf{OBJECT} -- a $SCTID$ that appears in the \emph{destinationId} position of a relationship.
 \item \textbf{REFSETID} -- a $SCTID$ that identifies a reference set
 \end{itemize}
 
@@ -41,7 +40,6 @@ We also introduce several synonyms for $SCTID$:
 \also
 SUBJECT == SCTID \\
 ATTRIBUTE == SCTID \\
-OBJECT == SCTID \\
 REFSETID == SCTID 
 \end{zed}
 
@@ -50,11 +48,11 @@ While we can't fully specify the behavior of the concrete data types portion of 
 to spell out the anticipated behavior on an abstract level.
 \begin{itemize}[noitemsep,nolistsep]
 \item \textbf{CONCRETEVALUE} -- a string, integer or real literal
-\item \textbf{TARGET} -- the target of a relationship that is either an OBJECT or a CONCRETEVALUE
+\item \textbf{TARGET} -- the target of a relationship that is either an SCTID or a CONCRETEVALUE
 \end{itemize}
 \begin{zed}
 CONCRETEVALUE ::= string \ldata STRING \rdata | integer \ldata \num \rdata | real \ldata REAL \rdata \\
-TARGET ::= object \ldata OBJECT \rdata | concrete \ldata CONCRETEVALUE \rdata
+TARGET ::= object \ldata SCTID \rdata | concrete \ldata CONCRETEVALUE \rdata
 \end{zed}
 
 \section{The Substrate}
@@ -131,13 +129,13 @@ through the application of a DL reasoner.
    equiv : \power (SCTID \cross SCTID) \\
    refset : REFSETID \pfun \power SCTID \\
 \where
-   \forall rel : r @  rel.s \in c \land rel.a \in c \land (object \inv rel.t \in SCTID \implies object \inv rel.t \in c)  \\
+   \forall rel : r @  rel.s \in c \land rel.a \in a \land (object \inv rel.t \in SCTID \implies object \inv rel.t \in c)  \\
    \forall q : r @ q.a \in a \land q.a = is\_a \implies q.s \neq object \inv q.t \\
    \forall q : r @ q.a \in descs~attribute\_concept
 \also
     \dom childrenOf \subseteq c \land \bigcup (\ran childrenOf) \subseteq c \\
-    \forall s : c @ parentsOf~s = \{q: r | q.s = s \land q.a = is\_a \land q.g = zero\_group @ object \inv q.t \} \\
-    \forall t : c @ childrenOf~t = \{q: r | q.a = is\_a \land q.t = object~t \land q.g = zero\_group @ q.s \} \\
+    \forall s : c @ parentsOf~s \subseteq \{q: r | q.s = s \land q.a = is\_a \land q.g = zero\_group @ object \inv q.t \} \\
+    \forall t : c @ childrenOf~t \subseteq \{q: r | q.a = is\_a \land q.t = object~t \land q.g = zero\_group @ q.s \} \\
     \forall c1, c2 : c @ c1 \in parentsOf~c2 \iff c2 \in childrenOf~c1
 \also
    \forall x : c @ (x \mapsto x) \in equiv \\
