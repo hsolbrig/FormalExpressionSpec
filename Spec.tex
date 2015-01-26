@@ -138,11 +138,12 @@ through the application of a DL reasoner.
    equiv : \power (SCTID \cross SCTID) \\
    refset : REFSETID \pfun \power SCTID \\
 \where
+   a \subseteq c \\
    \forall rel : r @  rel.s \in c \land rel.a \in a \land (object \inv rel.t \in SCTID \implies object \inv rel.t \in c)  \\
    \forall q : r @ q.a \in a \land q.a = is\_a \implies q.s \neq object \inv q.t \\
    \forall q : r @ q.a \in descs~attribute\_concept
 \also
-    \dom childrenOf \subseteq c \land \bigcup (\ran childrenOf) \subseteq c \\
+    \dom childrenOf = c \land \bigcup (\ran childrenOf) \subseteq c \\
     \forall s : c @ parentsOf~s \subseteq \{q: r | q.s = s \land q.a = is\_a \land q.g = zero\_group @ object \inv q.t \} \\
     \forall t : c @ childrenOf~t \subseteq \{q: r | q.a = is\_a \land q.t = object~t \land q.g = zero\_group @ q.s \} \\
     \forall c1, c2 : c @ c1 \in parentsOf~c2 \iff c2 \in childrenOf~c1
