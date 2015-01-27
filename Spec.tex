@@ -519,7 +519,6 @@ attribute = [cardinality] [reverseFlag] [attributeOperator] attributeName
 attributeGroup = "{" attributeSet "}" 
 attributeSet = attribute [binaryOperator  attributeSet] / "(" attributeSet ")" 
 cardinality = "[" nonNegativeIntegerValue to (nonNegativeIntegerValue / many) "]" 
-attributeOperator = descendantOrSelfOf / descendantOf 
 comparisonOperator = "=" / "!" ws "=" / 
     ("n"/"N") ("o"/"O") ("t"/"T") ws "=" / "<=" / "<" / ">=" /  ">"
 \end{verbatim}
