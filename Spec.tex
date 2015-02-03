@@ -32,6 +32,7 @@ This section identifies the atomic data types that are assumed for the rest of t
 
 
 We also introduce several synonyms for $SCTID$:
+\textbf{TODO:} change SUBJECT to SOURCE
 \begin{itemize}[noitemsep]
 \item \textbf{SUBJECT} -- a $SCTID$ that appears in the \emph{sourceId} position of a relationship.
 \item \textbf{ATTRIBUTE} -- a $SCTID$ that appears in the \emph{typeId} position of a relationship.
@@ -111,7 +112,7 @@ refset\_concept : SCTID
 The formal definition of substrate follows, where c and r are given and the remainder are derived.  The expressions below assert that:
 \begin{enumerate}
 \item All subjects and attributes and targets of type $object$ in $r$  must be members of the set of concepts, $c$.  All attributes are also members of $a$.
-\item The $is_a$ relation is irreflexive.
+\item The $is\_a$ relation is irreflexive and can only occur in the zero group.
 \item $childrenOf$ \emph{includes} the function from a concept in $c$ to the set of concepts that are the source of $c$ in an $is\_a$ relationship in the $zero\_group$.  Note that 
 substrates that include post-coordinated expressions may include additional entries in the $childrenOf$ function that are not in the relationships table and, instead, are derived 
 through the application of a DL reasoner.
@@ -140,12 +141,10 @@ through the application of a DL reasoner.
 \where
    a \subseteq c \\
    \forall rel : r @  rel.s \in c \land rel.a \in a \land (object \inv rel.t \in SCTID \implies object \inv rel.t \in c)  \\
-   \forall q : r @ q.a \in a \land q.a = is\_a \implies q.s \neq object \inv q.t \\
-   \forall q : r @ q.a \in descs~attribute\_concept
+   \forall rel : r @ q.a = is\_a \implies (q.s \neq object \inv q.t \land q.g = zero\_group)
 \also
     \dom childrenOf = c \land \bigcup (\ran childrenOf) \subseteq c \\
-    \forall s : c @ parentsOf~s \subseteq \{q: r | q.s = s \land q.a = is\_a \land q.g = zero\_group @ object \inv q.t \} \\
-    \forall t : c @ childrenOf~t \subseteq \{q: r | q.a = is\_a \land q.t = object~t \land q.g = zero\_group @ q.s \} \\
+    \forall s : c @ parentsOf~s \subseteq \{q: r | q.s = s \land q.a = is\_a @ object \inv q.t \} \\
     \forall c1, c2 : c @ c1 \in parentsOf~c2 \iff c2 \in childrenOf~c1
 \also
    \forall x : c @ (x \mapsto x) \in equiv \\
@@ -155,12 +154,20 @@ through the application of a DL reasoner.
    \forall t : c @ ancs~t = parentsOf~ t \cup \bigcup \{s : parentsOf~ t @ ancs~s\} \\
    \forall r: equiv @ first~r \in \dom descs \implies second~r \notin (descs~(first~r))
 \also
-    \dom refset \subseteq descs~refset\_concept \land \bigcup (\ran refset) \subseteq c
+    \dom refset \subseteq c \land \bigcup (\ran refset) \subseteq c
 \end{schema}
+
+\begin{schema}{strict\_substrate}
+    Substrate
+ \where
+     \forall q : r @ q.a \in descs~attribute\_concept \\
+      \dom refset \subseteq descs~refset\_concept
+ \end{schema}
 
 
 \section{Result}
 The result of applying a query against a substrate is either a (possibly empty) set of SCTID's or an $ERROR$.
+\textbf{TODO:} Where is unknownAttribute used?
 \begin{zed}
 ERROR ::= unknownOperation | unknownConceptReference | \\
 \t3 unknownAttribute | unknownRefsetId 
