@@ -5,7 +5,8 @@
 \usepackage{framed}
 
 \def\spec#1{{\tt #1}}
-\def\req#1{{\sf {{\bf #1}} }}
+\def\req#1{{\sf {{\it #1}} }}
+\def\bnf#1{{\scriptsize {{#1}} }}
 
 
 \raggedbottom
@@ -30,29 +31,25 @@ This section identifies the atomic data types that are assumed for the rest of t
 \item \textbf{$\num$} -- an integer
 \end{itemize}
 
-
-We also introduce several synonyms for $SCTID$:
-\textbf{TODO:} change SUBJECT to SOURCE
-\begin{itemize}[noitemsep]
-\item \textbf{SUBJECT} -- a $SCTID$ that appears in the \emph{sourceId} position of a relationship.
-\item \textbf{ATTRIBUTE} -- a $SCTID$ that appears in the \emph{typeId} position of a relationship.
-\item \textbf{REFSETID} -- a $SCTID$ that identifies a reference set
-\end{itemize}
-
 \begin{zed}
-[SCTID, TERM, REAL, STRING, GROUP] \\
-\also
-SUBJECT == SCTID \\
-ATTRIBUTE == SCTID \\
-REFSETID == SCTID 
+[SCTID, TERM, REAL, STRING, GROUP] 
 \end{zed}
+
+
+We will also need to recognize some well known identifiers: the $is\_a$ attribute, the $zero\_group$ and  $attribute\_concept$, the parent of all attributes
+\begin{axdef}
+is\_a : SCTID \\
+zero\_group : GROUP \\
+attribute\_concept : SCTID \\
+refset\_concept : SCTID
+\end{axdef}
 
 \subsection{Composite Data Types}
 While we can't fully specify the behavior of the concrete data types portion of the specification at this point, it is still useful 
 to spell out the anticipated behavior on an abstract level.
 \begin{itemize}[noitemsep,nolistsep]
 \item \textbf{CONCRETEVALUE} -- a string, integer or real literal
-\item \textbf{TARGET} -- the target of a relationship that is either an SCTID or a CONCRETEVALUE
+\item \textbf{TARGET} -- the target of a relationship that is either an $SCTID$ or a $CONCRETEVALUE$
 \end{itemize}
 \begin{zed}
 CONCRETEVALUE ::= string \ldata STRING \rdata | integer \ldata \num \rdata | real \ldata REAL \rdata \\
@@ -60,225 +57,271 @@ TARGET ::= object \ldata SCTID \rdata | concrete \ldata CONCRETEVALUE \rdata
 \end{zed}
 
 \section{The Substrate}
-A substrate represents the context of an interpretation.  A substrate consists of:
-
-
-\begin{itemize}[noitemsep,nolistsep]
-\item{\textbf{c}} The set of $SCTID$s (concepts) that are considered valid in the context of the substrate.  \req{References to any $SCTID$ that is
-not a member of this set MUST be treated as an error.}
-\item{\textbf{a}} The set of $SCTID$s that are considered to be valid attributes in the context of the substrate.  \req{Reference to any $ATTRIBUTE$ that is
-not a member of this set MUST be treated as an error.}
-\item{\textbf{r}} A set of relationship quads (subject, attribute, target, group)
-\item{\textbf{descs}} The subsumption (ISA) closure from general to specific (descendants)
-\item{\textbf{ancs}}  The subsumption (ISA) closure from specific to general (ancestors)
-\item{\textbf{refset}} The reference sets within the context of the substrate whose members are members are concept identifiers (i.e. are in $c$).  While not formally spelled out in this specification, it is assumed that the typical reference set function would be returning a subset of the $refsetId$/$referencedComponentId$ tuples represented in one or more RF2 Refset Distribution tables.
-\end{itemize}
-
-\paragraph{Issue:} this is currently the simplest possible kind of Substrate; it represents the DNF form of SNOMED~CT with concepts only
-(i.e., \textit{Expressions} and \textit{Expression Libraries} are not supported).
-
-\paragraph{Issue:} this is a \textit{flat} representation (fixed to 1 level of nesting corresponding to role grouping) and does not properly handle Concrete Domains (which almost always involve additional nesting
-
-\paragraph{Open questions:}
-While the Core will not contain cycles, and probably NRC Extensions will not, arbitrary extensions (e.g. as a result of handling Expression libraries) may involve cycles (or at least equivalent concepts).
-\begin{itemize}
-\item \textbf{Resolution: } A reflexive, symmetric equivalence relationship ($equiv$) was added to the substrate.  How it is determined is left unspecified, but a rule was added saying that an equivalent concept can not be a descendant of its equivalence.
-\item Is it correct to interpret the transitive closure directly against the substrate relationships ($r$) set or is there an implication of a reasoner being invoked somewhere, which 
-could potentially render the transitive closure as logically derived from ($r$).  \textbf{Answer: } If substrate includes postcoordinated expressions then subsumption would need to be calculated. \textbf{Followup: } How does one know whether it includes postcoordinated expressions?  How do we express this decision formally?
-\item Do we want to assert that it is an error to use a non-attribute concept in a attribute position?  If not, should we explicitly include a formal definition of the attribute set? \textbf{Answer: }  Because the ECL doesn't declare this as an error condition, we shouldn't assert in the Z spec.  \textbf{Resolution: } $   a = descs~attribute\_concept $ assertion pulled from the substrate declaration.
-\end{itemize}
-
+A substrate represents the context of an interpretation.  
 \subsection{Substrate Components}
 \paragraph{Quad}
-Relationships in the substrate are represented a 4 element tuples or ``Quads'', which consist of a subject, attribute, target and role group identifier.
+Relationships in the substrate are represented a 4 element tuples or ``quads'' which consist of a source, attribute, target and role group identifier.  The $is\_a$ attribute may
+only appear in the zero group, and the target of an $is\_a$ attribute must be a $SCTID$ (not a $CONCRETEVALUE$)
 
 \begin{schema}{Quad}
-   s : SUBJECT \\
-   a : ATTRIBUTE \\
+   s : SCTID \\
+   a : SCTID \\
    t : TARGET \\
    g : GROUP
+\where
+   a = is\_a \implies (g = zero\_group \land object \inv t \in SCTID)
 \end{schema}
 
 
-We will also need to recognize some "well known" identifiers: the $is\_a$ attribute, the $zero\_group$ and  $attribute\_concept$, the parent of all attributes
-\begin{axdef}
-is\_a : ATTRIBUTE \\
-zero\_group : GROUP \\
-attribute\_concept : SCTID \\
-refset\_concept : SCTID
-\end{axdef}
+
 
 \subsection{Substrate}
+A substrate consists of:
+
+\begin{itemize}[noitemsep,nolistsep]
+\item{\textbf{concepts}} The set of $SCTID$s (concepts) that are considered valid in the context of the substrate.  \req{References to any $SCTID$ that is
+not a member of $concepts$ MUST be treated as an error.}
+\item{\textbf{relationships}} A set of relationship quads (source, attribute, target, group)
+\item{\textbf{parentsOf}}  A function from an SCTID to its asserted and inferred parents
+\item{\textbf{equivalent\_concepts}} A function from an SCTID to the set of SCTID's that have been determined to be equivalent to it. 
+ \item{\textbf{refsets}} The reference sets within the context of the substrate whose members are members are concept identifiers (i.e. are in $concepts$).  While not formally spelled out in this specification, it is assumed that the typical reference set function would be returning a subset of the $refsetId$/$referencedComponentId$ tuples represented in one or more RF2 Refset Distribution tables.
+\end{itemize}
+\paragraph{}
+
+The following functions can be computed from the basic set above
+\begin{itemize}[noitemsep,nolistsep]
+\item{\textbf{childrenOf}} The inverse of the parentsOf function
+\item{\textbf{descendants}} The transitive closure of the childrenOf function
+\item{\textbf{ancestors}} The transitive closure of the parentsOf function
+\item{\textbf{attributeIds}} The descendantsOf the attribute\_concept, including equivalents
+\item{\textbf{refsetsIds}} The descendants of the refset\_concept, including equivalents
+\end{itemize}
+\paragraph{}
 The formal definition of substrate follows, where c and r are given and the remainder are derived.  The expressions below assert that:
-\begin{enumerate}
-\item All subjects and attributes and targets of type $object$ in $r$  must be members of the set of concepts, $c$.  All attributes are also members of $a$.
-\item The $is\_a$ relation is irreflexive and can only occur in the zero group.
-\item $childrenOf$ \emph{includes} the function from a concept in $c$ to the set of concepts that are the source of $c$ in an $is\_a$ relationship in the $zero\_group$.  Note that 
-substrates that include post-coordinated expressions may include additional entries in the $childrenOf$ function that are not in the relationships table and, instead, are derived 
-through the application of a DL reasoner.
-\item $parentsOf$ \emph{includes} the function from a concept $c$ to the set of concepts that are the target of of $c$ in an $is\_a$ relationship in the $zero\_group$.  Note that 
-substrates that include post-coordinated expressions may include additional entries in the $parentsOf$ function that are not in the relationships table and, instead, are derived 
-through the application of a DL reasoner.
-\item $parentsOf$ and $childrenOf$ are irreflexive.
-\item The $equiv$ relationship is symmetric and reflexive.
-\item The ancestors function, $ancs$ ,is the \emph{irreflexive} transitive closure of the $parentsOf$ relationship.
-\item The descendants function, $descs$, is the  \emph{irreflexive} transitive closure of the inverse of the $childrenOf$ relationship. 
-\item The descendants relationship must not contain any concepts that are declared as equivalent to the root.
-\item The reference set function is a function from  \emph{subset of} $c$ to set of SCTID's in $c$.  A SCTID that is not in the domain of $refset$ cannot appear as the target of a $memberOf$ function
+\begin{enumerate}[noitemsep,nolistsep]
+\item All sources, attributes and SCTID targets of $relationships$ are included in the substrate $concepts$ list.
+\item There is a $parentsOf$ entry for every concept in the substrate $concepts$ list.
+\item Every sctid in the range of the $parentsOf$ function is in the substrate $concepts$ list.
+\item Every $is\_a$ relationship entry is represented in the $parentsOf$ function.  (Note that the reverse isn't necessarily true).
+\item There is an $equivalent\_concepts$ assertion for every substrate concept.
+\item The $equivalent\_concepts$ function is reflexive (i.e. every concept is equivalent to itself)
+\item If two concepts (c2 and c2) are equivalent, then they:
+\begin{itemize}[noitemsep,nolistsep]
+\item Have the same parents
+\item Appear the subject, attribute and object of the same set of relationships
+\item Appear in the domain of the same set of refsets
+\item Both appear in the range of any refset that one appears in
+\end{itemize}
+\item Every refset is a substrate $concepts$
+\item Every member of a refset is a substrate $concept$
+\item $childrenOf$ is the inverse of $parentsOf$, where any concept that isn't a parent has no children.
+\item $descendants$ is the transitive closure of the $childrenOf$ function
+\item $ancestors$ is the transitive closure of the $parentsOf$ function
+\item No concept can be its own ancestor (or, by inference, descendant)
+\item Every $attributeId$ is a substrate $concept$
+\item Every $refsetId$ is a substrate $concept$
 \end{enumerate}
 \begin{schema}{Substrate}
-   c : \power SCTID \\
-   r : \power Quad  \\
-   a : \power SCTID
+   concepts : \power SCTID \\
+   relationships : \power Quad  \\
+   parentsOf : SCTID \pfun \power SCTID \\
+   equivalent\_concepts : SCTID \pfun \power SCTID \\
+   refsets : SCTID \pfun \power SCTID
 \also
    childrenOf : SCTID \pfun \power SCTID \\
-   parentsOf : SCTID \pfun \power SCTID
-\also
-   descs : SCTID \pfun \power SCTID \\
-   ancs : SCTID \pfun \power SCTID \\
-   equiv : \power (SCTID \cross SCTID) \\
-   refset : REFSETID \pfun \power SCTID \\
+   descendants : SCTID \pfun \power SCTID \\
+   ancestors : SCTID \pfun \power SCTID \\
+   attributeIds : \power SCTID \\
+   refsetIds : \power SCTID
 \where
-   a \subseteq c \\
-   \forall rel : r @  rel.s \in c \land rel.a \in a \land (object \inv rel.t \in SCTID \implies object \inv rel.t \in c)  \\
-   \forall rel : r @ q.a = is\_a \implies (q.s \neq object \inv q.t \land q.g = zero\_group)
+   \forall rel : relationships @  rel.s \in concepts \land rel.a \in concepts \land \\
+\t2 (object \inv rel.t \in SCTID \implies object \inv rel.t \in concepts)
 \also
-    \dom childrenOf = c \land \bigcup (\ran childrenOf) \subseteq c \\
-    \forall s : c @ parentsOf~s \subseteq \{q: r | q.s = s \land q.a = is\_a @ object \inv q.t \} \\
-    \forall c1, c2 : c @ c1 \in parentsOf~c2 \iff c2 \in childrenOf~c1
+   \dom parentsOf = concepts \\
+   \bigcup (\ran parentsOf) \subseteq concepts
 \also
-   \forall x : c @ (x \mapsto x) \in equiv \\
-   \forall x_1, x_2 : c @ x_1 \mapsto x_2 \in equiv \implies x_2 \mapsto x_1 \in equiv
+   \forall r : relationships @ r.a = is\_a \implies (object \inv r.t) \in parentsOf~r.a
 \also
-   \forall s : c @ descs~s = childrenOf~ s \cup \bigcup \{t : childrenOf~ s @ descs~t\} \\
-   \forall t : c @ ancs~t = parentsOf~ t \cup \bigcup \{s : parentsOf~ t @ ancs~s\} \\
-   \forall r: equiv @ first~r \in \dom descs \implies second~r \notin (descs~(first~r))
+   \dom equivalent\_concepts = concepts \\
+  \forall c : concepts @ c \in equivalent\_concepts~c \\
+  \forall c1, c2 : concepts | c2 \in (equivalent\_concepts~c1) @ \\
+\t2 parentsOf ~ c1 = parentsOf ~ c2 \land \\
+\t2 \{r : relationships | r.s = c1\} = \{r : relationships | r.s = c2\} \land \\
+\t2 \{r : relationships | r.a = c1\} = \{r : relationships | r.a = c2\} \land \\
+\t2 \{r : relationships | object \inv r.t = c1\} = \{r : relationships | object \inv r.t = c2\} \land \\
+\t2 c1 \in \dom refsets \iff c2 \in \dom refsets \land \\
+\t2 c1 \in \dom refsets \implies refsets~c1 = refsets~c2 \land \\
+\t2 (\forall rsd : \ran refsets @ c1 \in rsd \iff c2 \in rsd)
 \also
-    \dom refset \subseteq c \land \bigcup (\ran refset) \subseteq c
+   \dom refsets \subseteq concepts \\
+   \bigcup (\ran refsets) \subseteq concepts
+\also
+    \dom childrenOf = concepts \\
+    \forall s, t : concepts @ t \in parentsOf~s \iff s \in childrenOf~t  \\
+    \forall c : concepts | c \notin \bigcup (\ran childrenOf) @ childrenOf~c = \emptyset 
+\also
+   \forall s : concepts @ \\
+\t2 descendants~s = childrenOf~ s \cup \bigcup \{t : childrenOf~ s @ descendants~t\} \\
+   \forall t : concepts @ \\
+\t2 ancestors~t = parentsOf~ t \cup \bigcup \{s : parentsOf~ t @ ancestors~s\} \\
+   \forall t : concepts @ t \notin ancestors~t
+\also
+   attributeIds \subseteq concepts \\
+   refsetIds \subseteq concepts
 \end{schema}
+\subsubsection{Strict and Permissive Substrates}
+Implementations may choose to implement ``strict'' substrates, where additional rules apply or ``permissive'' substrates where rules are relaxed.
+\subsubsection{Strict Substrate}
+A \textbf{strict\_substrate} is a substrate where:
+\begin{itemize}[noitemsep,nolistsep]
+\item There is at least one $SCTID$ that is not substrate concept 
+\item Every $attributeId$ must be a descendant of $attribute\_concept$
+\item Every $refsetId$ must be a descendant of $refset\_concept$
+\item $relationship$ attributes must be $attributeId$s
+\item $refset$ domains must be $refsetId$s 
+\end{itemize}
 
 \begin{schema}{strict\_substrate}
     Substrate
  \where
-     \forall q : r @ q.a \in descs~attribute\_concept \\
-      \dom refset \subseteq descs~refset\_concept
- \end{schema}
-
-
-\section{Result}
-The result of applying a query against a substrate is either a (possibly empty) set of SCTID's or an $ERROR$.
-\textbf{TODO:} Where is unknownAttribute used?
-\begin{zed}
-ERROR ::= unknownOperation | unknownConceptReference | \\
-\t3 unknownAttribute | unknownRefsetId 
+     concepts \subset SCTID \\
+     attributeIds =  descendants~attribute\_concept \\
+     \forall r: relationships @ r.a \in attributeIds
 \also
-Result ::= ok \ldata \power SCTID \rdata | error \ldata ERROR \rdata 
+    refsetIds = descendants~refset\_concept \\
+    \dom refsets \subseteq refsetIds
+ \end{schema}
+ 
+ \subsubsection{Permissive Substrate}
+ A permissive substrate is a substrate where every query will return some result -- all $SCTID's$ are considered valid.
+ 
+ This includes the following rules:
+ \begin{enumerate}[noitemsep,nolistsep]
+ \item Every possible $SCTID$ is a substrate concept, attribute and a valid refset
+ \item The refset function will return a (possibly empty) set of results for any refuted
+ \end{enumerate}
+ 
+ 
+ \begin{schema}{permissive\_substrate}
+    Substrate
+\where
+    concepts = SCTID \land attributeIds = concepts \land refsetIds = concepts 
+\end{schema}
+   
+
+
+\section{SCTIDS or Error Return}
+The result of applying a query against a substrate is either a (possibly empty) set of SCTID's or an $ERROR$.  An $ERROR$ occurs when:
+\begin{itemize}[noitemsep,nolistsep]
+\item The interpretation of a conceptId is not a substrate $concept$
+\item The interpretation of a relationship attribute is not a substrate $attributeId$
+\item The interpretation of a reset is not a substrate $refsetId$
+\end{itemize}
+
+
+\begin{zed}  
+ERROR ::= unknownConceptReference | unknownAttribute | unknownRefsetId 
+\also
+Sctids\_or\_Error ::= ok \ldata \power SCTID \rdata | error \ldata ERROR \rdata 
 \end{zed}
-\section{Interpretation of Intermediate Constructs}
-This section carries the interpretation of the intermediate constructs -- the various forms
-of expressions and their combinations.
+
+\section{Interpretation of Expression Constraints}
+This section defines the interpretation of all language constructs that are interpreted in terms of other language constructs.  Each interpretation that follows begins with a simplified version
+of the language construct in the specification.  It then formally specifies the constructs that are used in the interpretation, followed by the interpretation itself. We start with the definition 
+of $expressionConstraint$, which, once interpreted, returns either a set of SCTIDs or an error condition.
 \subsection{expressionConstraint}
 \begin{framed}
-expressionConstraint = \\
-\t2 ( refinedExpressionConstraint / unrefinedExpressionConstraint ) 
+\noindent
+\bnf{expressionConstraint = ws ( refinedExpressionConstraint / unrefinedExpressionConstraint ) ws}
 \end{framed}
 
-\subsubsection{Interpretation}
-The interpretation of \spec{expressionConstraint} the interpretation of the  \spec{refinedExpressionConstraint}
-or the \spec{unrefinedExpressionConstraint}.
+\spec{expressionConstraint} takes either a \spec{refinedExpressionConstraint} or \\ \spec{unrefinedExpressionConstraint} and returns its interpretation as either a set of SCTIDs or an error condition.
 \begin{zed}
 expressionConstraint ::= \\
-\t2 ecrec \ldata refinedExpressionConstraint \rdata | \\
-\t2 ecurec \ldata unrefinedExpressionConstraint \rdata \\
+\t2 expcons\_refined \ldata refinedExpressionConstraint \rdata | \\
+\t2 expcons\_unrefined \ldata unrefinedExpressionConstraint \rdata \\
 \end{zed}
 
 
 \begin{gendef}
    i\_expressionConstraint : \\
-\t2 Substrate \fun expressionConstraint \fun Result
+\t2 Substrate \fun expressionConstraint \fun Sctids\_or\_Error
 \where
    \forall ss: Substrate; ec: expressionConstraint @ i\_expressionConstraint~ss~ec = \\
-\t1 \IF ecrec \inv ec \in refinedExpressionConstraint \\
-\t2 \THEN i\_refinedExpressionConstraint~ss~(ecrec \inv ec) \\
-\t1 \ELSE \IF ecurec \inv ec \in unrefinedExpressionConstraint \\
-\t2 \THEN i\_unrefinedExpressionConstraint~ss~(ecurec \inv ec) \\
-\t1 \ELSE error~ unknownOperation
+   \IF ec \in \ran expcons\_refined  \\
+\t1 \THEN i\_refinedExpressionConstraint~ss~(expcons\_refined \inv ec) \\
+   \ELSE i\_unrefinedExpressionConstraint~ss~(expcons\_unrefined \inv ec) 
 \end{gendef}
 
 \subsubsection{unrefinedExpressionConstraint}
-An \spec{unrefinedExpressionConstraint} is either a \spec{compoundExpressionConstraint} or a \spec{simpleExpressionConstraint}
+The interpretation of an \spec{unrefinedExpressionConstraint} is either the interpretation of a \spec{compoundExpressionConstraint} or a \spec{simpleExpressionConstraint}
 
-\begin{verbatim}
-unrefinedExpressionConstraint = 
-    compoundExpressionConstraint / simpleExpressionConstraint
-\end{verbatim}
+\begin{framed}
+\noindent
+\bnf{unrefinedExpressionConstraint = compoundExpressionConstraint / simpleExpressionConstraint}
+\end{framed}
 
 \begin{zed}
 unrefinedExpressionConstraint ::= \\
-\t2 ucec \ldata compoundExpressionConstraint \rdata | \\
-\t2 usec \ldata simpleExpressionConstraint \rdata
+\t2 unrefined\_compound \ldata compoundExpressionConstraint \rdata | \\
+\t2 unrefined\_simple \ldata simpleExpressionConstraint \rdata
 \end{zed}
 \begin{gendef}
    i\_unrefinedExpressionConstraint : \\
-\t2 Substrate \fun unrefinedExpressionConstraint \fun Result
+\t2 Substrate \fun unrefinedExpressionConstraint \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate; uec : unrefinedExpressionConstraint @  \\
    i\_unrefinedExpressionConstraint~ss~uec = \\
-\t1 \IF ucec \inv uec \in compoundExpressionConstraint \\
-\t2 \THEN i\_compoundExpressionConstraint~ss~(ucec \inv uec) \\
-\t1 \ELSE \IF usec \inv uec \in simpleExpressionConstraint  \\
-\t2 \THEN i\_simpleExpressionConstraint~ss~(usec \inv uec) \\
-\t1 \ELSE  error~ unknownOperation
+   \IF ucec \in \ran unrefined\_compound \\
+\t1 \THEN i\_compoundExpressionConstraint~ss~(unrefined\_compound \inv uec) \\
+\ELSE  i\_simpleExpressionConstraint~ss~(unrefined\_simple \inv uec) 
 \end{gendef}
 
 \subsubsection{refinedExpressionConstraint}
-\begin{verbatim}
-refinedExpressionConstraint = 
-     unrefinedExpressionConstraint ":" refinement /		
-     "(" refinedExpressionConstraint ")"
-\end{verbatim}
+\begin{framed}
+\noindent
+\bnf{refinedExpressionConstraint = unrefinedExpressionConstraint ws ":" ws refinement / "(" ws refinedExpressionConstraint ws ")"}
+\end{framed}
 
 The interpretation of \spec{refinedExpressionConstraint} is the intersection of the interpretation of
 the \spec{unrefinedExpressionConstraint} and the \spec{refinement}, both of which return a set of SCTID's or
-an error.
+an error.  The second production defines \spec{refinedExpressionConstraint} in terms of itself and has no impact on the results.
 
-The interpretation of the second option adds no value.
 \begin{zed}
 refinedExpressionConstraint == \\
-\t2 unrefinedExpressionConstraint \cross refinement
+\t2 unrefinedExpressionConstraint \cross refinement \\
 \end{zed}
 
 \begin{gendef}
    i\_refinedExpressionConstraint : \\
-\t2 Substrate \pfun refinedExpressionConstraint \pfun Result
+\t2 Substrate \fun refinedExpressionConstraint \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate; rec : refinedExpressionConstraint @ \\
    i\_refinedExpressionConstraint~ss~rec = \\
-\t1 intersect~(i\_unrefinedExpressionConstraint~ss~(first~rec)) (i\_refinement~ss~(second~rec))
+\t1 intersect~(i\_unrefinedExpressionConstraint~ss~(first~rec)) \\
+\t3 (i\_refinement~ss~(second~rec))
 \end{gendef}
 
 
-\subsection{simpleExpressionConstraint}
+\subsubsection{simpleExpressionConstraint}
 The interpretation of  \spec{simpleExpressionConstraint} is the application of an optional constraint 
 operator to the interpretation of \spec{focusConcept}, which returns a set of SCTID's or an error.
 The interpretation of an error is the error.
 
 
-\begin{verbatim}
-simpleExpressionConstraint =  
-     [constraintOperator ] focusConcept
-\end{verbatim}
+\begin{framed}
+\noindent
+\bnf{simpleExpressionConstraint =  [constraintOperator ws] focusConcept} \\
+\end{framed}
 
 
 \begin{zed}
-constraintOperator ::= descendantOrSelfOf | descendantOf |  \\
-\t2 ancestorOrSelfOf | ancestorOf \\
-simpleExpressionConstraint == \optional[constraintOperator] \cross focusConcept 
+simpleExpressionConstraint == \optional[constraintOperator] \cross focusConcept \\
 \end{zed} 
 
 \begin{gendef}
    i\_simpleExpressionConstraint : \\
-\t2 Substrate \pfun simpleExpressionConstraint \pfun Result
+\t2 Substrate \fun simpleExpressionConstraint \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate; sec : simpleExpressionConstraint @ \\
 i\_simpleExpressionConstraint~ss~sec =  \\
@@ -286,98 +329,116 @@ i\_simpleExpressionConstraint~ss~sec =  \\
 \end{gendef}
 
 
-\subsection{compoundExpressionConstraint}
+\subsubsection{compoundExpressionConstraint}
 The interpretation of a $compoundExpressionConstraint$ is the interpretation of its corresponding component.
-\begin{verbatim}
-compoundExpressionConstraint = conjunctionExpressionConstraint |
-       disjunctionExpressionConstraint | exclusionExpressionConstraint |
-        "(" compoundExpressionConstraint ")"
-\end{verbatim}
+\begin{framed}
+\noindent
+\bnf{compoundExpressionConstraint = conjunctionExpressionConstraint / 
+	disjunctionExpressionConstraint / exclusionExpressionConstraint / 
+	"(" ws compoundExpressionConstraint ws ")"}
+\end{framed}
 
 \begin{zed}
 compoundExpressionConstraint ::= \\
-\t2 cecConj \ldata conjunctionExpressionConstraint \rdata | \\
-\t2 cecDisj \ldata disjunctionExpressionConstraint \rdata | \\
-\t2 cecExc \ldata exclusionExpressionConstraint \rdata 
+\t2 compound\_conj \ldata conjunctionExpressionConstraint \rdata | \\
+\t2 compound\_disj \ldata disjunctionExpressionConstraint \rdata | \\
+\t2 compound\_excl \ldata exclusionExpressionConstraint \rdata 
 \end{zed}
 
 \begin{gendef}
    i\_compoundExpressionConstraint : \\
-\t2 Substrate \pfun compoundExpressionConstraint \pfun Result
+\t2 Substrate \fun compoundExpressionConstraint \fun Sctids\_or\_Error
 \where
   \forall ss : Substrate; cec : compoundExpressionConstraint @ \\
  i\_compoundExpressionConstraint~ss~cec = \\
- \t1 \IF cecConj \inv cec \in conjunctionExpressionConstraint \\
-\t2 \THEN i\_conjunctionExpressionConstraint~ss~(cecConj \inv cec) \\
- \t1 \ELSE \IF cecDisj \inv cec \in disjunctionExpressionConstraint \\
-\t2 \THEN i\_disjunctionExpressionConstraint~ss~(cecDisj \inv cec) \\
- \t1 \ELSE \IF cecExc \inv cec \in exclusionExpressionConstraint \\
-\t2 \THEN i\_exclusionExpressionConstraint~ss~(cecExc \inv cec) \\
-\t1 \ELSE error~ unknownOperation
+   \IF cec \in \ran compound\_conj \\
+\t1 \THEN i\_conjunctionExpressionConstraint~ss~(compound\_conj \inv cec) \\
+    \ELSE \IF cec \in\ran compound\_disj \\
+\t1 \THEN i\_disjunctionExpressionConstraint~ss~(compound\_disj \inv cec) \\
+    \ELSE i\_exclusionExpressionConstraint~ss~(compound\_excl \inv cec) 
 \end{gendef}
 
+The signature below is used because the definition of \spec{compountExpressionConstraint} is recursive
 \begin{gendef}
    i\_compoundExpressionConstraint' : \\
-\t2 Substrate \pfun compoundExpressionConstraint \pfun Result
+\t2 Substrate \fun compoundExpressionConstraint \fun Sctids\_or\_Error
 \end{gendef}
 
 
-\subsection{conjunctionExpressionConstraint}
-$conjunctionExpressionConstraint$ is interpreted the conjunction (intersection) of the interpretation of two or more
-$subExpressionConstraints$
-\begin{verbatim}
-conjunctionExpressionConstraint = 
-        subExpressionConstraint 1*(conjunction subExpressionConstraint)
-\end{verbatim}
+\subsubsection{conjunctionExpressionConstraint}
+\spec{conjunctionExpressionConstraint} is interpreted the conjunction (intersection) of the interpretation of two or more
+\spec{subExpressionConstraints}/  The \spec{conjunction} aspect is ignored because there is no other choice
+\begin{framed}
+\noindent
+\bnf{conjunctionExpressionConstraint = subExpressionConstraint 1*(ws conjunction ws subExpressionConstraint)}
+\end{framed}
 
 \begin{zed}
-conjunctionExpressionConstraint == subExpressionConstraint \cross \seq_1(subExpressionConstraint)
+conjunctionExpressionConstraint == \\
+\t2 subExpressionConstraint \cross \seq_1(subExpressionConstraint)
 \end{zed}
+
+In the formalization below, $first ~cecr$ refers to the left hand side of the $conjunctionExpressionConstraint$ and
+$second ~cecr$ to the right hand side.  $head (second~cecr)$ refers to the first element in the sequence and 
+$tail (second~cecr)$ refers to the remaining elements in the sequence, which may be empty ($\langle \rangle$).
 
 \begin{gendef}
     i\_conjunctionExpressionConstraint : \\
-\t2 Substrate \pfun conjunctionExpressionConstraint \pfun Result
+\t2 Substrate \fun conjunctionExpressionConstraint \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate;  cecr : conjunctionExpressionConstraint @ \\
 i\_conjunctionExpressionConstraint~ss~cecr = \\
-\t1 \IF tail(second~cecr) = \langle \rangle \THEN \\
-\t2 intersect~~(i\_subExpressionConstraint~ss~(first~cecr)) (i\_subExpressionConstraint~ss~(head~(second~cecr))) \\
-\t1 \ELSE \\
-\t2 intersect~~(i\_subExpressionConstraint~ss~(first~cecr)) (i\_conjunctionExpressionConstraint~ss~((head(second~cecr)), (tail(second~cecr))))
+   \IF tail(second~cecr) = \langle \rangle \THEN \\
+\t1 intersect~~(i\_subExpressionConstraint~ss~(first~cecr)) \\
+\t3 (i\_subExpressionConstraint~ss~(head~(second~cecr))) \\
+    \ELSE \\
+\t1 intersect~~(i\_subExpressionConstraint~ss~(first~cecr)) \\
+\t2 (i\_conjunctionExpressionConstraint~ss~((head(second~cecr)) \\
+\t4 (tail(second~cecr))))
 \end{gendef}
 
-\subsection{disjunctionExpressionConstraint}
-$disjunctionExpressionConstraint$ is interpreted the disjunction (union) of the interpretation of two or more
-$subExpressionConstraints$
-\begin{verbatim}
-disjunctionExpressionConstraint = 
-      subExpressionConstraint 1*(disjunction subExpressionConstraint)
-\end{verbatim}
+\subsubsection{disjunctionExpressionConstraint}
+\spec{disjunctionExpressionConstraint} is interpreted the disjunction (union) of the interpretation of two or more
+\spec{subExpressionConstraints}. The \spec{disjunction} element is ignored because there is no other choice.
+\begin{framed}
+\noindent
+\bnf{disjunctionExpressionConstraint = subExpressionConstraint 1*(ws disjunction ws subExpressionConstraint)}
+\end{framed}
 
 \begin{zed}
 disjunctionExpressionConstraint == \\
 \t2 subExpressionConstraint \cross \seq_1(subExpressionConstraint)
 \end{zed}
 
+In the formalization below, $first ~cecr$ refers to the left hand side of the $disjunctionExpressionConstraint$ and
+$second ~cecr$ to the right hand side.  $head (second~cecr)$ refers to the first element in the sequence and 
+$tail (second~cecr)$ refers to the remaining elements in the sequence, which may be empty ($\langle \rangle$).
+
 \begin{gendef}
     i\_disjunctionExpressionConstraint : \\
-\t2 Substrate \pfun disjunctionExpressionConstraint \pfun Result
+\t2 Substrate \fun disjunctionExpressionConstraint \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate;  cecr : disjunctionExpressionConstraint @ \\
 i\_disjunctionExpressionConstraint~ss~cecr = \\
-\t1 \IF tail(second~cecr) = \langle \rangle \THEN \\
-\t2 union~~(i\_subExpressionConstraint~ss~(first~cecr)) (i\_subExpressionConstraint~ss~(head~(second~cecr))) \\
-\t1 \ELSE \\
-\t2 union~~(i\_subExpressionConstraint~ss~(first~cecr)) (i\_disjunctionExpressionConstraint~ss~((head(second~cecr)), (tail(second~cecr))))
+   \IF tail(second~cecr) = \langle \rangle \THEN \\
+\t1 union~~(i\_subExpressionConstraint~ss~(first~cecr)) \\
+\t3 (i\_subExpressionConstraint~ss~(head~(second~cecr))) \\
+   \ELSE \\
+\t1 intersect~~(i\_subExpressionConstraint~ss~(first~cecr)) \\
+\t2 (i\_conjunctionExpressionConstraint~ss~((head(second~cecr)) \\
+\t3 (tail(second~cecr))))
 \end{gendef}
 
-\subsection{exclusionExpressionConstraint}
-$exclusionExpressionConstraint$ is interpreted the result of removing the members of the second
-$subExpressionConstraint$ from the first
-\begin{verbatim}
-exclusionExpressionConstraint = 
-      subExpressionConstraint exclusion subExpressionConstraint
-\end{verbatim}
+
+
+\subsubsection{exclusionExpressionConstraint}
+The interpretation \spec{exclusionExpressionConstraint} removes the interpretation of the second \spec{exclusionExpressionConstraint} from
+the interpretation of the first.  Errors are propagated.
+
+\begin{framed}
+\noindent
+\bnf{exclusionExpressionConstraint = subExpressionConstraint ws exclusion ws subExpressionConstraint}
+\end{framed}
 
 \begin{zed}
 exclusionExpressionConstraint == \\ 
@@ -386,172 +447,371 @@ exclusionExpressionConstraint == \\
 
 \begin{gendef}
     i\_exclusionExpressionConstraint : \\
-\t2 Substrate \pfun exclusionExpressionConstraint \pfun Result
+\t2 Substrate \fun exclusionExpressionConstraint \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate; ecr : exclusionExpressionConstraint @ \\
 i\_exclusionExpressionConstraint~ss~ecr = \\
-\t1~ minus~~ (i\_subExpressionConstraint~ss~(first~ecr))~ (i\_subExpressionConstraint~ss~(second~ecr))
+\t1~ minus~~ (i\_subExpressionConstraint~ss~(first~ecr)) \\
+\t3 (i\_subExpressionConstraint~ss~(second~ecr))
 \end{gendef}
 
-\subsection{subExpressionConstraint}
+\subsubsection{subExpressionConstraint}
 $subExpressionConstraint$ is interpreted as the interpretation of either a $simpleExpressionConstraint$
 or a $compoundExpressionConstraint$
-\begin{verbatim}
-subExpressionConstraint =
-      simpleExpressionConstraint | "(" compoundExpressionConstraint ")
-\end{verbatim}
+\begin{framed}
+\noindent
+\bnf{subExpressionConstraint = simpleExpressionConstraint / "(" ws (compoundExpressionConstraint / refinedExpressionConstraint)  ws ")"}
+\end{framed}
 
 \begin{zed}
 subExpressionConstraint ::= \\
-\t1 secSec \ldata simpleExpressionConstraint \rdata | \\
-\t1 secCec \ldata compoundExpressionConstraint \rdata
+\t1 subExpr\_simple \ldata simpleExpressionConstraint \rdata | \\
+\t1 subExpr\_compound \ldata compoundExpressionConstraint \rdata | \\
+\t1 subExpr\_refined \ldata refinedExpressionConstraint \rdata
 \end{zed}
 
 \begin{gendef}
    i\_subExpressionConstraint : \\
-\t2 Substrate \pfun subExpressionConstraint \pfun Result
+\t2 Substrate \fun subExpressionConstraint \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate; sec : subExpressionConstraint @ \\
 i\_subExpressionConstraint~ss~sec = \\
-\t1 \IF (secSec \inv sec) \in simpleExpressionConstraint \\
-\t2 \THEN i\_simpleExpressionConstraint~ss~(secSec \inv sec) \\
- \t1 \ELSE \IF secCec \inv sec \in compoundExpressionConstraint \\
-\t2 \THEN i\_compoundExpressionConstraint'~ss~(secCec \inv sec) \\
-\t1 \ELSE error~ unknownOperation
+   \IF sec \in \ran subExpr\_simple \\
+\t1 \THEN i\_simpleExpressionConstraint~ss~(subExpr\_simple \inv sec) \\
+    \ELSE \IF sec \in \ran subExpr\_compound \\
+\t1 \THEN i\_compoundExpressionConstraint'~ss~(subExpr\_compound \inv sec) \\
+    \ELSE i\_refinedExpressionConstraint~ss~(subExpr\_refined \inv sec) 
 \end{gendef}
-
 
 \subsection{refinement}
-\spec{refinement} is the interpretation of one or more \spec{attribute} or \spec{attributeGroup}s joined
-by \spec{binaryOperator}s
+The interpretation of \spec{refinement} is the interpretation of the \spec{subRefinement}, \spec{conjunctionGroup} or \spec{disjunctionGroup}
+\begin{framed}
+\noindent
+\bnf{refinement = subRefinement / conjunctionGroup / disjunctionGroup}
+\end{framed}
 
-\begin{verbatim}
-binaryOperator = conjunction / disjunction / minus
-refinement = (attribute / attributeGroup / "(" refinement ")") 
-         [binaryOperator 	refinement]
-\end{verbatim}
 \begin{zed}
-refTarget ::= att \ldata attribute \rdata | attg \ldata attributeGroup \rdata \\
-refinement == refTarget  \cross \seq(binaryOperator \cross refTarget)\\
+refinement ::= \\
+\t1 refine\_subrefine \ldata subrefinement \rdata | \\
+\t1 refine\_conjg \ldata conjunctionGroup \rdata | \\
+\t1 refine\_disjg \ldata disjunctionGroup \rdata
 \end{zed}
 
 \begin{gendef}
-   i\_refTarget : Substrate \fun refTarget \fun Result \\
-   i\_refinement : Substrate \fun refinement \fun Result
+   i\_refinement : Substrate \fun refinement \fun Sctids\_or\_Error
 \where
-   \forall ss : Substrate; rt : refTarget @ i\_refTarget~ss~rt = \\
-\t1 \IF att \inv rt \in attribute \\
-\t2 \THEN i\_attribute~ss~(att \inv rt) \\
-\t1 \ELSE \IF attg \inv rt \in attributeGroup \\
-\t2 \THEN i\_attributeGroup~ss~(attg \inv rt) \\
-\t1 \ELSE error~ unknownOperation
-\also
-   \forall ss : Substrate; ref : refinement @ \\
-\t1i\_refinement~ss~ref = \\
-\t1 evalRefinement~ss~(i\_refTarget~ss~(first~ref))~(second~ref)
+   \forall ss : Substrate; rfnment : refinement @ i\_refinement = \\
+   \IF refnment \in \ran refine\_subrefine \\
+\t1 \THEN i\_subrefinement~ss~(refine\_subrefine \inv refnment) \\
+   \ELSE \IF refnment \in \ran refine\_conjg \\
+\t1 \THEN i\_conjunctionGroup~ss~(refine\_conjg \inv refnment) \\
+   \ELSE i\_disjunctionGroup~ss~(refine\_disjg \inv refnment)
 \end{gendef}
 
-\begin{gendef}
-   evalRefinement : \\
-\t2 Substrate \fun Result \fun \seq (binaryOperator \cross refTarget) \fun Result
-\where
-   \forall ss : Substrate; r: Result; opt : \seq(binaryOperator \cross refTarget) @ \\
-\t1 evalRefinement~ss~r~opt = \\
-\t2 \IF opt = \langle \rangle \\
-\t3 \THEN r \\
-\t2 \ELSE \IF first~(head~opt) = conjunction \\
-\t3  \THEN  evalRefinement~ss~(intersect~ r (i\_refTarget'~ss~(second~(head~opt))))~(tail~opt) \\
-\t2 \ELSE \IF first~(head~opt)  = disjunction \\
-\t3  \THEN  evalRefinement~ss~(union~ r (i\_refTarget'~ss~(second~(head~opt))))~(tail~opt) \\
-\t2 \ELSE \IF first~(head~opt)  = exclusion \\
-\t3  \THEN  evalRefinement~ss~(minus~ r (i\_refTarget'~ss~(second~(head~opt))))~(tail~opt) \\
-\t2 \ELSE error~ unknownOperation
-\end{gendef}
-\begin{gendef}
-   i\_refTarget' : Substrate \fun refTarget \fun Result
-\end{gendef}
-
-
-
-\subsection{expressionConstraintValue}
-\begin{verbatim}
-expressionConstraintValue = simpleExpressionConstraint / 
-       "(" (refinedExpressionConstraint / 			
-       compoundExpressionConstraint) ")"
-\end{verbatim}
+\subsubsection{conjunctionGroup}
+\begin{framed}
+\noindent
+\bnf{conjunctionGroup = subRefinement 1*(conjunction subRefinement)}
+\end{framed}
 
 \begin{zed}
-expressionConstraintValue ::= ecvsec \ldata simpleExpressionConstraint \rdata | \\
-\t2 ecvrec \ldata refinedExpressionConstraint' \rdata | \\
-\t2 ecvcec \ldata compoundExpressionConstraint \rdata \\
-[refinedExpressionConstraint']
+conjunctionGroup == \\
+\t2 subRefinement \cross \seq_1(subRefinement)
 \end{zed}
+
 \begin{gendef}
-   i\_expressionConstraintValue : Substrate \fun \\
-\t2 expressionConstraintValue \fun Result
+    i\_conjunctionGroup : \\
+\t2 Substrate \fun conjunctionGroup \fun Sctids\_or\_Error
 \where
-   \forall ss : Substrate; ecv : expressionConstraintValue @  \\
-   i\_expressionConstraintValue~ss~ecv = \\
-\t1 \IF ecvsec \inv ecv \in simpleExpressionConstraint \\
-\t2 \THEN i\_simpleExpressionConstraint~ss~(ecvsec \inv ecv) \\
-\t1 \ELSE \IF ecvrec \inv ecv \in refinedExpressionConstraint' \\ 
-\t2 \THEN i\_refinedExpressionConstraint'~ss~(ecvrec \inv ecv) \\
-\t1 \ELSE \IF ecvcec \inv ecv \in compoundExpressionConstraint \\ 
-\t2 \THEN i\_compoundExpressionConstraint~ss~(ecvcec \inv ecv) \\
-\t1 \ELSE error~ unknownOperation
+   \forall ss : Substrate;  conjg : conjunctionGroup @ \\
+i\_conjunctionGroup~ss~conjg = \\
+   \IF tail(second~conjg) = \langle \rangle \THEN \\
+\t1 intersect~~(i\_subRefinement~ss~(first~conjg)) \\
+\t3 (i\_subRefinement~ss~(head~(second~conjg))) \\
+   \ELSE \\
+\t1 intersect~~(i\_subRefinement~ss~(first~conjg)) \\
+\t2 (i\_conjunctionGroup~ss~((head(second~conjg)) \\
+\t3 (tail(second~conjg))))
 \end{gendef}
+
+\subsubsection{disjunctionGroup}
+\begin{framed}
+\noindent
+\bnf{disjunctionGroup = subRefinement 1*(disjunction subRefinement)}
+\end{framed}
+
+\begin{zed}
+disjunctionGroup == \\
+\t2 subRefinement \cross \seq_1(subRefinement)
+\end{zed}
 
 \begin{gendef}
-   i\_refinedExpressionConstraint' : \\
-\t2 Substrate \pfun refinedExpressionConstraint' \pfun Result
+    i\_disjunctionGroup : \\
+\t2 Substrate \fun disjunctionGroup \fun Sctids\_or\_Error
+\where
+   \forall ss : Substrate;  disjg : disjunctionGroup @ \\
+ii\_disjunctionGroup~ss~disjg = \\
+   \IF tail(second~disjg) = \langle \rangle \THEN \\
+\t1 intersect~~(i\_subRefinement~ss~(first~disjg)) \\
+\t3 (i\_subRefinement~ss~(head~(second~disjg))) \\
+   \ELSE \\
+\t1 intersect~~(i\_subRefinement~ss~(first~disjg)) \\
+\t2 (ii\_disjunctionGroup~ss~((head(second~disjg)) \\
+\t3 (tail(second~disjg))))
+\end{gendef}
+
+\subsubsection{subRefinement}
+The interpretation of a \spec{subRefinement} is the interpretation of the corresponding \spec{attributeSet}, \spec{attributeGroup} or \spec{refinement}.
+
+\begin{framed}
+\noindent
+\bnf{subRefinement = attributeSet / attributeGroup / "(" ws refinement ws ")?}
+\end{framed}
+
+\begin{zed}
+subRefinement ::= \\
+\t1 subrefine\_attset \langle attributeSet \rangle | \\
+\t1 subrefine\_attgroup \langle attributeGroup \rangle | \\
+\t1 subrefine\_refinement \langle refinement \rangle
+\end{zed}
+
+
+\begin{gendef}
+   i\_subRefinement : \\
+\t2 Substrate \fun subRefinement \fun Sctids\_or\_Error
+\where
+   \forall ss : Substrate; subrefine : subRefinement @ \\
+   \IF subrefine \in \ran subrefine\_attset \\
+\t1 \THEN i\_attributeSet~ss~(subrefine\_attset \inv subrefine) \\
+   \ELSE \IF subrefine \in \ran subrefine\_attgroup \\
+\t1 \THEN i\_attributeGroup~ss~(subrefine\_attgroup \inv subrefine) \\
+  \ELSE i\_refinement~ss~(subrefine\_refinement \inv subrefine)
+\end{gendef}
+\subsection{attributeSet}
+
+\begin{framed}
+\noindent
+\bnf{attributeSet = subAttributeSet / conjunctionAttributeSet / disjunctionAttributeSet}
+\end{framed}
+
+\begin{zed}
+attributeSet ::= \\
+\t1 attset\_subattset \ldata subAttributeSet \rdata | \\
+\t1 attset\_conjattset \ldata conjunctionAttributeSet \rdata | \\
+\t1 attset\_disjattset \ldata disjunctionAttributeSet \rdata
+\end{zed}
+
+\begin{gendef}
+   i\_attributeSet : \\
+\t2 Substrate \fun attributeSet \fun Sctids\_or\_Error
+\where
+   \forall ss : Substrate; attset : attributeSet @ \\
+   \IF attset \in \ran attset\_subattset \\
+\t1 \THEN i\_subAttributeSet~ss~(attset\_subattset \inv attset) \\
+   \ELSE \IF attset \in \ran attset\_conjattset \\
+\t1 \THEN i\_conjunctionAttributeSet~ss~(attset\_conjattset \inv attset) \\
+  \ELSE i\_disjunctionAttributeSet~ss~(attset\_disjattset \inv attset)
+\end{gendef}
+
+\subsubsection{conjunctionAttributeSet}
+\begin{framed}
+\noindent
+\bnf{conjunctionAttributeSet = subAttributeSet 1*(conjunction subAttributeSet)}
+\end{framed}
+
+\begin{zed}
+conjunctionAttributeSet == \\
+\t2 subAttributeSet \cross \seq_1(subAttributeSet)
+\end{zed}
+
+\begin{gendef}
+    i\_conjunctionAttributeSet : \\
+\t2 Substrate \fun conjunctionAttributeSet \fun Sctids\_or\_Error
+\where
+   \forall ss : Substrate;  conjaset : conjunctionAttributeSet @ \\
+i\_conjunctionAttributeSet~ss~conjaset = \\
+   \IF tail(second~conjaset) = \langle \rangle \THEN \\
+\t1 intersect~~(i\_subAttributeSet~ss~(first~conjaset)) \\
+\t3 (i\_subAttributeSet~ss~(head~(second~conjaset))) \\
+   \ELSE \\
+\t1 intersect~~(i\_subAttributeSet~ss~(first~conjaset)) \\
+\t2 (i\_conjunctionGroup~ss~((head(second~conjaset)) \\
+\t3 (tail(second~conjaset))))
+\end{gendef}
+
+\subsubsection{disjunctionAttributeSet}
+\begin{framed}
+\noindent
+\bnf{disjunctionAttributeSet = subAttributeSet 1*(disjunction subAttributeSet)}
+\end{framed}
+
+\begin{zed}
+disjunctionAttributeSet == \\
+\t2 subAttributeSet \cross \seq_1(subAttributeSet)
+\end{zed}
+
+\begin{gendef}
+    i\_disjunctionAttributeSet : \\
+\t2 Substrate \fun disjunctionAttributeSet \fun Sctids\_or\_Error
+\where
+   \forall ss : Substrate;  disjaset : disjunctionAttributeSet @ \\
+i\_disjunctionAttributeSet~ss~disjaset = \\
+   \IF tail(second~disjaset) = \langle \rangle \THEN \\
+\t1 intersect~~(i\_subAttributeSet~ss~(first~disjaset)) \\
+\t3 (i\_subAttributeSet~ss~(head~(second~disjaset))) \\
+   \ELSE \\
+\t1 intersect~~(i\_subAttributeSet~ss~(first~disjaset)) \\
+\t2 (i\_disjunctionAttributeSet~ss~((head(second~disjaset)) \\
+\t3 (tail(second~disjaset))))
+\end{gendef}
+
+\subsubsection{subAttributeSet}
+\begin{framed}
+\noindent
+\bnf{subAttributeSet = attribute / "(" ws attributeSet ws ")"}
+\end{framed}
+
+\begin{zed}
+subAttributeSet == \\
+\t1 subaset\_attribute \ldata attribute \rdata | \\
+\t1 subaset\_attset \ldata attributeSet \rdata
+\end{zed}
+
+\begin{gendef}
+   i\_subAttributeSet : \\
+\t2 Substrate \fun subAttributeSet \fun Sctids\_or\_Error
+\where
+   \forall ss : Substrate; subaset : subAttributeSet @ \\
+   \IF subaset \in \ran subaset\_attribute \\
+\t1 \THEN i\_attribute~ss~(subaset\_attribute \inv subaset) \\
+  \ELSE i\_attributeSet~ss~(subaset\_attset \inv subaset)
+\end{gendef}
+
+\subsection{attributeGroup}
+\begin{framed}
+\noindent
+\bnf{attributeGroup = [cardinality ws] "\{" ws attributeSet ws "\}"}
+\end{framed}
+
+
+\subsection{attribute}
+\begin{framed}
+\noindent
+\bnf{attribute = [cardinality ws] [reverseFlag ws] ws attributeName ws 
+	(concreteComparisonOperator ws concreteValue / 
+	expressionComparisonOperator ws expressionConstraintValue )} \\
+\bnf{cardinality = "[" nonNegativeIntegerValue to (nonNegativeIntegerValue / many) "]" }
+\end{framed}
+
+
+\begin{zed}
+   attribute ::= \\
+\t1 attrib\_conc \ldata concreteAttribute \rdata | \\
+\t1 attrib\_expr \ldata expressionAttribute \rdata
+\end{zed}
+
+\begin{gendef}
+   i\_attribute : \\
+\t1 Substrate \fun attribute \fun Sctids\_or\_Error
+\where
+   \forall ss : Substrate; att : attribute @ \\
+   \IF att \in \ran attrib\_conc \\
+\t1 \THEN i\_concreteAttribute~ss~(attrib\_conc \inv att) \\
+   \ELSE i\_expressionAttribute~ss~(attrib\_expr \inv att)
+\end{gendef}
+
+For the sake of simplicity, we separate out the components of the concrete and expression constraints.
+
+\begin{zed}
+unlimitedNat ::= num \ldata \nat \rdata | many \\
+cardinality == \nat \cross unlimitedNat \\
+[reverseFlag] 
+\end{zed}
+
+\subsubsection{expressionAttribute}
+\begin{framed}
+\noindent
+\bnf{expressionComparisonOperator = "=" / "!=" / "\textless\textgreater"}
+\end{framed}
+\begin{zed}
+expressionComparisonOperator ::= eco\_eq | eco\_neq
+\end{zed}
+
+
+\begin{schema}{expressionAttribute}
+	card : \optional[cardinality] \\
+	reverse : \optional[reverseFlag] \\
+	name : attributeName \\
+	operator : expressionComparisonOperator \\
+	value : expressionConstraintValue
+\end{schema}
+
+
+\subsubsection{concreteAttribute}
+\begin{framed}
+\noindent
+\bnf{concreteComparisonOperator = "=" / "!=" /  "\textless\textgreater" / "\textless=" / "\textless" / "\textgreater=" / "\textgreater"} \\
+\bnf{concreteValue =  QM stringValue QM / "\#" numericValue} \\
+\bnf{stringValue = 1*(anyNonEscapedChar / escapedChar)} \\
+\bnf{numericValue = decimalValue / integerValue}
+\end{framed}
+\begin{zed}
+concreteComparisonOperator ::= \\
+\t3 cco\_eq | cco\_neq | cco\_leq | ccl\_lt | cco\_geq | cco\_gt \\
+concreteValue ::= stringValue | integerValue | decimalValue
+\end{zed}
+
+
+\begin{schema}{concreteAttribute}
+	card : \optional[cardinality] \\
+	name : attributeName \\
+	operator : concreteComparisonOperator \\
+	value : concreteValue
+\end{schema}
+
+
+The interpretation of a \spec{concreteAttribute} selects the set of quads in the substrate that have an attribute in the set of attributes 
+determined by the interpretation of \spec{attributeName} having $CONCRETEVALUE$ targets that meet the supplied comparison rules.
+
+\begin{gendef}
+   i\_concreteAttribute : \\
+\t1 Substrate \fun concreteAttribute \fun Quads\_or\_Error
+\where
+   \forall ss : Substrate; ca : concreteAttribute @ \\
+   i\_concreteAttribute~ss~ca = \\
+   (\LET attids = i\_attributeName~ss~ca.name @ \\
+\t1 i\_concreteAttributeConstraint~ss~attids~ca.operator~ca.value
 \end{gendef}
 
 
 
 
-\subsection{Attributes and Attribute Groups}
+   
+   
+
+
 The interpretation of an attribute.  \spec{attributeOperator} and \spec{attributeName}
 determines the set of possible attributes in the substrate relationship table.  \spec{reverseFlag} and
 \spec{expressionConstraintValue} determine the set of candidate targets (if \spec{reverseFlag}
-is absent) or \spec{subjects} (if \spec{reverseFlag} is present).
+is absent) or \spec{source\_direction} (if \spec{reverseFlag} is present).
 
-\spec{cardinality} determines the minimum and maximum matches.  In all cases, only a subset of the subjects 
+\spec{cardinality} determines the minimum and maximum matches.  In all cases, only a subset of the sources 
 (targets if \spec{reverseFlag} is present) in the substrate relationship table will be returned in the interpretation.
 
-
-
-\begin{verbatim}
-attribute = [cardinality] [reverseFlag] [attributeOperator] attributeName 			
-       (comparisonOperator concreteValue / "=" expressionConstraintValue )
-attributeGroup = "{" attributeSet "}" 
-attributeSet = attribute [binaryOperator  attributeSet] / "(" attributeSet ")" 
-cardinality = "[" nonNegativeIntegerValue to (nonNegativeIntegerValue / many) "]" 
-comparisonOperator = "=" / "!" ws "=" / 
-    ("n"/"N") ("o"/"O") ("t"/"T") ws "=" / "<=" / "<" / ">=" /  ">"
-\end{verbatim}
-
-\subsection{AttributeName and AttributeSubject}
-$i\_attributeName$ verifies that  $conceptReference$ is a valid concept in the substrate and
-interprets it as a set of (exactly one) $ATTRIBUTE$
+\subsection{AttributeSubject}
 
 $i\_attributeSubject$ interprets the constraintOperator, if any in the context of the attribute name and
 interprets it as a set of $ATTRIBUTE$s
 
-\textbf{Question:} Should we add any additional validation checks?
 \begin{zed}
-attributeName == conceptReference \\
-\also
+
 attributeOperator ==  \{ descendantOrSelfOf , descendantOf \} \\
 attributeSubject == \optional[attributeOperator] \cross attributeName 
 \end{zed}
 
 \begin{gendef}
-   i\_attributeName : Substrate \pfun attributeName \pfun Result \\
-   i\_attributeSubject : Substrate \pfun attributeSubject \pfun Result \\
+   i\_attributeSubject : Substrate \pfun attributeSubject \pfun Sctids\_or\_Error \\
 \where
-   \forall ss : Substrate; an : attributeName @ i\_attributeName~ss~an = \\
-\t1 i\_conceptReference~ss~an \\
-\also
    \forall ss : Substrate; as : attributeSubject @ i\_attributeSubject~ss~as = \\
 \t1 i\_constraintOperator~ss~(first~as)~(i\_attributeName~ss~(second~as)) \\
 \end{gendef}
@@ -572,8 +832,8 @@ attributeConstraint ::= aec \ldata attributeExpressionConstraint \rdata | \\
 \t2 acvc \ldata attributeConcreteValueConstraint \rdata \\
 \end{zed}
 
-\spec{attributeExpressionEonstraint} is a combination of a subject constraint (target if reverse flag is true) and an
-expression constraint value whose interpretation yields a set of SCTID's that filter the target (subject if reverse flag).
+\spec{attributeExpressionEonstraint} is a combination of a source constraint (target if reverse flag is true) and an
+expression constraint value whose interpretation yields a set of SCTID's that filter the target (source if reverse flag).
 \begin{zed}
 [reverseFlag] 
 \end{zed}
@@ -583,8 +843,8 @@ expression constraint value whose interpretation yields a set of SCTID's that fi
    cs : expressionConstraintValue
 \end{schema}
 
-A concrete value constraint is the combination of a subject constraint and a comparison operator/concrete value 
-whose interpretation yields a set of subject ids.  The intersection of the subject and concrete value interpretation
+A concrete value constraint is the combination of a source constraint and a comparison operator/concrete value 
+whose interpretation yields a set of source ids.  The intersection of the source and concrete value interpretation
 is the interpretation of \spec{attributeConcreteValueConstraint}
 \begin{zed}
 comparisonOperator ::= eq | neq | gt | ge | lt | le 
@@ -604,13 +864,13 @@ constraint or the concrete expression constraint that produces a set of Quads or
 The actual interpretations if attribute expression and concrete value are in Section \ref{sect:substrate}
 \begin{gendef}
    i\_attribute : \\
-\t2 Substrate \pfun attribute \pfun Result \\
+\t2 Substrate \pfun attribute \pfun Sctids\_or\_Error \\
    i\_attributeConstraint : \\
-\t2 Substrate \pfun attributeConstraint \pfun Quads \\
+\t2 Substrate \pfun attributeConstraint \pfun Quads\_or\_Error \\
    i\_attributeExpressionConstraint : \\
-\t2 Substrate \pfun attributeExpressionConstraint \pfun Quads \\
+\t2 Substrate \pfun attributeExpressionConstraint \pfun Quads\_or\_Error \\
    i\_attributeConcreteValueConstraint : \\
-\t2 Substrate \pfun attributeConcreteValueConstraint \pfun Quads \\
+\t2 Substrate \pfun attributeConcreteValueConstraint \pfun Quads\_or\_Error \\
 \where
 \forall ss : Substrate; a : attribute @ \\
 \t1 i\_attribute~ss~a =  i\_cardinality~a.card~(i\_attributeConstraint~ss~a.attw) \\
@@ -618,9 +878,7 @@ The actual interpretations if attribute expression and concrete value are in Sec
 \forall ss :Substrate; aw : attributeConstraint @ i\_attributeConstraint~ss~aw = \\
 \t1 \IF aec \inv aw \in attributeExpressionConstraint \\
 \t2  \THEN i\_attributeExpressionConstraint~ss~(aec \inv aw) \\
-\t1 \ELSE \IF acvc \inv aw \in attributeConcreteValueConstraint \\
-\t2  \THEN i\_attributeConcreteValueConstraint~ss~(acvc \inv aw) \\
-\t1 \ELSE qerror~ unknownOperation
+\t1 \ELSE  i\_attributeConcreteValueConstraint~ss~(acvc \inv aw) 
  \also
 \forall ss : Substrate; aec : attributeExpressionConstraint; eca : expressionConstraintArgs | \\
 \t1 eca.atts = i\_attributeSubject~ss~aec.a \land \\
@@ -646,15 +904,15 @@ attributeSet == attribute \cross \seq (binaryOperator \cross attribute)
 \end{zed}
 
 \begin{gendef}
-   i\_attributeGroup : Substrate \pfun attributeGroup \pfun Result 
+   i\_attributeGroup : Substrate \pfun attributeGroup \pfun Sctids\_or\_Error 
 \also
-   i\_attributeSet : Substrate \pfun attributeSet \pfun Result 
+   i\_attributeSet : Substrate \pfun attributeSet \pfun Sctids\_or\_Error 
 \where
 \forall ss : Substrate; ag : attributeGroup @ i\_attributeGroup~ss~ag = \\
 \t1 i\_attributeSet~ss~ag
 \also
 \forall ss : Substrate; a: attributeSet @ i\_attributeSet~ss~a = \\
-\t1 result~(evalCmpndAtt~ss~(i\_groupedAttribute~ss~(first~a))~(second~a))
+\t1 idgroups\_to\_sctids~(evalCmpndAtt~ss~(i\_groupedAttribute~ss~(first~a))~(second~a))
 \end{gendef}
 
 \subsection{Compound attribute evaluation}
@@ -677,23 +935,21 @@ tuples and recursively interprets the $lhs$ and interpretation of the head of th
 \THEN  evalCmpndAtt~ss~(gintersect~ lhs (i\_groupedAttribute~ss~(second~(head~rhs))))~(tail~rhs) \\
  \ELSE \IF first~(head~rhs)  = disjunction \\
 \THEN  evalCmpndAtt~ss~(gunion~ lhs (i\_groupedAttribute~ss~(second~(head~rhs))))~(tail~rhs) \\
- \ELSE \IF first~(head~rhs)  = exclusion \\
-\THEN  evalCmpndAtt~ss~(gminus~ lhs (i\_groupedAttribute~ss~(second~(head~rhs))))~(tail~rhs) \\
- \ELSE gerror~ unknownOperation
+ \ELSE evalCmpndAtt~ss~(gminus~ lhs (i\_groupedAttribute~ss~(second~(head~rhs))))~(tail~rhs) 
 \also
    \forall a, b, r : IDGroups | \\
 \t1 r = \IF gerror \inv a \in ERROR \lor gerror \inv b \in ERROR \THEN gfirstError~a~b \\
-\t1 \ELSE gv ~(gv \inv a \cap gv \inv b) @ \\
+\t1 \ELSE id\_groups ~(id\_groups \inv a \cap id\_groups \inv b) @ \\
 \t1 gintersect~a~b=r
 \also
    \forall a, b, r : IDGroups | \\
 \t1 r = \IF gerror \inv a \in ERROR \lor gerror \inv b \in ERROR \THEN gfirstError~a~b \\
-\t1 \ELSE gv ~(gv \inv a \cup gv \inv b) @ \\
+\t1 \ELSE id\_groups ~(id\_groups \inv a \cup id\_groups \inv b) @ \\
 \t1 gunion~a~b=r
 \also
    \forall a, b, r : IDGroups | \\
 \t1 r = \IF gerror \inv a \in ERROR \lor gerror \inv b \in ERROR \THEN gfirstError~a~b \\
-\t1 \ELSE gv ~(gv \inv a \setminus gv \inv b) @ \\
+\t1 \ELSE id\_groups ~(id\_groups \inv a \setminus id\_groups \inv b) @ \\
 \t1 gminus~a~b=r
 \end{gendef}
 \begin{gendef}
@@ -720,21 +976,21 @@ The algorithm below partitions the input set of Quads by group and validates the
 pass are returned
 
 \textbf{TODO:} This assumes that q.t is always type object. It doesn't say what to do if it is concrete
-\textbf{TODO:} the $gresult$ function seems to express what is described below more simply
+\textbf{TODO:} the $quads\_to\_idgroups$ function seems to express what is described below more simply
 \begin{gendef}
    i\_groupCardinality : \\
-\t2 Quads \fun \optional[cardinality] \fun IDGroups
+\t2 Quads\_or\_Error \fun \optional[cardinality] \fun IDGroups
 \where
-   \forall quads : Quads; oc : \optional[cardinality]; uniqueGroups : \power GROUP; \\
+   \forall quads : Quads\_or\_Error; oc : \optional[cardinality]; uniqueGroups : \power GROUP; \\
 \t2 quadsByGroup : GROUP \pfun \power Quad |  \\
-\t1    uniqueGroups = \{q : qids~quads @ q.g\}  \land \\
+\t1    uniqueGroups = \{q : quads\_for~quads @ q.g\}  \land \\
 \t1    quadsByGroup = \{g: uniqueGroups; q : \power Quad | \\
-\t2 q = \{e: qids~quads | e.g = g\}  @ g \mapsto (evalCardinality~oc~q) \} @ \\
+\t2 q = \{e: quads\_for~quads | e.g = g\}  @ g \mapsto (evalCardinality~oc~q) \} @ \\
 i\_groupCardinality~quads~oc = \\
-\t1 gv~ \{sctid : SCTID; groups : \power GROUP | sctid \in \{q : \bigcup (\ran quadsByGroup) @ \\
-\t2  \IF qidd~quads = subjects \THEN q.s \ELSE object \inv q.t \} \land \\
+\t1 id\_groups~ \{sctid : SCTID; groups : \power GROUP | sctid \in \{q : \bigcup (\ran quadsByGroup) @ \\
+\t2  \IF quad\_direction~quads = source\_direction \THEN q.s \ELSE object \inv q.t \} \land \\
 \t1 groups = \{g: \dom quadsByGroup | (\exists q: quadsByGroup~g @ \\
-\t2 sctid = \IF qidd~quads = subjects \THEN q.s \ELSE object \inv q.t) \} @ \\
+\t2 sctid = \IF quad\_direction~quads = source\_direction \THEN q.s \ELSE object \inv q.t) \} @ \\
 \t2 sctid \mapsto groups \}
 \end{gendef}
 
@@ -743,147 +999,161 @@ i\_groupCardinality~quads~oc = \\
 $cardinality$ is tested against a set of quads with the following rules:
 \begin{enumerate}[noitemsep,nolistsep]
 \item Errors are propagated
-\item No cardinality or passing cardinality returns  the subjects / targets of the set of quads
+\item No cardinality or passing cardinality returns  the sources / targets of the set of quads
 \item Otherwise return an empty set
 \end{enumerate}
 \begin{gendef}
    i\_cardinality :  \\
-\t2 \optional[cardinality] \fun Quads \fun  Result
+\t1 \optional[cardinality] \fun Quads\_or\_Error \fun  Sctids\_or\_Error
 \where
-   \forall oc: \optional[cardinality]; qr : Quads  @ \\
-i\_cardinality~oc~qr = \\
-\t1 \IF qerror \inv qr \in ERROR \THEN result~(gresult~qr) \\
-\t1 \ELSE  result~(gresult~(qv~(evalCardinality~oc~(qids~qr), qidd~qr))) 
+   \forall card: \optional[cardinality]; quads : Quads\_or\_Error  @ \\
+i\_cardinality~card~quads = \\
+\IF quads \in \ran error \\
+\t1 \THEN idgroups\_to\_sctids~(quads\_to\_idgroups~quads) \\
+\ELSE  \\
+\t1 idgroups\_to\_sctids~(quads\_to\_idgroups~\\
+\t2 (quad\_value~(evalCardinality~card~(quads\_for~quads), quad\_direction~quads))) 
 \end{gendef}
 
 \paragraph{evalCardinality}
-Evaluate the cardinality of a set, returning the set if it meets the constraints, otherwise return the empty set.
+Evaluate the cardinality of an arbitrary set of type $T$.  
+\begin{itemize}[noitemsep,nolistsep]
+\item If the cardinality isn't supplied ($\#opt\_cardinality = 0$), return the set.
+\item If the number of elements is greater or equal to the minimum cardinality ($first~(head~opt\_cardinality)$) then:
+\begin{itemize}[noitemsep,nolistsep]
+\item If the max cardinality is an integer ($num \inv second~(head~opt\_cardinality)$) and it is greater than or equal to the number of elements or:
+\item the max cardinality is not specified ($second~(head~opt\_cardinality) = many$)
+\end{itemize}
+return the set
+\item Otherwise return $\emptyset$
+\end{itemize}
 
-\begin{gendef}
-   evalCardinality : \optional[cardinality] \fun \power Quad \fun \power Quad
+\begin{gendef}[T]
+   evalCardinality : \optional[cardinality] \fun \power T \fun \power T
 \where
-   \forall oc : \optional[cardinality]; s : \power Quad @ evalCardinality~oc~s = \\
-\t1 \IF \#oc = 0 \THEN s \\
-\t1 \ELSE \IF (\#s \geq first~(head~oc)) \land \\
-\t2 (second~(head~oc) = many \lor num \inv (second~(head~oc)) \leq \#s) \\
-\t1 \THEN s \\
+   \forall opt\_cardinality : \optional[cardinality]; t : \power T @ \\
+evalCardinality~opt\_cardinality~t = \\
+\t1 \IF \#opt\_cardinality = 0 \lor \\
+\t2 (\#t \geq first~(head~opt\_cardinality)) \land \\
+\t2 (second~(head~opt\_cardinality) = many \lor \\
+\t2 num \inv (second~(head~opt\_cardinality)) \geq \#t) \\
+\t1 \THEN t \\
 \t1 \ELSE  \emptyset
 \end{gendef}
+
+% =========================================== Section 5 ===============================================
 
 \section{Substrate Interpretations}
 \label{sect:substrate}
 This section defines the interpretations that are realized against the substrate. 
 
-\subsection{AttributeExpressionConstraint}
-$expressionConstraintArgs$ carries the arguments necessary to evaluate an attribute expression
-\begin{itemize}[noitemsep,nolistsep]
-\item{\textbf{rf}}  -- If present, return subjects matching attribute/target subjects
-\item{\textbf{subjOrTarg}} -- Set of subject or target SCTIDS (or error)
-\item{\textbf{atts}}  -- Set of attributes to evaluate
-\end{itemize}
+\subsection{attributeName}
+\spec{attributeName} is the interpretation of a \spec{conceptReference} with the additional caveat that the SCTID(s) have to be substrate $attributeIds$
+\begin{framed}
+\noindent
+\bnf{attributeName = conceptReference}
+\end{framed}
 
-\begin{schema}{expressionConstraintArgs}
-   rf : \optional[reverseFlag] \\
-   subjOrTarg : Result \\
-   atts : Result \\
-\end{schema}
+\begin{zed}
+attributeName == conceptReference
+\end{zed}
 
-Evaluate an attribute expression, returning the set of quads in the substrate relationship table
-with the supplied subject / attribute if $rf$ is
-absent and attribute / target if $rf$ is present.  The interpretation returns an error there is
-an error in either the subject/targets or attributes.
-\textbf{TODO:}  We don't say what to do if the target (t) is concrete
 \begin{gendef}
-   i\_attributeExpression : \\ 
-\t2 Substrate \fun expressionConstraintArgs \fun Quads
+   i\_attributeName : \\
+\t1 Substrate \fun attributeName \fun Sctids\_or\_Error
 \where
-   \forall ss : Substrate;  args : expressionConstraintArgs; \\
-\t1 sti: \power TARGET; atts : \power ATTRIBUTE | \\
-   sti = ok \inv args.subjOrTarg \land atts = ok \inv args.atts @ \\
-   i\_attributeExpression~ss~args = \\
-\t1 \IF error \inv (bigunion \{args.subjOrTarg, args.atts \}) \in ERROR \\
-\t1 \THEN \\
-\t2 qfirstError \{args.subjOrTarg, args.atts\} \\
-\t1 \ELSE \IF \lnot (sti \cup  atts) \subseteq ss.c \\
-\t1 \THEN \\
-\t2 qerror~  unknownConceptReference \\
-\t1 \ELSE \IF \# args.rf = 0 \\
-\t1 \THEN \\
-\t2 qv (\{ s: SUBJECT; t: sti; a: atts; g: GROUP; re : ss.r |\\
-\t3 re.t = t \land re.a = a @ re \} , subjects) \\
-\t1 \ELSE \\
-\t2 qv  (\{ s: sti; a: atts; t : TARGET; g: GROUP; re : ss.r | \\
-\t3 re.s = object \inv t \land re.a= a @ re \} , targets) \\
+   \forall ss : Substrate; attName : attributeName @ \\
+   (\LET attn == i\_conceptReference~ss~attName @ \\
+\t1 \IF attn \in \ran ERROR \\
+\t2 \THEN attn \\
+\t1 \ELSE \IF (result\_sctids~attn) \subseteq ss.attributeIds \\
+\t2 \THEN attn \\
+\t1 \ELSE error~unknownAttributeId)
 \end{gendef}
 
 
 
-\subsection{ConcreteAttributeConstraint}
-\begin{verbatim}
-concreteValue =  QM stringValue QM / "#" numericValue 
-stringValue = 1*(anyNonEscapedChar / escapedChar)
-numericValue = decimalValue / integerValue
-integerValue = ( ["-"/"+"] digitNonZero *digit ) / zero
-\end{verbatim}
-The mechanism for interpreting $concreteValue$ is not fully specified at this point. 
-Much of the rest of the machinery is focused around interpreting constraints in the context
-of quads - subject, attribute, target and group, so the function is currently defined as returning
-a $Quads$, but another type or interpretation may be in order.
-\begin{zed}
-concreteValue ::= stringValue | integerValue | realValue 
-\end{zed}
+\subsection{attributeExpressionConstraint}
+\spec{attributeExpressionConstraint} takes a substrate, an optional reverse flag, a set of attribute SCTIDs, an expression operator (equal or not equal) and a set of subject/target SCTIDS (depending on 
+whether reverse flag is present) and returns a collection of quads that match / don't match the entry.
+\begin{gendef}
+   i\_attributeExpressionConstraint : \\ 
+\t1 Substrate \fun \optional[reverseFlag] \fun Sctids\_or\_Error \fun \\
+\t2 expressionComparisonOperator \fun Sctids\_or\_Error \fun Quads\_or\_Error
+\where
+   \forall ss : Substrate;  rf : \optional[reverseFlag]; atts : Sctids\_or\_Error; \\
+\t1 op : expressionComparisonOperator; subj\_or\_targets : Sctids\_or\_Error @ \\
+   i\_attributeExpressionConstraint~ss~rf~atts~op~subj\_or\_targets = \\
+ \IF atts \in \ran error \lor subj\_or\_targets \in \ran error \\
+\t1 \THEN qfirstError \{atts, subj\_or\_targets\} \\
+ \ELSE \IF \# args.rf = 0 \land op = eco\_eq \THEN \\
+\t1 quad\_value (\{ t : result\_sctids~subj\_or\_targets; a : result\_sctids~atts; \\
+\t2 rels : ss.relationships |\\
+\t2 object \inv rels.t = t \land rels.a = a @ rels \} , source\_direction) \\
+\ELSE \IF \# args.rf = 1 \land op = eco\_eq \THEN \\
+\t1 quad\_value (\{ s : result\_sctids~subj\_or\_targets; a : result\_sctids~atts; \\
+\t2 rels : ss.relationships |\\
+\t2 rels.s = s \land rels.t \in \ran object \land rels.a = a @ rels \} , targets\_direction) \\
+ \ELSE \IF \# args.rf = 0 \land op = eco\_neq \THEN \\
+\t1 quad\_value (\{ t : result\_sctids~subj\_or\_targets; a : result\_sctids~atts; \\
+\t2 rels : ss.relationships |\\
+\t2 object \inv rels.t \neq t \land rels.a = a @ rels \} , source\_direction) \\
+ \ELSE \IF \# args.rf = 1 \land op = eco\_neq \THEN \\
+\t1 quad\_value (\{ s : result\_sctids~subj\_or\_targets; a : result\_sctids~atts; \\
+\t2 rels : ss.relationships |\\
+\t2 rels.s \neq s \land rels.t \in \ran object \land rels.a = a @ rels \} , targets\_direction) \\
+\end{gendef}
 
-\paragraph{concreteConstraintArgs}  The arguments to the concrete value function.
-\begin{itemize}[noitemsep,nolistsep]
-\item \textbf{atts} -- list of attributes to test
-\item \textbf{op} -- operator
-\item \textbf{t} -- value to test against
-\end{itemize}
-\noindent 
-\textbf{Note:} $reverseFlag$ has no meaning for concrete constraints.
 
-\begin{schema}{concreteConstraintArgs}
-   atts : Result \\
-   op : comparisonOperator \\
-   t : concreteValue
-\end{schema}
+
+\subsection{concreteAttributeConstraint}
+
 
 \begin{gendef}
   i\_concreteAttributeConstraint : \\
-\t2 Substrate \fun concreteConstraintArgs \fun Quads
+\t1 Substrate \fun Sctids\_or\_Error \fun concreteComparisonOperator \fun\\
+\t2 concreteValue \fun Quads\_or\_Error
+\where
+   \forall ss : Substrate; atts : Sctids\_or\_error; op : concreteComparisonOperator; \\
+\t2 val : concreteValue @ \\
+i\_concreteAttributeConstraint = \\
+\IF atts \in \ran error \\
+\t1 \THEN qerror ~ (error \inv atts) \\
+   \ELSE quad\_value \{ss.relationships | ss.a \in (result\_sctids~atts) \land \\
+\t2 ss.t \in \ran concrete \land val \in concreteMatch~(concrete \inv ss.t)~op \}
 \end{gendef}
 
-
-\subsection{ConstraintOperator}
-\begin{verbatim}
-constraintOperator = 
-         descendantOrSelfOf / descendantOf /  ancestorOrSelfOf / ancestorOf 
-\end{verbatim}
+\begin{gendef}
+   concreteMatch : \\
+\t1 CONCRETEVALUE \fun comparison \fun concreteValue
+\end{gendef}
 
 \noindent
 \textbf{Interpretation:}  Apply the substrate descendants ($descs$) or ancestors ($ancs$) function to a set of SCTID's in the supplied
-$Result$.  Error conditions are propagated.
+$Sctids\_or\_Error$.  Error conditions are propagated.
 
 
 \begin{gendef}
    i\_constraintOperator : \\
-\t2 Substrate \pfun \optional[constraintOperator] \pfun Result \pfun Result
+\t1 Substrate \pfun \optional[constraintOperator] \pfun Sctids\_or\_Error \pfun Sctids\_or\_Error
 \also
    completeFun : (SCTID \pfun \power SCTID) \fun SCTID \fun \power SCTID \\
 \where
-	\forall ss : Substrate; oco : \optional[constraintOperator]; refset : Result @ \\
-i\_constraintOperator~ss~oco~refset = \\
-\t1 \IF error \inv refset \in ERROR \lor \# oco = 0 \\
-\t2 \THEN refset \\
+	\forall ss : Substrate; oco : \optional[constraintOperator]; subresult : Sctids\_or\_Error @ \\
+i\_constraintOperator~ss~oco~subresult = \\
+\t1 \IF error \inv subresult \in ERROR \lor \# oco = 0 \\
+\t2 \THEN subresult \\
 \t1 \ELSE \IF head~oco = descendantOrSelfOf~ \\
-\t2 \THEN ok (\bigcup \{id : ids~refset @ completeFun~ss.descs~id \cup \{id\}~\}) \\
+\t2 \THEN ok (\bigcup \{id : result\_sctids~subresult @ \\
+\t4 completeFun~ss.descendants~id \} \cup result\_sctids~subresult) \\
 \t1 \ELSE \IF head~oco = descendantOf~ \\
-\t2 \THEN ok  (\bigcup \{id : ids~refset @ completeFun~ss.descs~id \setminus \{id\}~\}) \\
+\t2 \THEN ok  (\bigcup \{id : result\_sctids~subresult @ \\
+\t4 completeFun~ss.descendants~id ~\}) \\
 \t1 \ELSE \IF head~oco = ancestorOrSelfOf~ \\
-\t2 \THEN  ok (\bigcup \{id : ids~refset @ completeFun~ss.ancs~id \cup \{id\}~\}) \\
-\t1 \ELSE \IF head~oco = ancestorOf~ \\
-\t2 \THEN ok (\bigcup \{id : ids~refset @ completeFun~ ss.ancs~id \setminus \{id\}~\}) \\
-\t1 \ELSE error~ unknownOperation
+\t2 \THEN  ok (\bigcup \{id : result\_sctids~subresult @ \\
+\t4 completeFun~ss.ancestors~id \} \cup result\_sctids~subresult) \\
+\t1 \ELSE  ok (\bigcup \{id : result\_sctids~subresult \\
+\t4 @ completeFun~ ss.ancestors~id ~\}) \\
 \also
    \forall f : (SCTID \pfun \power SCTID); id : SCTID @ completeFun~f~id = \\
 \t1\IF id \in \dom f \THEN f~id \ELSE \emptyset 
@@ -891,62 +1161,89 @@ i\_constraintOperator~ss~oco~refset = \\
 
 
 \subsection{FocusConcept}
-
 \begin{verbatim}
 focusConcept = [memberOf] conceptReference
 \end{verbatim}
-
-\textbf{Interpretation:}  focusConcept is interpreted as the interpretation of conceptReference itself or, if memberOf is specified, the interpretation of the memberOf function
-applied to the conceptReference
-
+\subsubsection{focusConcept}
+\spec{focusConcept} is either a simple concept reference or the interpretation of the \spec{memberOf} function applied to a concept reference.
 \begin{zed}
-focusConcept ::= mo \ldata conceptReference \rdata | cr \ldata conceptReference \rdata
+focusConcept ::= \\
+\t1 focusConcept\_m \ldata conceptReference \rdata | \\
+\t1 focusConcept\_c \ldata conceptReference \rdata
 \end{zed}
 
+
+\textbf{Interpretation:}  If  \spec{memberOf} is present the interpretation of  \spec{focusConcept} is union the interpretation of \spec{memberOf} applied to
+each element in the interpretation of \spec{conceptReference}.  If \spec{memberOf} isn't part of the spec, the interpretation is the interpretation of \spec{conceptReference} itself
+
 \begin{gendef}
-   i\_focusConcept : Substrate \fun focusConcept \fun Result
+   i\_focusConcept : Substrate \fun focusConcept \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate; fc : focusConcept @ \\
 i\_focusConcept~ss~fc = \\
-\t1 \IF cr \inv fc \in conceptReference \\
-\t2 \THEN i\_conceptReference~ss~(cr \inv fc) \\
-\t1 \ELSE \IF mo \inv fc \in conceptReference \\
-\t2 \THEN i\_memberOf~ss~(mo \inv fc) \\
-\t1 \ELSE error~ unknownOperation
+\t1 \IF focusConcept\_c \inv fc \in conceptReference \\
+\t2 \THEN i\_conceptReference~ss~(focusConcept\_c~\inv fc) \\
+\t1 \ELSE  i\_memberOf~ss~(i\_conceptReference~ss~(focusConcept\_m~\inv fc)) 
 \end{gendef}
 
 \subsubsection{memberOf}
-\textbf{Interpretation:} memberOf is interpreted as application $refset$ function to the conceptReference SCTID or an error if the SCTID isn't in the domain of the $refset$ function.
+\spec{memberOf} returns the union of the application of the substrate $refset$ function to each of the supplied reference set identifiers.  An error is
+returned if (a) $refsetids$ already has an error or (b) one or more of the refset identifiers aren't substrate $refsetIds$
 
 \begin{gendef}
-   i\_memberOf : Substrate \fun conceptReference \fun Result
+   i\_memberOf : Substrate \fun Sctids\_or\_Error \fun Sctids\_or\_Error \\
+   i\_refset : Substrate \fun SCTID \fun Sctids\_or\_Error
 \where
-   \forall ss : Substrate; cr : conceptReference @ \\
-i\_memberOf~ss~cr = \\
-\t1 (\LET sctid == toSCTID~cr @ \\
-\t2 \IF sctid \notin \dom ss.refset \THEN error~unknownRefsetId \\
-\t1 \ELSE ok~(ss.refset~sctid))
+   \forall ss : Substrate; refsetids : Sctids\_or\_Error @ \\
+i\_memberOf~ss~refsetids= \\
+\t1 \IF refsetids \in \ran error \\
+\t2 \THEN refsetids \\
+\t1 \ELSE bigunion \{sctid: result\_sctids~refsetids @ i\_refset~ss~sctid \} 
+\also
+  \forall ss : Substrate; sctid : SCTID @ \\
+i\_refset~ss~sctid = \\
+\IF sctid \notin ss.refsetIds \\
+\t1 \THEN error~unknownRefsetId \\
+\ELSE \IF sctid \in \dom ss.refsetIds \\
+\t1 \THEN ok~(ss.refsets~sctid) \\
+ \ELSE ok~\emptyset
 \end{gendef}
 
-\subsection{ConceptReference}
+
+
+\subsection{ConceptReferences}
+\subsubsection{conceptId}
+\begin{verbatim}
+conceptId = sctId
+\end{verbatim}
+\textbf{Interpretation}: \spec{conceptId} is interpreted as $SCTID$ that it represents.  For our purposes, all \spec{conceptId}s are considered valid, so this is a bijection.
+\begin{zed}
+[conceptId]
+\end{zed}
+
+\begin{gendef}
+   i\_conceptId : conceptId \bij SCTID
+\end{gendef}
+
+\subsubsection{conceptReference}
 \begin{verbatim}
 conceptReference = conceptId [ "|" Term "|"]
 conceptId = sctId
 \end{verbatim}
-\textbf{Interpretation:}  conceptReference is interpreted as $SCTID$ if it is a member the list of concepts, $c$
-in the substrate, otherwise as an $error$.
+\textbf{Interpretation:}  \spec{conceptReference} is interpreted as the \emph{set of} $SCTID$s that are equivalent to the supplied SCTID if it is known concepts, $c$,
+in the substrate.  If it isn't in the list of known concepts otherwise as the $unknownConceptReference$ error.  The \spec{Term} part of \spec{conceptReference} is ignored.
 
 \begin{zed}
-[conceptReference]
+conceptReference == conceptId
 \end{zed}
 
 \begin{gendef}
-   toSCTID : conceptReference \fun SCTID \\
-   i\_conceptReference : Substrate \fun conceptReference \fun Result \\
+   i\_conceptReference : Substrate \fun conceptReference \fun Sctids\_or\_Error \\
 \where
    \forall ss: Substrate; c : conceptReference @ i\_conceptReference~ss~c = \\
-\t1 \IF (toSCTID~ c) \in ss.c \THEN ok \{(toSCTID~ c)\} \\
-\t1 \ELSE error~ unknownConceptReference
+\t1 (\LET sctid == i\_conceptId~c @ \\
+\t1 \IF sctid \in ss.concepts \THEN ok ~ (ss.equivalent\_concepts~ sctid) \\
+\t1 \ELSE error~ unknownConceptReference)
 \end{gendef}
 
 \section{Glue and Helper Functions}
@@ -955,63 +1252,68 @@ This section carries various type transformations and error checking functions
 \subsection{Types}
 
 \begin{itemize}[noitemsep,nolistsep]
-\item \textbf{direction} -- an indicator whether a collection of quads was determined as subject to target ($subjects$) or target to subject ($targets$)
-\item \textbf{Quads} --  a collection of $Quad$s or an error condition. If it is a collection $Quad$s, it also carries
-a direction indicator that determines whether it represents a set of subjects or targets. 
+\item \textbf{direction} -- an indicator whether a collection of quads was determined as source to target ($source\_direction$) or target to source ($targets\_direction$)
+\item \textbf{Quads\_or\_Error} --  a collection of $Quad$s or an error condition. If it is a collection $Quad$s, it also carries
+a direction indicator that determines whether it represents a set of sources or targets. 
 \item \textbf{IDGroups} -- a map from $SCTID$s to the $GROUP$ they were in when they passed if successful, otherwise an error indication.
 \end{itemize}
 
 \begin{zed}
-direction ::= subjects | targets \\
-Quads ::= qv \ldata \power Quad \cross direction \rdata | qerror \ldata ERROR \rdata \\
+direction ::= source\_direction | targets\_direction \\
+Quads\_or\_Error ::= quad\_value \ldata \power Quad \cross direction \rdata | qerror \ldata ERROR \rdata \\
 \also
-IDGroups ::= gv \ldata SCTID \pfun \power GROUP \rdata | gerror \ldata ERROR \rdata
+IDGroups ::= id\_groups \ldata SCTID \pfun \power GROUP \rdata | gerror \ldata ERROR \rdata
 \end{zed}
 
 \subsection{Result transformations}
 \begin{itemize}[noitemsep,nolistsep]
-\item \textbf{ids} -- return the set of $SCTID$s in a result or the empty set if there is an error
-\item \textbf{qids} -- return the set of $Quads$ in a quads result or an empty set if there is an error
-\item \textbf{qidd} -- return the direction of a $Quads$ result.  Undefined if error
-\item \textbf{gids} -- return the $SCTID$ to group map in an id group or an empty map if there is error
-\item \textbf{gresult} -- convert a set of quads int a set of id groups
-\item \textbf{result} -- convert a set of id groups into a simple result.
+\item \textbf{result\_sctids} -- the set of $SCTID$s in $Sctids\_or\_Error$ or the empty set if there is an error
+\item \textbf{quads\_for} -- the set of quads in a $Quads\_or\_Error$ or an empty set if there is an error
+\item \textbf{quad\_direction} -- the direction of a $Quads\_or\_Error$ result.  Undefined if error
+\item \textbf{to\_idGroups} -- the $SCTID$ to $GROUP$ part of in an id group or an empty map if there is error
+\item \textbf{quads\_to\_idgroups} -- convert a set of quads int a set of id groups using the following rules:
+\begin{itemize}[noitemsep,nolistsep]
+\item If the set of quads has an error, propagate it
+\item If the quad direction is $source\_direction$ (target to source) a list of unique relationship subjects and, for each subjects, the set of different groups it appears as a subject in
+\item Otherwise return a list of relationship target sctids and, for each target, the set of different groups it appears as a target in.
+\end{itemize}
+\item \textbf{idgroups\_to\_sctids} -- remove the sctids in an idgroup sans the group identifiers.
 \end{itemize}
 \begin{gendef}
-   ids: Result \fun \power SCTID \\
-   qids: Quads \fun \power Quad  \\
-   qidd: Quads \pfun direction \\
-   gids: IDGroups \fun SCTID \fun \power GROUP \\
-   gresult: Quads \fun IDGroups \\
-   result: IDGroups \fun Result \\
+   result\_sctids: Sctids\_or\_Error \fun \power SCTID \\
+   quads\_for: Quads\_or\_Error \fun \power Quad  \\
+   quad\_direction: Quads\_or\_Error \pfun direction \\
+   to\_idGroups: IDGroups \fun SCTID \fun \power GROUP \\
+   quads\_to\_idgroups: Quads\_or\_Error \fun IDGroups \\
+   idgroups\_to\_sctids: IDGroups \fun \power SCTID \\
 \where
-   \forall r: Result @ ids~r = \\
+   \forall r: Sctids\_or\_Error @ result\_sctids~r = \\
 \t1 \IF error \inv r \in ERROR \THEN \emptyset \\
 \t1 \ELSE ok \inv r
 \also
-   \forall q : Quads @ qids~q = \\
+   \forall q : Quads\_or\_Error @ quads\_for~q = \\
 \t1 \IF qerror \inv q \in ERROR \THEN \emptyset \\
-\t1 \ELSE first~(qv \inv q)
+\t1 \ELSE first~(quad\_value \inv q)
 \also
-   \forall q : Quads @ qidd~q = \\
-\t1 second~(qv \inv q)
+   \forall q : Quads\_or\_Error @ quad\_direction~q = \\
+\t1 second~(quad\_value \inv q)
 \also
-   \forall g : IDGroups @ gids~g = \\
+   \forall g : IDGroups @ to\_idGroups~g = \\
 \t1 \IF gerror \inv g \in ERROR \THEN \emptyset \\
-\t1 \ELSE gv \inv g
+\t1 \ELSE id\_groups \inv g
 \also
-   \forall q : Quads @ gresult~q = \\
+   \forall q : Quads\_or\_Error @ quads\_to\_idgroups~q = \\
 \t1 \IF qerror  \inv q \in ERROR \THEN gerror (qerror \inv q) \\
-\t1 \ELSE \IF qidd~q = subjects \\
-\t2 \THEN gv~\{s : SCTID | (\exists qr : qids~q @ s = qr.s) @ \\
-\t2 s \mapsto \{qr : qids~q @ qr.g\} \} \\
+\t1 \ELSE \IF quad\_direction~q = source\_direction \\
+\t2 \THEN id\_groups~\{s : SCTID | (\exists qr : quads\_for~q @ s = qr.s) @ \\
+\t2 s \mapsto \{qr : quads\_for~q @ qr.g\} \} \\
 \t1 \ELSE \\
-\t2 gv~\{t : SCTID | (\exists qr : qids~q @ t = object \inv qr.t ) @ \\
-\t2 t \mapsto \{qr : qids~q @ qr.g\} \} 
+\t2 id\_groups~\{t : SCTID | (\exists qr : quads\_for~q @ t = object \inv qr.t ) @ \\
+\t2 t \mapsto \{qr : quads\_for~q @ qr.g\} \} 
 \also
-   \forall g : IDGroups @ result~g = \\
-\t1 \IF gerror \inv g \in ERROR \THEN error (gerror \inv g) \\
-\t1 \ELSE ok (\dom (gv \inv g))
+   \forall g : IDGroups @ idgroups\_to\_sctids~g = \\
+\t1 \IF gerror \inv g \in ERROR \THEN \emptyset \\
+\t1 \ELSE \dom (id\_groups \inv g)
 \end{gendef}
 
 
@@ -1019,49 +1321,45 @@ IDGroups ::= gv \ldata SCTID \pfun \power GROUP \rdata | gerror \ldata ERROR \rd
 \paragraph{}
 Definition of the various functions that are performed on the result type. \\
 \begin{itemize}[noitemsep,nolistsep]
-\item \textbf{firstError} -- take a set of $Result$s with one or more errors and return an aggregation / summary as a $Result$.  (Not fully defined)
-\item \textbf{qfirstError} -- take a set of $Result$s with one or more errors and return an aggregation / summary as a $Quads$ instance. (not fully defined)
+\item \textbf{firstError} -- aggregate one or more $Sctids\_or\_Error$ types, at least one of which carries and error and merge them into a single $Sctid\_or\_Error$ instance propagating at least one of the errors (Not fully defined)
+\item \textbf{qfirstError} -- convert two $Sctids\_or\_Error$ types, into a $Quads\_or\_Error$ propagating at least one of the errors. (not fully defined)
 \end{itemize}
 
 \begin{itemize}[noitemsep]
-\item \textbf{union} -- return the union of two $Result$ $SCTID$s or $ERROR$ if either of them have an error.
-\item \textbf{intersect} -- return the intersection of two  $Result$ $SCTID$s or $ERROR$ if either of them have an error.
-\item \textbf{minus} -- return the set of $SCTID$s in the first set of results that are not in the second or $ERROR$ if either of them have an error.
-\item \textbf{bigunion} -- return the union of a set $Result$ $SCTID$s or $ERROR$ if any of the results in the set have an error.
-\item \textbf{bigintersect} -- return the intersection of a set $Result$ $SCTID$s or $ERROR$ if any of the results in the set have an error.
+\item \textbf{union} -- return the union of two $Sctids\_or\_Error$ types, propagating errors if they exist, else returning the union of the SCTID sets.
+\item \textbf{intersect} --return the intersection of two $Sctids\_or\_Error$ types, propagating errors if they exist, else returning the intersection of the SCTID sets.
+\item \textbf{minus} -- return the difference of one $Sctids\_or\_Error$ type and a second, propagating errors if they exist, else returning the set of SCTID's in the first set that aren't in the second. 
+\item \textbf{bigunion} -- return the union of a set of $Sctids\_or\_Error$ types, propagating errors if they exist, else returning the union of  all of the SCTID sets.
+\item \textbf{bigintersect} -- return the intersection a set of $Sctids\_or\_Error$ types, propagating errors if they exist, else returning the intersection of all of  the SCTID sets.
 \end{itemize}
 
-
-$firstError$ is not fully defined -- it takes a set of results with one or more errors
-and returns an aggregation of all of the errors.
 \begin{gendef}
-   union, intersect, minus : Result \fun Result \fun Result \\
-   bigunion, bigintersect : \power Result \fun Result \\
-   firstError : \power Result \pfun Result \\
-   qfirstError : \power Result \pfun Quads 
+   firstError : \power Sctids\_or\_Error \pfun Sctids\_or\_Error \\
+   qfirstError : \power Sctids\_or\_Error \pfun Quads\_or\_Error 
+\also
+   union, intersect, minus : Sctids\_or\_Error \fun Sctids\_or\_Error \fun \\
+\t2 Sctids\_or\_Error \\
+   bigunion, bigintersect : \power Sctids\_or\_Error \fun Sctids\_or\_Error \\
 \where
-   \forall x,y : Result @ union~x~y = \\
-\t1 \IF error \inv x \in ERROR \THEN x \\
-\t1 \ELSE \IF error \inv y \in ERROR \THEN y \\
+   \forall x,y : Sctids\_or\_Error @ union~x~y = \\
+\t1 \IF x \in \ran error \lor  y \in \ran error \THEN firstError~\{x, y\} \\
 \t1 \ELSE ok~((ok \inv x) \cup (ok \inv y))
 \also
-   \forall x,y : Result @ intersect~x~y = \\
-\t1 \IF error \inv x \in ERROR \THEN x \\
-\t1 \ELSE \IF error \inv y \in ERROR \THEN y \\
+   \forall x,y : Sctids\_or\_Error @ intersect~x~y = \\
+\t1 \IF x \in \ran error \lor y \in \ran error \THEN firstError~\{x, y\} \\
 \t1 \ELSE ok~((ok \inv x) \cap (ok \inv y))
 \also
-   \forall x,y : Result @ minus~x~y = \\
-\t1 \IF error \inv x \in ERROR \THEN x \\
-\t1 \ELSE \IF error \inv y \in ERROR \THEN y \\
+   \forall x,y : Sctids\_or\_Error @ minus~x~y = \\
+\t1 \IF x \in \ran error \lor y \in \ran error \THEN firstError~\{x, y\} \\
 \t1 \ELSE ok~((ok \inv x) \setminus (ok \inv y))
 \also
-  \forall rs : \power Result @ bigunion~rs = \\
-\t1 \IF \exists r : rs @ error \inv r \in ERROR \THEN firstError~ rs \\
-\t1 \ELSE ok~(\bigcup \{r : rs @ ids~r\})
+  \forall rs : \power Sctids\_or\_Error @ bigunion~rs = \\
+\t1 \IF \exists r : rs @ r \in \ran error \THEN firstError~ rs \\
+\t1 \ELSE ok~(\bigcup \{r : rs @ result\_sctids~r\})
 \also
-  \forall rs : \power Result @ bigintersect~rs = \\
-\t1 \IF \exists r : rs @ error \inv r \in ERROR \THEN firstError~ rs \\
-\t1 \ELSE ok~(\bigcap \{r : rs @ ids~r\})
+  \forall rs : \power Sctids\_or\_Error @ bigintersect~rs = \\
+\t1 \IF \exists r : rs @ r \in \ran error \THEN firstError~ rs \\
+\t1 \ELSE ok~(\bigcap \{r : rs @ result\_sctids~r\})
 \end{gendef}
 
    
@@ -1071,8 +1369,10 @@ Representing optional elements of type $T$.  Representing it as a sequence allow
 determine absence by $\#T = 0$ and the value by $head~T$. 
 
 \begin{zed} 
-  \optional[T] == \{ s : \seq T \mid \# s \leq 1 \} \\
+  \optional[T] == \{ s : \seq T \mid \# s \leq 1 \} 
 \end{zed}
+
+   
 
 \end{document}
 
