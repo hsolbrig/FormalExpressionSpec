@@ -298,8 +298,7 @@ refinedExpressionConstraint == \\
 \where
    \forall ss : Substrate; rec : refinedExpressionConstraint @ \\
    i\_refinedExpressionConstraint~ss~rec = \\
-\t1 intersect~(i\_unrefinedExpressionConstraint~ss~(first~rec)) \\
-\t3 (i\_refinement~ss~(second~rec))
+\t1 intersect~(i\_unrefinedExpressionConstraint~ss~(first~rec)) (i\_refinement~ss~(second~rec))
 \end{gendef}
 
 
@@ -378,23 +377,15 @@ conjunctionExpressionConstraint == \\
 \t2 subExpressionConstraint \cross \seq_1(subExpressionConstraint)
 \end{zed}
 
-In the formalization below, $first ~cecr$ refers to the left hand side of the $conjunctionExpressionConstraint$ and
-$second ~cecr$ to the right hand side.  $head (second~cecr)$ refers to the first element in the sequence and 
-$tail (second~cecr)$ refers to the remaining elements in the sequence, which may be empty ($\langle \rangle$).
+Apply the intersection operator to the interpretation of each  subExpressionConstraint
 
 \begin{gendef}
     i\_conjunctionExpressionConstraint : \\
-\t2 Substrate \fun conjunctionExpressionConstraint \fun Sctids\_or\_Error
+\t1 Substrate \fun conjunctionExpressionConstraint \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate;  cecr : conjunctionExpressionConstraint @ \\
 i\_conjunctionExpressionConstraint~ss~cecr = \\
-   \IF tail(second~cecr) = \langle \rangle \THEN \\
-\t1 intersect~~(i\_subExpressionConstraint~ss~(first~cecr)) \\
-\t3 (i\_subExpressionConstraint~ss~(head~(second~cecr))) \\
-    \ELSE \\
-\t1 intersect~~(i\_subExpressionConstraint~ss~(first~cecr)) \\
-\t2 (i\_conjunctionExpressionConstraint~ss~((head(second~cecr)) \\
-\t4 (tail(second~cecr))))
+\t1 applyToSequence~ss~i\_subExpressionConstraint~intersect~cecr
 \end{gendef}
 
 \subsubsection{disjunctionExpressionConstraint}
@@ -410,24 +401,17 @@ disjunctionExpressionConstraint == \\
 \t2 subExpressionConstraint \cross \seq_1(subExpressionConstraint)
 \end{zed}
 
-In the formalization below, $first ~cecr$ refers to the left hand side of the $disjunctionExpressionConstraint$ and
-$second ~cecr$ to the right hand side.  $head (second~cecr)$ refers to the first element in the sequence and 
-$tail (second~cecr)$ refers to the remaining elements in the sequence, which may be empty ($\langle \rangle$).
+Apply the union operator to the interpretation of each  subExpressionConstraint
 
 \begin{gendef}
     i\_disjunctionExpressionConstraint : \\
-\t2 Substrate \fun disjunctionExpressionConstraint \fun Sctids\_or\_Error
+\t1 Substrate \fun disjunctionExpressionConstraint \fun Sctids\_or\_Error
 \where
-   \forall ss : Substrate;  cecr : disjunctionExpressionConstraint @ \\
-i\_disjunctionExpressionConstraint~ss~cecr = \\
-   \IF tail(second~cecr) = \langle \rangle \THEN \\
-\t1 union~~(i\_subExpressionConstraint~ss~(first~cecr)) \\
-\t3 (i\_subExpressionConstraint~ss~(head~(second~cecr))) \\
-   \ELSE \\
-\t1 intersect~~(i\_subExpressionConstraint~ss~(first~cecr)) \\
-\t2 (i\_conjunctionExpressionConstraint~ss~((head(second~cecr)) \\
-\t3 (tail(second~cecr))))
+   \forall ss : Substrate;  decr : disjunctionExpressionConstraint @ \\
+i\_disjunctionExpressionConstraint~ss~decr = \\
+\t1 applyToSequence~ss~i\_subExpressionConstraint~union~decr
 \end{gendef}
+
 
 
 
@@ -451,8 +435,7 @@ exclusionExpressionConstraint == \\
 \where
    \forall ss : Substrate; ecr : exclusionExpressionConstraint @ \\
 i\_exclusionExpressionConstraint~ss~ecr = \\
-\t1~ minus~~ (i\_subExpressionConstraint~ss~(first~ecr)) \\
-\t3 (i\_subExpressionConstraint~ss~(second~ecr))
+\t1~ minus~~ (i\_subExpressionConstraint~ss~(first~ecr)) (i\_subExpressionConstraint~ss~(second~ecr))
 \end{gendef}
 
 \subsubsection{subExpressionConstraint}
@@ -519,20 +502,17 @@ conjunctionGroup == \\
 \t2 subRefinement \cross \seq_1(subRefinement)
 \end{zed}
 
+Apply the intersect operator to the interpretation of each  subRefinement
+
 \begin{gendef}
     i\_conjunctionGroup : \\
-\t2 Substrate \fun conjunctionGroup \fun Sctids\_or\_Error
+\t1 Substrate \fun conjunctionGroup \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate;  conjg : conjunctionGroup @ \\
 i\_conjunctionGroup~ss~conjg = \\
-   \IF tail(second~conjg) = \langle \rangle \THEN \\
-\t1 intersect~~(i\_subRefinement~ss~(first~conjg)) \\
-\t3 (i\_subRefinement~ss~(head~(second~conjg))) \\
-   \ELSE \\
-\t1 intersect~~(i\_subRefinement~ss~(first~conjg)) \\
-\t2 (i\_conjunctionGroup~ss~((head(second~conjg)) \\
-\t3 (tail(second~conjg))))
+\t1 applyToSequence~ss~i\_subRefinement~intersect~conjg
 \end{gendef}
+
 
 \subsubsection{disjunctionGroup}
 \begin{framed}
@@ -545,19 +525,15 @@ disjunctionGroup == \\
 \t2 subRefinement \cross \seq_1(subRefinement)
 \end{zed}
 
+Apply the union operator to the interpretation of each  subRefinement
+
 \begin{gendef}
     i\_disjunctionGroup : \\
-\t2 Substrate \fun disjunctionGroup \fun Sctids\_or\_Error
+\t1 Substrate \fun disjunctionGroup \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate;  disjg : disjunctionGroup @ \\
-ii\_disjunctionGroup~ss~disjg = \\
-   \IF tail(second~disjg) = \langle \rangle \THEN \\
-\t1 intersect~~(i\_subRefinement~ss~(first~disjg)) \\
-\t3 (i\_subRefinement~ss~(head~(second~disjg))) \\
-   \ELSE \\
-\t1 intersect~~(i\_subRefinement~ss~(first~disjg)) \\
-\t2 (ii\_disjunctionGroup~ss~((head(second~disjg)) \\
-\t3 (tail(second~disjg))))
+i\_disjunctionGroup~ss~disjg = \\
+\t1 applyToSequence~ss~i\_subRefinement~union~disjg
 \end{gendef}
 
 \subsubsection{subRefinement}
@@ -570,9 +546,9 @@ The interpretation of a \spec{subRefinement} is the interpretation of the corres
 
 \begin{zed}
 subRefinement ::= \\
-\t1 subrefine\_attset \langle attributeSet \rangle | \\
-\t1 subrefine\_attgroup \langle attributeGroup \rangle | \\
-\t1 subrefine\_refinement \langle refinement \rangle
+\t1 subrefine\_attset \ldata attributeSet \rdata | \\
+\t1 subrefine\_attgroup \ldata attributeGroup \rdata | \\
+\t1 subrefine\_refinement \ldata refinement \rdata
 \end{zed}
 
 
@@ -581,12 +557,14 @@ subRefinement ::= \\
 \t2 Substrate \fun subRefinement \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate; subrefine : subRefinement @ \\
+   i\_subRefinement~ss~subrefine = \\
    \IF subrefine \in \ran subrefine\_attset \\
 \t1 \THEN i\_attributeSet~ss~(subrefine\_attset \inv subrefine) \\
    \ELSE \IF subrefine \in \ran subrefine\_attgroup \\
 \t1 \THEN i\_attributeGroup~ss~(subrefine\_attgroup \inv subrefine) \\
   \ELSE i\_refinement~ss~(subrefine\_refinement \inv subrefine)
 \end{gendef}
+
 \subsection{attributeSet}
 
 \begin{framed}
@@ -606,6 +584,7 @@ attributeSet ::= \\
 \t2 Substrate \fun attributeSet \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate; attset : attributeSet @ \\
+   i\_attributeSet~ss~attset = \\
    \IF attset \in \ran attset\_subattset \\
 \t1 \THEN i\_subAttributeSet~ss~(attset\_subattset \inv attset) \\
    \ELSE \IF attset \in \ran attset\_conjattset \\
@@ -624,20 +603,18 @@ conjunctionAttributeSet == \\
 \t2 subAttributeSet \cross \seq_1(subAttributeSet)
 \end{zed}
 
+
+Apply the intersect operator to the interpretation of each  subAttributeSet
+
 \begin{gendef}
     i\_conjunctionAttributeSet : \\
-\t2 Substrate \fun conjunctionAttributeSet \fun Sctids\_or\_Error
+\t1 Substrate \fun conjunctionAttributeSet \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate;  conjaset : conjunctionAttributeSet @ \\
 i\_conjunctionAttributeSet~ss~conjaset = \\
-   \IF tail(second~conjaset) = \langle \rangle \THEN \\
-\t1 intersect~~(i\_subAttributeSet~ss~(first~conjaset)) \\
-\t3 (i\_subAttributeSet~ss~(head~(second~conjaset))) \\
-   \ELSE \\
-\t1 intersect~~(i\_subAttributeSet~ss~(first~conjaset)) \\
-\t2 (i\_conjunctionGroup~ss~((head(second~conjaset)) \\
-\t3 (tail(second~conjaset))))
+\t1 applyToSequence~ss~i\_subAttributeSet~intersect~conjaset
 \end{gendef}
+
 
 \subsubsection{disjunctionAttributeSet}
 \begin{framed}
@@ -650,19 +627,16 @@ disjunctionAttributeSet == \\
 \t2 subAttributeSet \cross \seq_1(subAttributeSet)
 \end{zed}
 
+
+Apply the union operator to the interpretation of each  subAttributeSet
+
 \begin{gendef}
     i\_disjunctionAttributeSet : \\
-\t2 Substrate \fun disjunctionAttributeSet \fun Sctids\_or\_Error
+\t1 Substrate \fun disjunctionAttributeSet \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate;  disjaset : disjunctionAttributeSet @ \\
 i\_disjunctionAttributeSet~ss~disjaset = \\
-   \IF tail(second~disjaset) = \langle \rangle \THEN \\
-\t1 intersect~~(i\_subAttributeSet~ss~(first~disjaset)) \\
-\t3 (i\_subAttributeSet~ss~(head~(second~disjaset))) \\
-   \ELSE \\
-\t1 intersect~~(i\_subAttributeSet~ss~(first~disjaset)) \\
-\t2 (i\_disjunctionAttributeSet~ss~((head(second~disjaset)) \\
-\t3 (tail(second~disjaset))))
+\t1 applyToSequence~ss~i\_subAttributeSet~union~disjaset
 \end{gendef}
 
 \subsubsection{subAttributeSet}
@@ -672,7 +646,7 @@ i\_disjunctionAttributeSet~ss~disjaset = \\
 \end{framed}
 
 \begin{zed}
-subAttributeSet == \\
+subAttributeSet ::= \\
 \t1 subaset\_attribute \ldata attribute \rdata | \\
 \t1 subaset\_attset \ldata attributeSet \rdata
 \end{zed}
@@ -682,6 +656,7 @@ subAttributeSet == \\
 \t2 Substrate \fun subAttributeSet \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate; subaset : subAttributeSet @ \\
+   i\_subAttributeSet~ss~subaset = \\
    \IF subaset \in \ran subaset\_attribute \\
 \t1 \THEN i\_attribute~ss~(subaset\_attribute \inv subaset) \\
   \ELSE i\_attributeSet~ss~(subaset\_attset \inv subaset)
@@ -715,6 +690,7 @@ subAttributeSet == \\
 \t1 Substrate \fun attribute \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate; att : attribute @ \\
+   i\_attribute~ss~att = \\
    \IF att \in \ran attrib\_conc \\
 \t1 \THEN i\_concreteAttribute~ss~(attrib\_conc \inv att) \\
    \ELSE i\_expressionAttribute~ss~(attrib\_expr \inv att)
@@ -779,8 +755,8 @@ determined by the interpretation of \spec{attributeName} having $CONCRETEVALUE$ 
 \where
    \forall ss : Substrate; ca : concreteAttribute @ \\
    i\_concreteAttribute~ss~ca = \\
-   (\LET attids = i\_attributeName~ss~ca.name @ \\
-\t1 i\_concreteAttributeConstraint~ss~attids~ca.operator~ca.value
+   (\LET attids == i\_attributeName~ss~ca.name @ \\
+\t1 i\_concreteAttributeConstraint~ss~attids~ca.operator~ca.value)
 \end{gendef}
 
 
@@ -1011,8 +987,7 @@ i\_cardinality~card~quads = \\
 \IF quads \in \ran error \\
 \t1 \THEN idgroups\_to\_sctids~(quads\_to\_idgroups~quads) \\
 \ELSE  \\
-\t1 idgroups\_to\_sctids~(quads\_to\_idgroups~\\
-\t2 (quad\_value~(evalCardinality~card~(quads\_for~quads), quad\_direction~quads))) 
+\t1 idgroups\_to\_sctids~(quads\_to\_idgroups~(quad\_value~(evalCardinality~card~(quads\_for~quads), quad\_direction~quads))) 
 \end{gendef}
 
 \paragraph{evalCardinality}
@@ -1063,8 +1038,9 @@ attributeName == conceptReference
 \t1 Substrate \fun attributeName \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate; attName : attributeName @ \\
+   i\_attributeName~ss~attName = \\
    (\LET attn == i\_conceptReference~ss~attName @ \\
-\t1 \IF attn \in \ran ERROR \\
+\t1 \IF attn \in \ran error \\
 \t2 \THEN attn \\
 \t1 \ELSE \IF (result\_sctids~attn) \subseteq ss.attributeIds \\
 \t2 \THEN attn \\
@@ -1087,21 +1063,15 @@ whether reverse flag is present) and returns a collection of quads that match / 
  \IF atts \in \ran error \lor subj\_or\_targets \in \ran error \\
 \t1 \THEN qfirstError \{atts, subj\_or\_targets\} \\
  \ELSE \IF \# args.rf = 0 \land op = eco\_eq \THEN \\
-\t1 quad\_value (\{ t : result\_sctids~subj\_or\_targets; a : result\_sctids~atts; \\
-\t2 rels : ss.relationships |\\
-\t2 object \inv rels.t = t \land rels.a = a @ rels \} , source\_direction) \\
+\t1 quad\_value (\{ t : result\_sctids~subj\_or\_targets; \\
+\t3 a : result\_sctids~atts; rels : ss.relationships | \\
+\t3 object \inv rels.t = t \land rels.a = a @ rels \} , source\_direction) \\
 \ELSE \IF \# args.rf = 1 \land op = eco\_eq \THEN \\
-\t1 quad\_value (\{ s : result\_sctids~subj\_or\_targets; a : result\_sctids~atts; \\
-\t2 rels : ss.relationships |\\
-\t2 rels.s = s \land rels.t \in \ran object \land rels.a = a @ rels \} , targets\_direction) \\
+\t1 quad\_value (\{ s : result\_sctids~subj\_or\_targets; a : result\_sctids~atts; rels : ss.relationships | rels.s = s \land rels.t \in \ran object \land rels.a = a @ rels \} , targets\_direction) \\
  \ELSE \IF \# args.rf = 0 \land op = eco\_neq \THEN \\
-\t1 quad\_value (\{ t : result\_sctids~subj\_or\_targets; a : result\_sctids~atts; \\
-\t2 rels : ss.relationships |\\
-\t2 object \inv rels.t \neq t \land rels.a = a @ rels \} , source\_direction) \\
+\t1 quad\_value (\{ t : result\_sctids~subj\_or\_targets; a : result\_sctids~atts; rels : ss.relationships | object \inv rels.t \neq t \land rels.a = a @ rels \} , source\_direction) \\
  \ELSE \IF \# args.rf = 1 \land op = eco\_neq \THEN \\
-\t1 quad\_value (\{ s : result\_sctids~subj\_or\_targets; a : result\_sctids~atts; \\
-\t2 rels : ss.relationships |\\
-\t2 rels.s \neq s \land rels.t \in \ran object \land rels.a = a @ rels \} , targets\_direction) \\
+\t1 quad\_value (\{ s : result\_sctids~subj\_or\_targets; a : result\_sctids~atts; rels : ss.relationships | rels.s \neq s \land rels.t \in \ran object \land rels.a = a @ rels \} , targets\_direction) 
 \end{gendef}
 
 
@@ -1372,6 +1342,35 @@ determine absence by $\#T = 0$ and the value by $head~T$.
   \optional[T] == \{ s : \seq T \mid \# s \leq 1 \} 
 \end{zed}
 
+\section{Appendix 2}
+A generic function that takes:
+\begin{itemize}[noitemsep]
+\item A substrate
+\item A function that takes a substrate, a sequence of type $T$ and returns $Sctids\_or\_Error$  (example: $i\_subExpressionConstraint$)
+\item An operator that takes two $Sctids\_or\_Error$ and returns a combination (example: $union$)
+\item A structure of the form "$T \cross \seq_1 T$
+\end{itemize}
+
+And returns $Sctids\_or\_Error$
+
+In the formalization below, $first ~seq\_e$ refers to the left hand side of the $T \cross \seq_1 T$ and
+$second ~seq\_e$ to the right hand side.  $head (second~seq\_e)$ refers to the first element in the sequence and 
+$tail (second~seq\_e)$ refers to the remaining elements in the sequence, which may be empty ($\langle \rangle$).
+
+\begin{gendef}[T]
+    applyToSequence : Substrate \fun (Substrate \fun T \fun Sctids\_or\_Error) \fun \\
+\t1 (Sctids\_or\_error \fun Sctids\_or\_error \fun Sctids\_or\_error) \fun \\
+\t1 (T \cross \seq_1 T) \fun Sctids\_or\_Error
+\where
+   \forall ss : Substrate;  f: (Substrate \fun T \fun Sctids\_or\_Error); \\
+\t1 op: (Sctids\_or\_error \fun Sctids\_or\_error \fun Sctids\_or\_error); \\
+\t1 seq\_e:  (T \cross \seq_1 T) @ \\
+applyToSequence~ss~f~op~seq\_e = \\
+   \IF tail(second~seq\_e) = \langle \rangle \THEN \\
+\t1 op~(f~ss~(first~seq\_e)) (f~ss~(head~(second~seq\_e))) \\
+   \ELSE \\
+\t1 op~(f~ss~(first~seq\_e)) (f~ss~((head(second~seq\_e)) (tail(second~seq\_e))))
+\end{gendef}
    
 
 \end{document}
