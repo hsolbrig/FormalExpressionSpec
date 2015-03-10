@@ -492,10 +492,10 @@ refinement ::= \\
 \where
    \forall ss : Substrate; rfnment : refinement @ i\_refinement = \\
    \IF rfnment \in \ran refine\_subrefine \\
-\t1 \THEN i\_subRefinement~ss~(refine\_subrefine \inv refinement) \\
+\t1 \THEN i\_subRefinement~ss~(refine\_subrefine \inv rfnment) \\
    \ELSE \IF rfnment \in \ran refine\_conjg \\
-\t1 \THEN i\_conjunctionGroup~ss~(refine\_conjg \inv refinement) \\
-   \ELSE i\_disjunctionGroup~ss~(refine\_disjg \inv refinement)
+\t1 \THEN i\_conjunctionGroup~ss~(refine\_conjg \inv rfnment) \\
+   \ELSE i\_disjunctionGroup~ss~(refine\_disjg \inv rfnment)
 \end{gendef}
 
 \subsubsection{conjunctionGroup}
@@ -912,11 +912,17 @@ whether reverse flag is present) and returns a collection of quads that match / 
 \t3 a : result\_sctids~atts; rels : ss.relationships | \\
 \t3 object \inv rels.t = t \land rels.a = a @ rels \} , source\_direction) \\
 \ELSE \IF \# args.rf = 1 \land op = eco\_eq \THEN \\
-\t1 quad\_value (\{ s : result\_sctids~subj\_or\_targets; a : result\_sctids~atts; rels : ss.relationships | rels.s = s \land rels.t \in \ran object \land rels.a = a @ rels \} , targets\_direction) \\
+\t1 quad\_value (\{ s : result\_sctids~subj\_or\_targets; \\
+\t3 a : result\_sctids~atts; rels : ss.relationships | \\
+\t3 rels.s = s \land rels.t \in \ran object \land rels.a = a @ rels \} , targets\_direction) \\
  \ELSE \IF \# args.rf = 0 \land op = eco\_neq \THEN \\
-\t1 quad\_value (\{ t : result\_sctids~subj\_or\_targets; a : result\_sctids~atts; rels : ss.relationships | object \inv rels.t \neq t \land rels.a = a @ rels \} , source\_direction) \\
- \ELSE \IF \# args.rf = 1 \land op = eco\_neq \THEN \\
-\t1 quad\_value (\{ s : result\_sctids~subj\_or\_targets; a : result\_sctids~atts; rels : ss.relationships | rels.s \neq s \land rels.t \in \ran object \land rels.a = a @ rels \} , targets\_direction) 
+\t1 quad\_value (\{ t : result\_sctids~subj\_or\_targets; \\
+\t3 a : result\_sctids~atts; rels : ss.relationships | \\
+\t3object \inv rels.t \neq t \land rels.a = a @ rels \} , source\_direction) \\
+ \ELSE \\
+\t1 quad\_value (\{ s : result\_sctids~subj\_or\_targets; \\
+\t3 a : result\_sctids~atts; rels : ss.relationships | \\
+\t3 rels.s \neq s \land rels.t \in \ran object \land rels.a = a @ rels \} , targets\_direction) 
 \end{gendef}
 
 
@@ -929,17 +935,17 @@ whether reverse flag is present) and returns a collection of quads that match / 
 \t1 Substrate \fun Sctids\_or\_Error \fun concreteComparisonOperator \fun\\
 \t2 concreteValue \fun Quads\_or\_Error
 \where
-   \forall ss : Substrate; atts : Sctids\_or\_error; op : concreteComparisonOperator; \\
+   \forall ss : Substrate; atts : Sctids\_or\_Error; op : concreteComparisonOperator; \\
 \t2 val : concreteValue @ \\
-i\_concreteAttributeConstraint = \\
+i\_concreteAttributeConstraint~ss~atts~op~val= \\
 \IF atts \in \ran error \\
 \t1 \THEN qerror ~ (error \inv atts) \\
-   \ELSE quad\_value \{ss.relationships | ss.a \in (result\_sctids~atts) \land ss.t \in \ran concrete \land val \in concreteMatch~(concrete \inv ss.t)~op \}
+   \ELSE quad\_value \{rels : ss.relationships | rels.a \in (result\_sctids~atts) \land rels.t \in \ran concrete \land val \in concreteMatch~(concrete \inv rels.t)~op \}
 \end{gendef}
 
 \begin{gendef}
    concreteMatch : \\
-\t1 CONCRETEVALUE \fun concreteComparisonOperator \fun concreteValue
+\t1 \power CONCRETEVALUE \fun concreteComparisonOperator \fun \power concreteValue 
 \end{gendef}
 
 \noindent
@@ -1203,11 +1209,11 @@ $tail (second~seq\_e)$ refers to the remaining elements in the sequence, which m
 
 \begin{gendef}[T]
     applyToSequence : Substrate \fun (Substrate \fun T \fun Sctids\_or\_Error) \fun \\
-\t1 (Sctids\_or\_error \fun Sctids\_or\_error \fun Sctids\_or\_error) \fun \\
+\t1 (Sctids\_or\_Error \fun Sctids\_or\_Error \fun Sctids\_or\_Error) \fun \\
 \t1 (T \cross \seq_1 T) \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate;  f: (Substrate \fun T \fun Sctids\_or\_Error); \\
-\t1 op: (Sctids\_or\_error \fun Sctids\_or\_error \fun Sctids\_or\_error); \\
+\t1 op: (Sctids\_or\_Error \fun Sctids\_or\_Error \fun Sctids\_or\_Error); \\
 \t1 seq\_e:  (T \cross \seq_1 T) @ \\
 applyToSequence~ss~f~op~seq\_e = \\
    \IF tail(second~seq\_e) = \langle \rangle \THEN \\
