@@ -220,7 +220,7 @@ The result of applying a query against a substrate is either a (possibly empty) 
 
 
 \begin{zed}  
-ERROR ::= unknownConceptReference | unknownAttribute | unknownRefsetId 
+ERROR ::= unknownConceptReference | unknownAttributeId | unknownRefsetId 
 \also
 Sctids\_or\_Error ::= ok \ldata \power SCTID \rdata | error \ldata ERROR \rdata 
 \end{zed}
@@ -294,11 +294,16 @@ refinedExpressionConstraint == \\
 
 \begin{gendef}
    i\_refinedExpressionConstraint : \\
-\t2 Substrate \fun refinedExpressionConstraint \fun Sctids\_or\_Error
+\t1 Substrate \fun refinedExpressionConstraint \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate; rec : refinedExpressionConstraint @ \\
    i\_refinedExpressionConstraint~ss~rec = \\
 \t1 intersect~(i\_unrefinedExpressionConstraint~ss~(first~rec)) (i\_refinement~ss~(second~rec))
+\end{gendef}
+
+\begin{gendef}
+   i\_refinedExpressionConstraint : \\
+\t1 Substrate \fun refinedExpressionConstraint \fun Sctids\_or\_Error
 \end{gendef}
 
 
@@ -311,11 +316,13 @@ The interpretation of an error is the error.
 \begin{framed}
 \noindent
 \bnf{simpleExpressionConstraint =  [constraintOperator ws] focusConcept} \\
+bnf{constraintOperator = descendantOrSelfOf / descendantOf /  ancestorOrSelfOf / ancestorOf}
 \end{framed}
 
 
 \begin{zed}
 simpleExpressionConstraint == \optional[constraintOperator] \cross focusConcept \\
+constraintOperator ::= descendantsOrSelfOf | descendantOf | ancestorOrSelfOf | ancestorOf
 \end{zed} 
 
 \begin{gendef}
@@ -462,7 +469,7 @@ i\_subExpressionConstraint~ss~sec = \\
    \IF sec \in \ran subExpr\_simple \\
 \t1 \THEN i\_simpleExpressionConstraint~ss~(subExpr\_simple \inv sec) \\
     \ELSE \IF sec \in \ran subExpr\_compound \\
-\t1 \THEN i\_compoundExpressionConstraint'~ss~(subExpr\_compound \inv sec) \\
+\t1 \THEN i\_compoundExpressionConstraint~ss~(subExpr\_compound \inv sec) \\
     \ELSE i\_refinedExpressionConstraint~ss~(subExpr\_refined \inv sec) 
 \end{gendef}
 
@@ -475,7 +482,7 @@ The interpretation of \spec{refinement} is the interpretation of the \spec{subRe
 
 \begin{zed}
 refinement ::= \\
-\t1 refine\_subrefine \ldata subrefinement \rdata | \\
+\t1 refine\_subrefine \ldata subRefinement \rdata | \\
 \t1 refine\_conjg \ldata conjunctionGroup \rdata | \\
 \t1 refine\_disjg \ldata disjunctionGroup \rdata
 \end{zed}
@@ -484,11 +491,11 @@ refinement ::= \\
    i\_refinement : Substrate \fun refinement \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate; rfnment : refinement @ i\_refinement = \\
-   \IF refnment \in \ran refine\_subrefine \\
-\t1 \THEN i\_subrefinement~ss~(refine\_subrefine \inv refnment) \\
-   \ELSE \IF refnment \in \ran refine\_conjg \\
-\t1 \THEN i\_conjunctionGroup~ss~(refine\_conjg \inv refnment) \\
-   \ELSE i\_disjunctionGroup~ss~(refine\_disjg \inv refnment)
+   \IF rfnment \in \ran refine\_subrefine \\
+\t1 \THEN i\_subRefinement~ss~(refine\_subrefine \inv refinement) \\
+   \ELSE \IF rfnment \in \ran refine\_conjg \\
+\t1 \THEN i\_conjunctionGroup~ss~(refine\_conjg \inv refinement) \\
+   \ELSE i\_disjunctionGroup~ss~(refine\_disjg \inv refinement)
 \end{gendef}
 
 \subsubsection{conjunctionGroup}
@@ -668,6 +675,15 @@ subAttributeSet ::= \\
 \bnf{attributeGroup = [cardinality ws] "\{" ws attributeSet ws "\}"}
 \end{framed}
 
+\begin{zed}
+attributeGroup == \optional[cardinality] \cross attributeSet
+\end{zed}
+
+\begin{gendef}
+   i\_attributeGroup : Substrate \fun attributeGroup \fun Sctids\_or\_Error
+\end{gendef}
+
+
 
 \subsection{attribute}
 \begin{framed}
@@ -719,7 +735,7 @@ expressionComparisonOperator ::= eco\_eq | eco\_neq
 	reverse : \optional[reverseFlag] \\
 	name : attributeName \\
 	operator : expressionComparisonOperator \\
-	value : expressionConstraintValue
+	value : SCTID
 \end{schema}
 
 
@@ -763,178 +779,7 @@ determined by the interpretation of \spec{attributeName} having $CONCRETEVALUE$ 
 
 
    
-   
-
-
-The interpretation of an attribute.  \spec{attributeOperator} and \spec{attributeName}
-determines the set of possible attributes in the substrate relationship table.  \spec{reverseFlag} and
-\spec{expressionConstraintValue} determine the set of candidate targets (if \spec{reverseFlag}
-is absent) or \spec{source\_direction} (if \spec{reverseFlag} is present).
-
-\spec{cardinality} determines the minimum and maximum matches.  In all cases, only a subset of the sources 
-(targets if \spec{reverseFlag} is present) in the substrate relationship table will be returned in the interpretation.
-
-\subsection{AttributeSubject}
-
-$i\_attributeSubject$ interprets the constraintOperator, if any in the context of the attribute name and
-interprets it as a set of $ATTRIBUTE$s
-
-\begin{zed}
-
-attributeOperator ==  \{ descendantOrSelfOf , descendantOf \} \\
-attributeSubject == \optional[attributeOperator] \cross attributeName 
-\end{zed}
-
-\begin{gendef}
-   i\_attributeSubject : Substrate \pfun attributeSubject \pfun Sctids\_or\_Error \\
-\where
-   \forall ss : Substrate; as : attributeSubject @ i\_attributeSubject~ss~as = \\
-\t1 i\_constraintOperator~ss~(first~as)~(i\_attributeName~ss~(second~as)) \\
-\end{gendef}
-\subsection{Attribute}
-\spec{attribute} consists of an optional \spec{cardinality} and an \spec{attributeConstraint}.
-\begin{zed}
-unlimitedNat ::= num \ldata \nat \rdata | many \\
-cardinality == \nat \cross unlimitedNat \\
-\end{zed}
-\begin{schema}{attribute}
-   card : \optional[cardinality] \\
-   attw : attributeConstraint
-\end{schema}
-
-$attributeConstraint$ is either an attribute expression constraint or a concrete value constraint.
-\begin{zed}
-attributeConstraint ::= aec \ldata attributeExpressionConstraint \rdata | \\
-\t2 acvc \ldata attributeConcreteValueConstraint \rdata \\
-\end{zed}
-
-\spec{attributeExpressionEonstraint} is a combination of a source constraint (target if reverse flag is true) and an
-expression constraint value whose interpretation yields a set of SCTID's that filter the target (source if reverse flag).
-\begin{zed}
-[reverseFlag] 
-\end{zed}
-\begin{schema}{attributeExpressionConstraint}
-   a : attributeSubject \\
-   rf : \optional[reverseFlag] \\
-   cs : expressionConstraintValue
-\end{schema}
-
-A concrete value constraint is the combination of a source constraint and a comparison operator/concrete value 
-whose interpretation yields a set of source ids.  The intersection of the source and concrete value interpretation
-is the interpretation of \spec{attributeConcreteValueConstraint}
-\begin{zed}
-comparisonOperator ::= eq | neq | gt | ge | lt | le 
-\end{zed}
-\begin{schema}{attributeConcreteValueConstraint}
-   a : attributeSubject \\
-   op : comparisonOperator \\
-   v : concreteValue
-\end{schema}
-
-The interpretation of an attribute is the interpretation of the cardinality applied against the
-underlying attribute constraint, producing a set of SCTID's or an error condition
-
-The interpretation of an attribute constraint is the interpretation of either the attribute expression
-constraint or the concrete expression constraint that produces a set of Quads or an error condition.
-
-The actual interpretations if attribute expression and concrete value are in Section \ref{sect:substrate}
-\begin{gendef}
-   i\_attribute : \\
-\t2 Substrate \pfun attribute \pfun Sctids\_or\_Error \\
-   i\_attributeConstraint : \\
-\t2 Substrate \pfun attributeConstraint \pfun Quads\_or\_Error \\
-   i\_attributeExpressionConstraint : \\
-\t2 Substrate \pfun attributeExpressionConstraint \pfun Quads\_or\_Error \\
-   i\_attributeConcreteValueConstraint : \\
-\t2 Substrate \pfun attributeConcreteValueConstraint \pfun Quads\_or\_Error \\
-\where
-\forall ss : Substrate; a : attribute @ \\
-\t1 i\_attribute~ss~a =  i\_cardinality~a.card~(i\_attributeConstraint~ss~a.attw) \\
-\also
-\forall ss :Substrate; aw : attributeConstraint @ i\_attributeConstraint~ss~aw = \\
-\t1 \IF aec \inv aw \in attributeExpressionConstraint \\
-\t2  \THEN i\_attributeExpressionConstraint~ss~(aec \inv aw) \\
-\t1 \ELSE  i\_attributeConcreteValueConstraint~ss~(acvc \inv aw) 
- \also
-\forall ss : Substrate; aec : attributeExpressionConstraint; eca : expressionConstraintArgs | \\
-\t1 eca.atts = i\_attributeSubject~ss~aec.a \land \\
-\t1 eca.rf = aec.rf \land \\
-\t1 eca.subjOrTarg = i\_expressionConstraintValue~ss~aec.cs @ \\
-\t1 i\_attributeExpressionConstraint~ss~aec = i\_attributeExpression~ss~eca
-\also 
-\forall ss : Substrate; awc : attributeConcreteValueConstraint; aca : concreteConstraintArgs | \\
-\t1 aca.atts = i\_attributeSubject~ss~awc.a \land \\
-\t1 aca.op =awc.op \land \\
-\t1 aca.t = awc.v @ \\
-\t1 i\_attributeConcreteValueConstraint~ss~awc = i\_concreteAttributeConstraint~ss~aca \\
-\end{gendef}
-
-\subsection{AttributeSet and AttributeGroup}
-An \spec{attributeGroup} is an \spec{attributeSet}.  An \spec{attributeSet} consists of a sequence of one or more attribute constraints joined by \spec{binaryOperator}s.
-
-
-\begin{zed}
-binaryOperator  ::= conjunction | disjunction | exclusion \\
-attributeGroup == attributeSet \\
-attributeSet == attribute \cross \seq (binaryOperator \cross attribute) 
-\end{zed}
-
-\begin{gendef}
-   i\_attributeGroup : Substrate \pfun attributeGroup \pfun Sctids\_or\_Error 
-\also
-   i\_attributeSet : Substrate \pfun attributeSet \pfun Sctids\_or\_Error 
-\where
-\forall ss : Substrate; ag : attributeGroup @ i\_attributeGroup~ss~ag = \\
-\t1 i\_attributeSet~ss~ag
-\also
-\forall ss : Substrate; a: attributeSet @ i\_attributeSet~ss~a = \\
-\t1 idgroups\_to\_sctids~(evalCmpndAtt~ss~(i\_groupedAttribute~ss~(first~a))~(second~a))
-\end{gendef}
-
-\subsection{Compound attribute evaluation}
-The left-to-right evaluation of \spec{attributeSet}.  The interpretation takes a $lhs$ as 
-a function from $SCTID$ to $GROUP$ and a $rhs$ which is sequence of operator/attribute
-tuples and recursively interprets the $lhs$ and interpretation of the head of the $rhs$.
-
-\begin{gendef}
-   evalCmpndAtt : \\
-\t2 Substrate \fun IDGroups \fun \seq (binaryOperator \cross attribute) \fun IDGroups
-\also
-   gintersect, gunion, gminus, gfirstError : \\
-\t2 IDGroups \fun IDGroups \fun IDGroups \\
-\where
-   \forall ss : Substrate; lhs: IDGroups; rhs: \seq (binaryOperator \cross attribute) @ \\
-  evalCmpndAtt~ss~lhs~rhs = \\
- \IF rhs = \langle \rangle \\
-\t1 \THEN lhs \\
-\ELSE \IF first~(head~rhs) = conjunction \\
-\THEN  evalCmpndAtt~ss~(gintersect~ lhs (i\_groupedAttribute~ss~(second~(head~rhs))))~(tail~rhs) \\
- \ELSE \IF first~(head~rhs)  = disjunction \\
-\THEN  evalCmpndAtt~ss~(gunion~ lhs (i\_groupedAttribute~ss~(second~(head~rhs))))~(tail~rhs) \\
- \ELSE evalCmpndAtt~ss~(gminus~ lhs (i\_groupedAttribute~ss~(second~(head~rhs))))~(tail~rhs) 
-\also
-   \forall a, b, r : IDGroups | \\
-\t1 r = \IF gerror \inv a \in ERROR \lor gerror \inv b \in ERROR \THEN gfirstError~a~b \\
-\t1 \ELSE id\_groups ~(id\_groups \inv a \cap id\_groups \inv b) @ \\
-\t1 gintersect~a~b=r
-\also
-   \forall a, b, r : IDGroups | \\
-\t1 r = \IF gerror \inv a \in ERROR \lor gerror \inv b \in ERROR \THEN gfirstError~a~b \\
-\t1 \ELSE id\_groups ~(id\_groups \inv a \cup id\_groups \inv b) @ \\
-\t1 gunion~a~b=r
-\also
-   \forall a, b, r : IDGroups | \\
-\t1 r = \IF gerror \inv a \in ERROR \lor gerror \inv b \in ERROR \THEN gfirstError~a~b \\
-\t1 \ELSE id\_groups ~(id\_groups \inv a \setminus id\_groups \inv b) @ \\
-\t1 gminus~a~b=r
-\end{gendef}
-\begin{gendef}
-   i\_groupedAttribute : \\
-\t2 Substrate \fun attribute \fun IDGroups
-\where
-\forall ss : Substrate; a : attribute @ \\
-\t1 i\_groupedAttribute~ss~a =  i\_groupCardinality~(i\_attributeConstraint~ss~a.attw)~a.card \\
-\end{gendef}
+ 
 
 \subsection{Group Cardinality}
 The interpretation of cardinality within a group impose additional constraints:
@@ -984,7 +829,7 @@ $cardinality$ is tested against a set of quads with the following rules:
 \where
    \forall card: \optional[cardinality]; quads : Quads\_or\_Error  @ \\
 i\_cardinality~card~quads = \\
-\IF quads \in \ran error \\
+\IF quads \in \ran qerror \\
 \t1 \THEN idgroups\_to\_sctids~(quads\_to\_idgroups~quads) \\
 \ELSE  \\
 \t1 idgroups\_to\_sctids~(quads\_to\_idgroups~(quad\_value~(evalCardinality~card~(quads\_for~quads), quad\_direction~quads))) 
@@ -1089,13 +934,12 @@ whether reverse flag is present) and returns a collection of quads that match / 
 i\_concreteAttributeConstraint = \\
 \IF atts \in \ran error \\
 \t1 \THEN qerror ~ (error \inv atts) \\
-   \ELSE quad\_value \{ss.relationships | ss.a \in (result\_sctids~atts) \land \\
-\t2 ss.t \in \ran concrete \land val \in concreteMatch~(concrete \inv ss.t)~op \}
+   \ELSE quad\_value \{ss.relationships | ss.a \in (result\_sctids~atts) \land ss.t \in \ran concrete \land val \in concreteMatch~(concrete \inv ss.t)~op \}
 \end{gendef}
 
 \begin{gendef}
    concreteMatch : \\
-\t1 CONCRETEVALUE \fun comparison \fun concreteValue
+\t1 CONCRETEVALUE \fun concreteComparisonOperator \fun concreteValue
 \end{gendef}
 
 \noindent
@@ -1247,7 +1091,7 @@ IDGroups ::= id\_groups \ldata SCTID \pfun \power GROUP \rdata | gerror \ldata E
 \item If the quad direction is $source\_direction$ (target to source) a list of unique relationship subjects and, for each subjects, the set of different groups it appears as a subject in
 \item Otherwise return a list of relationship target sctids and, for each target, the set of different groups it appears as a target in.
 \end{itemize}
-\item \textbf{idgroups\_to\_sctids} -- remove the sctids in an idgroup sans the group identifiers.
+\item \textbf{idgroups\_to\_sctids} -- remove the groups and return an $Sctids\_or\_Error$ for the ids
 \end{itemize}
 \begin{gendef}
    result\_sctids: Sctids\_or\_Error \fun \power SCTID \\
@@ -1255,7 +1099,7 @@ IDGroups ::= id\_groups \ldata SCTID \pfun \power GROUP \rdata | gerror \ldata E
    quad\_direction: Quads\_or\_Error \pfun direction \\
    to\_idGroups: IDGroups \fun SCTID \fun \power GROUP \\
    quads\_to\_idgroups: Quads\_or\_Error \fun IDGroups \\
-   idgroups\_to\_sctids: IDGroups \fun \power SCTID \\
+   idgroups\_to\_sctids: IDGroups \fun Sctids\_or\_Error \\
 \where
    \forall r: Sctids\_or\_Error @ result\_sctids~r = \\
 \t1 \IF error \inv r \in ERROR \THEN \emptyset \\
@@ -1282,8 +1126,8 @@ IDGroups ::= id\_groups \ldata SCTID \pfun \power GROUP \rdata | gerror \ldata E
 \t2 t \mapsto \{qr : quads\_for~q @ qr.g\} \} 
 \also
    \forall g : IDGroups @ idgroups\_to\_sctids~g = \\
-\t1 \IF gerror \inv g \in ERROR \THEN \emptyset \\
-\t1 \ELSE \dom (id\_groups \inv g)
+\t1 \IF g \in \ran gerror \THEN ok~\emptyset \\
+\t1 \ELSE ok~(\dom (id\_groups \inv g))
 \end{gendef}
 
 
