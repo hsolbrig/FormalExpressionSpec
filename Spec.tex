@@ -731,6 +731,11 @@ subAttributeSet ::= \\
 \end{gendef}
 
 \subsection{attributeGroup}
+The difference between the interpretation of an \spec{attributeGroup} and an \spec{attributeSet} is that, within an \spec{attributeGroup} all of the 
+qualifying \spec{sctIds} must belong to the same (non-zero) group.  Outside, a \spec{sctId} would qualify an conjunction if one group passed the first match
+and a different one the second.  \emph{Within} a group, however, conjunctions and disjunctions only count if they both apply in the same group.  This means
+that we have to re-interpret the meaning of \spec{attributeSet} on down in terms of $IDGroup$s rather than $Quads$
+
 \begin{framed}
 \noindent
 \bnf{attributeGroup = [cardinality ws] "\{" ws attributeSet ws "\}"}
@@ -740,10 +745,102 @@ subAttributeSet ::= \\
 attributeGroup == \optional[cardinality] \cross attributeSet
 \end{zed}
 
+The interpretation of an attribute group is the application of a cardinality constraint to all of the $sctId$s that pass the grouped 
+attribute set.
+
 \begin{gendef}
    i\_attributeGroup : Substrate \fun attributeGroup \fun Sctids\_or\_Error
+\where
+   \forall ss : Substrate; ag : attributeGroup @ \\
+   i\_attributeGroup~ss~ag = \\
+   \t1  i\_cardinality~(first~ag)~(idgroups\_to\_sctids~(i\_groupAttributeSet~ss~(second~ag)))
 \end{gendef}
-\textbf{TODO: Finish this}
+
+\subsubsection{attributeSet for Groups}
+The interpretation of an \spec{attributeSet} within the context of a group is the interpretation of the \spec{subAttributeSet}
+optionally intersected or union with additional conjunction or disjunction attribute sets.
+
+\begin{gendef}
+   i\_groupAttributeSet : \\
+\t1 Substrate \fun attributeSet \fun IDGroups
+\where
+   \forall ss : Substrate; attset : attributeSet @ \\
+   i\_groupAttributeSet~ss~attset = \\
+   (\LET lhs == i\_groupSubAttributeSet~ss~(first~attset); rhs == second~attset @ \\
+ \IF \# rhs = 0 \\
+\t1 \THEN lhs \\
+ \ELSE \IF head~rhs \in \ran attset\_conjattset \\
+\t1 \THEN gintersect~lhs~(i\_groupConjunctionAttributeSet~ss~(attset\_conjattset \inv (head~rhs))) \\
+  \ELSE gunion~lhs~(i\_groupDisjunctionAttributeSet~ss~(attset\_conjattset \inv (head~rhs))))
+\end{gendef}
+
+\subsubsection{conjunctionAttributeSet for Groups}
+Apply the intersect operator to the interpretation of each  subAttributeSet in a group context
+
+\begin{gendef}
+    i\_groupConjunctionAttributeSet : \\
+\t1 Substrate \fun conjunctionAttributeSet \fun IDGroups
+\where
+   \forall ss : Substrate;  conjset : conjunctionAttributeSet @ \\
+   i\_groupConjunctionAttributeSet~ss~conjset = ~ \\
+   \IF tail~conjset = \langle \rangle \\
+\t1 \THEN i\_groupSubAttributeSet~ss~(head~conjset) \\
+\ELSE \\
+\t1 gintersect~(i\_groupSubAttributeSet~ss~(head~conjset))~(i\_groupConjunctionAttributeSet~ss~(tail~conjset))
+\end{gendef}
+
+
+\subsubsection{disjunctionAttributeSet for Groups}
+Apply the union operator to the interpretation of each  subAttributeSet in a group context
+
+\begin{gendef}
+    i\_groupDisjunctionAttributeSet : \\
+\t1 Substrate \fun disjunctionAttributeSet \fun IDGroups
+\where
+   \forall ss : Substrate;  disjset : disjunctionAttributeSet @ \\
+   i\_groupDisjunctionAttributeSet~ss~disjset = ~ \\
+   \IF tail~disjset = \langle \rangle \\
+\t1 \THEN i\_groupSubAttributeSet~ss~(head~disjset) \\
+\ELSE \\
+\t1 gunion~(i\_groupSubAttributeSet~ss~(head~disjset))~(i\_groupDisjunctionAttributeSet~ss~(tail~disjset))
+\end{gendef}
+
+\subsubsection{subAttributeSet for Groups}
+
+\begin{gendef}
+   i\_groupSubAttributeSet : \\
+\t1 Substrate \fun subAttributeSet \fun IDGroups
+\where
+  \forall ss : Substrate; subaset : subAttributeSet @ \\
+  i\_subAttributeSet~ss~subaset = \\
+  \IF subaset \in \ran subaset\_attribute \THEN \\
+ \t1 i\_groupAttribute~ss~ (subaset\_attribute \inv subaset) \\
+ \ELSE i\_groupAttributeSet'~ss~(subaset\_attset \inv subaset)
+\end{gendef}
+
+
+\subsubsection{attribute for Groups}
+
+\begin{gendef}
+   i\_groupAttribute : \\
+\t1 Substrate  \fun attribute \fun IDGroups
+\where
+   \forall ss : Substrate; att : attribute @ \\
+   i\_groupAttribute~ss~att = \\
+   (\LET att\_sctids == ss.i\_attributeName~att.name @ \\
+   \IF att\_sctids \in \ran error \\
+\t1 \THEN gerror(error \inv att\_sctids) \\
+   \ELSE \IF att.targets \in \ran attrib\_concrete \\
+\t1 \THEN \\
+\t1 (\LET conc\_interp == \\
+\t1 i\_concreteAttribute~ss~(result\_sctids~att\_sctids)~(attrib\_concrete \inv att.targets) @ \\
+\t2 i\_cardinality~att.card~conc\_interp) \\
+   \ELSE  \\
+\t1 (\LET exp\_interp == \\
+\t1 i\_expressionAttribute~ss~att.rf~(result\_sctids~att\_sctids)~(attrib\_expr \inv att.targets) @ \\
+\t2 i\_groupCardinality~att.card~exp\_interp))
+\end{gendef}
+
 
 
 \subsection{attribute}
@@ -768,7 +865,7 @@ the right hand side of \spec{cardinality} is treated as quads.  $i\_cardinality$
 \begin{zed}
 [reverseFlag] \\
 concreteOrExpressionAttribute ::= \\
-\t1 attrib\_conc \ldata concreteAttribute \rdata | \\
+\t1 attrib\_concrete \ldata concreteAttribute \rdata | \\
 \t1 attrib\_expr \ldata expressionAttribute \rdata
 \also
 concreteAttribute == concreteComparisonOperator \cross concreteValue
@@ -785,10 +882,10 @@ expressionAttribute == expressionComparisonOperator \cross expressionConstraintV
    (\LET att\_sctids == ss.i\_attributeName~att.name @ \\
    \IF att\_sctids \in \ran error \\
 \t1 \THEN att\_sctids \\
-   \ELSE \IF att. targets \in \ran attrib\_conc \\
+   \ELSE \IF att. targets \in \ran attrib\_concrete \\
 \t1 \THEN \\
 \t1 (\LET conc\_interp == \\
-\t1 i\_concreteAttribute~ss~(result\_sctids~att\_sctids)~(attrib\_conc \inv att.targets) @ \\
+\t1 i\_concreteAttribute~ss~(result\_sctids~att\_sctids)~(attrib\_concrete \inv att.targets) @ \\
 \t2 i\_cardinality~att.card~conc\_interp) \\
    \ELSE  \\
 \t1 (\LET exp\_interp == \\
@@ -929,29 +1026,55 @@ The interpretation of a grouped cardinality is a function from a set of sctId's 
 The algorithm below partitions the input set of Quads by group and validates the cardinality on a per-group basis.  Groups that
 pass are returned
 
-\textbf{TODO:} This assumes that q.t is always type object. It doesn't say what to do if it is concrete
-\textbf{TODO:} the $quads\_to\_idgroups$ function seems to express what is described below more simply
 \begin{gendef}
    i\_groupCardinality : \\
-\t2 Quads\_or\_Error \fun \optional[cardinality] \fun IDGroups
+\t2 \optional[cardinality] \fun Quads\_or\_Error \fun  IDGroups
 \where
-   \forall quads : Quads\_or\_Error; oc : \optional[cardinality]; uniqueGroups : \power groupId; \\
-\t2 quadsByGroup : groupId \pfun \power Quad |  \\
-\t1    uniqueGroups = \{q : quads\_for~quads @ q.g\}  \land \\
-\t1    quadsByGroup = \{g: uniqueGroups; q : \power Quad | \\
-\t2 q = \{e: quads\_for~quads | e.g = g\}  @ g \mapsto (evalCardinality~oc~q) \} @ \\
-i\_groupCardinality~quads~oc = \\
-\t1 id\_groups~ \{sctid : sctId; groups : \power groupId | sctid \in \{q : \bigcup (\ran quadsByGroup) @ \\
-\t2  \IF quad\_direction~quads = source\_direction \THEN q.s \ELSE t\_sctid \inv q.t \} \land \\
-\t1 groups = \{g: \dom quadsByGroup | (\exists q: quadsByGroup~g @ \\
-\t2 sctid = \IF quad\_direction~quads = source\_direction \THEN q.s \ELSE t\_sctid \inv q.t) \} @ \\
-\t2 sctid \mapsto groups \}
+   \forall oc : \optional[cardinality]; quads : Quads\_or\_Error @ \\
+   i\_groupCardinality~oc~quads = \\
+   \IF quads \in \ran qerror \\
+\t1 \THEN gerror~(qerror \inv quads) \\
+   \ELSE \\
+   (\LET uniqueGroups == \{q : quads\_for~quads | q.g \neq zero\_group @ q.g \} @ \\
+   (\LET passingGroups == \bigcup \{g : uniqueGroups @ evalCardinaltyForGroup~oc~g~(quads\_for~quads) \} @
+   group\_value (quadsToTuples~passingGroups~quad\_direction~quads)))
+\end{gendef}
+
+$evalCardinalityForGroup$ takes an optional cardinality, a group id and collection of $Quad$s and evaluates the cardinality against the subset of
+the $Quad$s that belong to the supplied group.
+
+\begin{axdef}
+noCardinality : \optional[cardinality]
+\end{axdef}
+
+\begin{gendef}
+   evalCardinaltyForGroup : \optional[cardinality]  \pfun groupId \pfun \power Quad \pfun \power Quad 
+\where
+   \forall  oc: \optional[cardinality];  g : groupId;  quads : \power Quad @
+   evalCardinalityForGroup~oc~g~quads = \\
+   ( \LET groupQuads == \{q : quads | q.g = g\} @ \\
+   \IF first~oc = 0 \land (second~oc \in \ran num \land num \inv (second~oc) = 0) \\
+\t1   \THEN  \\
+\t2 \IF \# (evalCardinality[Quad]~noCardinality~groupQuads) > 0 \\
+\t2 \THEN quads \ELSE \emptyset \\
+     \ELSE \IF first~oc = 0 \\
+\t1 \THEN evalCardinality[Quad]~oc~\{q : quads | q.g = g \})
+\end{gendef}
+
+$quadsToTuples$ takes a collection of quads and returns a set of $sctId \cross groupId$ tuples.
+\begin{gendef}
+   quadsToTuples : \power Quad \pfun direction \pfun \power (sctId \cross groupId) 
+\where
+   \forall quads : \power Quad; d : direction @
+   quadsToTuples~quads~d = \\
+   \IF d = source\_direction \\
+\t1 \THEN \{q : quads @ (q.s, q.g) \} \\
+\t1 \ELSE \{q : quads @ (t\_sctid \inv q.t, q.g) \}
 \end{gendef}
 
 
 
-
-% =========================================== Section 5 ===============================================
+% =========================================== Section 4 ===============================================
 
 \section{Substrate Interpretations}
 \label{sect:substrate}
@@ -1098,18 +1221,24 @@ This section carries various type transformations and error checking functions
 
 \subsection{Types}
 
+\subsubsection{Quads\_or\_Error}
+$Quads\_or\_Error$ is a collection of $Quad$s or an error condition.  If it is a collection of $Quad$s, it also carries a direction indicator that determines
+whether it is the source or targets that carry the matching elements.   Note:
 \begin{itemize}[noitemsep,nolistsep]
-\item \textbf{direction} -- an indicator whether a collection of quads was determined as source to target ($source\_direction$) or target to source ($targets\_direction$)
-\item \textbf{Quads\_or\_Error} --  a collection of $Quad$s or an error condition. If it is a collection $Quad$s, it also carries
-a direction indicator that determines whether it represents a set of sources or targets. 
-\item \textbf{IDGroups} -- a map from $sctId$s to the $groupId$ they were in when they passed if successful, otherwise an error indication.
+\item \textbf{$source\_direction$} -- matches were performed on attribute/target. Return the source $sctId$s.
+\item \textbf{$target\_direction$} -- matches were performed on attribute/source (\spec{reverseFlag} was present).  Return the target $sctId$s or, eventually, concrete values
 \end{itemize}
 
 \begin{zed}
 direction ::= source\_direction | targets\_direction \\
-Quads\_or\_Error ::= quad\_value \ldata \power Quad \cross direction \rdata | qerror \ldata ERROR \rdata \\
-\also
-IDGroups ::= id\_groups \ldata sctId \pfun \power groupId \rdata | gerror \ldata ERROR \rdata
+Quads\_or\_Error ::= quad\_value \ldata \power Quad \cross direction \rdata | qerror \ldata ERROR \rdata
+\end{zed}
+
+\subsubsection{IDGroups}
+$IDGroups$ represent carries a list of $sctId$s and the corresponding groups that they passed in, if successful, otherwise an error indication.
+
+\begin{zed}
+IDGroups ::= group\_value \ldata \power (sctId \cross groupId) \rdata | gerror \ldata ERROR \rdata
 \end{zed}
 
 \subsection{Result transformations}
@@ -1140,28 +1269,26 @@ IDGroups ::= id\_groups \ldata sctId \pfun \power groupId \rdata | gerror \ldata
 \t1 \ELSE ok \inv r
 \also
    \forall q : Quads\_or\_Error @ quads\_for~q = \\
-\t1 \IF qerror \inv q \in ERROR \THEN \emptyset \\
+\t1 \IF q \in \ran qerror  \THEN \emptyset \\
 \t1 \ELSE first~(quad\_value \inv q)
 \also
    \forall q : Quads\_or\_Error @ quad\_direction~q = \\
 \t1 second~(quad\_value \inv q)
 \also
-   \forall g : IDGroups @ to\_idGroups~g = \\
-\t1 \IF gerror \inv g \in ERROR \THEN \emptyset \\
-\t1 \ELSE id\_groups \inv g
+   \forall g : IDGroups; id : sctId @ to\_idGroups~g~id = \\
+\t1 \IF g \in \ran gerror \THEN \emptyset \\
+\t1 \ELSE \{ge : (group\_value \inv g) | first~ge = id @ second~ge\}
 \also
    \forall q : Quads\_or\_Error @ quads\_to\_idgroups~q = \\
-\t1 \IF qerror  \inv q \in ERROR \THEN gerror (qerror \inv q) \\
+\t1 \IF q \in \ran qerror \\
+\t2     \THEN gerror (qerror \inv q) \\
 \t1 \ELSE \IF quad\_direction~q = source\_direction \\
-\t2 \THEN id\_groups~\{s : sctId | (\exists qr : quads\_for~q @ s = qr.s) @ \\
-\t2 s \mapsto \{qr : quads\_for~q @ qr.g\} \} \\
-\t1 \ELSE \\
-\t2 id\_groups~\{t : sctId | (\exists qr : quads\_for~q @ t = t\_sctid \inv qr.t ) @ \\
-\t2 t \mapsto \{qr : quads\_for~q @ qr.g\} \} 
+\t2     \THEN group\_value\{qe : quads\_for~ q @ (qe.s, qe.g) \} \\
+\t1 \ELSE group\_value\{qe : quads\_for~ q @ (t\_sctid \inv qe.t, qe.g)\}
 \also
    \forall g : IDGroups @ idgroups\_to\_sctids~g = \\
 \t1 \IF g \in \ran gerror \THEN ok~\emptyset \\
-\t1 \ELSE ok~(\dom (id\_groups \inv g))
+\t1 \ELSE ok~(\dom (group\_value \inv g))
 \also
    \forall q : Quads\_or\_Error @ quads\_to\_sctids~q = \\
 \t1 \IF q \in \ran qerror \THEN error~(qerror \inv q) \\
@@ -1175,6 +1302,7 @@ Definition of the various functions that are performed on the result type. \\
 \begin{itemize}[noitemsep,nolistsep]
 \item \textbf{firstError} -- aggregate one or more $Sctids\_or\_Error$ types, at least one of which carries and error and merge them into a single $Sctid\_or\_Error$ instance propagating at least one of the errors (Not fully defined)
 \item \textbf{qfirstError} -- convert two $Sctids\_or\_Error$ types, into a $Quads\_or\_Error$ propagating at least one of the errors. (not fully defined)
+\item \textbf{gfirstError} -- convert two $IDGroups$ into a single $IDGroups$ propagating at least one of the errors.
 \end{itemize}
 
 \begin{itemize}[noitemsep]
@@ -1186,12 +1314,15 @@ Definition of the various functions that are performed on the result type. \\
 \end{itemize}
 
 \begin{gendef}
-   firstError : \power Sctids\_or\_Error \pfun Sctids\_or\_Error \\
-   qfirstError : \power Sctids\_or\_Error \pfun Quads\_or\_Error 
+   firstError : \power Sctids\_or\_Error \fun Sctids\_or\_Error \\
+   qfirstError : \power Sctids\_or\_Error \fun Quads\_or\_Error  \\
+   gfirstError : \power IDGroups \fun IDGroups
 \also
    union, intersect, minus : Sctids\_or\_Error \fun Sctids\_or\_Error \fun \\
 \t2 Sctids\_or\_Error \\
    bigunion, bigintersect : \power Sctids\_or\_Error \fun Sctids\_or\_Error \\
+\also
+   gunion, gintersect, gminus : IDGroups \fun IDGroups \fun IDGroups
 \where
    \forall x,y : Sctids\_or\_Error @ union~x~y = \\
 \t1 \IF x \in \ran error \lor  y \in \ran error \THEN firstError~\{x, y\} \\
@@ -1212,6 +1343,18 @@ Definition of the various functions that are performed on the result type. \\
   \forall rs : \power Sctids\_or\_Error @ bigintersect~rs = \\
 \t1 \IF \exists r : rs @ r \in \ran error \THEN firstError~ rs \\
 \t1 \ELSE ok~(\bigcap \{r : rs @ result\_sctids~r\})
+\also
+   \forall x,y : IDGroups @ gintersect~x~y = \\
+\t1 \IF x \in \ran gerror \lor y \in \ran gerror \THEN gfirstError~\{x, y\} \\
+\t1 \ELSE group\_value((group\_value \inv x) \cap (group\_value \inv y))
+\also
+\forall x,y : IDGroups @ gunion~x~y = \\
+\t1 \IF x \in \ran gerror \lor y \in \ran gerror \THEN gfirstError~\{x, y\} \\
+\t1 \ELSE group\_value((group\_value \inv x) \cup (group\_value \inv y))
+\also
+\forall x,y : IDGroups @ gminus~x~y = \\
+\t1 \IF x \in \ran gerror \lor y \in \ran gerror \THEN gfirstError~\{x, y\} \\
+\t1 \ELSE group\_value((group\_value \inv x) \setminus (group\_value \inv y))
 \end{gendef}
 
    
