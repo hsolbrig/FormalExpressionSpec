@@ -4,10 +4,10 @@
 \usepackage{verbatim}
 \usepackage{framed}
 
-\def\spec#1{{\tt \small \textit{{#1}} }}
+\def\spec#1{{\tt \small \textsc{{#1}} }}
 \def\req#1{{\sf {{\it #1}} }}
 \def\bnf#1{{\scriptsize {{#1}} }}
-\def\desc#1{{``\small \it #1''}}
+\def\desc#1{{\small \textsl{{#1}} }}
 
 
 \raggedbottom
@@ -18,8 +18,9 @@
 \begin{document}
 \maketitle
 \tableofcontents
+\pagebreak
 % =================================  Data types and Substrate ========================
-\section{Axiomatic Data Types}
+\section{Data Types}
 \subsection{Atomic Data Types}
 This section identifies the atomic data types that are assumed for the rest of this specification.  These types
 are defined as lexical components in the specification.
@@ -48,7 +49,7 @@ are defined as lexical components in the specification.
 \end{zed}
 
 
-We will also need to recognize some well known identifiers: the $is\_a$ attribute, the $zero\_group$ and  $attribute\_concept$, and $refset\_concept$ the parents of all attributes and all refsets respectively.
+We specifically define some well known identifiers: the $is\_a$ attribute, the $zero\_group$ and  $attribute\_concept$, and $refset\_concept$ the parents of all attributes and all refsets respectively.
 \begin{axdef}
 is\_a : sctId \\
 zero\_group : groupId \\
@@ -57,23 +58,24 @@ refset\_concept : sctId
 \end{axdef}
 
 \subsection{Composite Data Types}
-While we can't fully specify the behavior of the concrete data types portion of the specification at this point, it is still useful 
-to spell out the anticipated behavior on an abstract level.
+$concreteValue$ is in anticipation of the enhanced specification that includes target strings, integers or decimals.
+
 \begin{itemize}[noitemsep,nolistsep]
 \item \textbf{concreteValue} -- a string, integer or decimal literal
 \item \textbf{target} -- the target of a relationship that is either an $sctId$ or a $concreteValue$
 \end{itemize}
+
 \begin{zed}
 concreteValue ::= \\
 \t1 cv\_string \ldata stringValue \rdata | cv\_integer \ldata \num \rdata | cv\_decimal \ldata decimalValue \rdata
 \also
 target ::= t\_sctid \ldata sctId \rdata | t\_concrete \ldata concreteValue \rdata
 \end{zed}
-
+\pagebreak
 \section{The Substrate}
 A substrate represents the context of an interpretation.  
 \subsection{Substrate Components}
-\paragraph{Quad}
+\subsubsection{Quad}
 Relationships in the substrate are represented a 4 element tuples or ``quads'' which consist of a source, attribute, target and role group identifier.  The $is\_a$ attribute may
 only appear in the zero group, and the target of an $is\_a$ attribute must be a $sctId$ (not a $concreteValue$)
 
@@ -107,6 +109,7 @@ attributeName == conceptReference
 \end{zed}
 
 \subsection{Substrate}
+\subsubsection{Substrate Definition}
 A substrate consists of:
 
 \begin{itemize}[noitemsep,nolistsep]
@@ -205,9 +208,8 @@ The formal definition of substrate follows. The expressions below assert that:
 \also
     \dom childrenOf = concepts \\
     \forall s, t : concepts @ t \in parentsOf~s \iff s \in childrenOf~t  \\
-    \forall c : concepts | c \notin \bigcup (\ran childrenOf) @ childrenOf~c = \emptyset 
-\also
-   \forall s : concepts @ \\
+    \forall c : concepts | c \notin \bigcup (\ran childrenOf) @ childrenOf~c = \emptyset \\
+    \forall s : concepts @ \\
 \t2 descendants~s = childrenOf~ s \cup \bigcup \{t : childrenOf~ s @ descendants~t\} \\
    \forall t : concepts @ \\
 \t2 ancestors~t = parentsOf~ t \cup \bigcup \{s : parentsOf~ t @ ancestors~s\} \\
@@ -224,7 +226,7 @@ The formal definition of substrate follows. The expressions below assert that:
    \forall refset\_interp : \ran i\_refsetId | refset\_interp \in \ran ok @ \\
 \t2 result\_sctids~refset\_interp \subseteq concepts 
 \end{schema}
-\subsubsection{Strict and Permissive Substrates}
+
 Implementations may choose to implement ``strict'' substrates, where additional rules apply or ``permissive'' substrates where rules are relaxed.
 \subsubsection{Strict Substrate}
 A \textbf{strict\_substrate} is a substrate where:
@@ -258,8 +260,8 @@ A \textbf{strict\_substrate} is a substrate where:
  \subsubsection{Permissive Substrate}
 (fill in options)
 
-% ================================= Chapter 2 Interpretations ========================
-
+% ================================= Chapter 3 Interpretations ========================
+\pagebreak
 \section{Interpretation of Expression Constraints}
 An \spec{expressionConstraint} is interpreted in the context of a $Substrate$ and returns a set of $sctId$s or an error indicator.  
 
@@ -279,12 +281,11 @@ ERROR ::= unknownConceptReference | unknownAttributeId | unknownRefsetId
 Sctids\_or\_Error ::= ok \ldata \power sctId \rdata | error \ldata ERROR \rdata 
 \end{zed}
 
-
-
 Each interpretation that follows begins with a simplified version
 of the language construct in the specification.  It then formally specifies the constructs that are used in the interpretation, followed by the interpretation itself. We start with the definition 
 of $expressionConstraint$, which, once interpreted, returns either a set of sctIds or an error condition.
 \subsection{expressionConstraint}
+
 \begin{framed}
 \desc{An expression constraint is either a refined expression constraint or an unrefined expression constraint.}
 \end{framed}
@@ -293,7 +294,7 @@ of $expressionConstraint$, which, once interpreted, returns either a set of sctI
 \bnf{expressionConstraint = ws ( refinedExpressionConstraint / unrefinedExpressionConstraint ) ws}
 \end{framed}
 
-The interpretation of an \spec{expressionConstraint} is the interpretation of either the  \spec{refinedExpressionConstraint} or the \spec{unrefinedExpressionConstraint}.
+The interpretation of an \spec{expressionConstraint} is the interpretation of either the  \spec{refinedExpressionConstraint} or the \\ \spec{unrefinedExpressionConstraint}.
 
 \begin{zed}
 expressionConstraint ::= \\
@@ -308,8 +309,10 @@ expressionConstraint ::= \\
 \where
    \forall ss: Substrate; ec: expressionConstraint @ i\_expressionConstraint~ss~ec = \\
    \IF ec \in \ran expcons\_refined  \\
-\t1 \THEN i\_refinedExpressionConstraint~ss~(expcons\_refined \inv ec) \\
-   \ELSE i\_unrefinedExpressionConstraint~ss~(expcons\_unrefined \inv ec) 
+\THEN \\
+\t1 i\_refinedExpressionConstraint~ss~(expcons\_refined \inv ec) \\
+   \ELSE \\
+\t1 i\_unrefinedExpressionConstraint~ss~(expcons\_unrefined \inv ec) 
 \end{gendef}
 
 \subsubsection{unrefinedExpressionConstraint}
@@ -336,8 +339,10 @@ unrefinedExpressionConstraint ::= \\
    \forall ss : Substrate; uec : unrefinedExpressionConstraint @  \\
    i\_unrefinedExpressionConstraint~ss~uec = \\
    \IF uec \in \ran unrefined\_compound \\
-\t1 \THEN i\_compoundExpressionConstraint~ss~(unrefined\_compound \inv uec) \\
-\t1 \ELSE  i\_simpleExpressionConstraint~ss~(unrefined\_simple \inv uec) 
+ \THEN \\
+ \t1 i\_compoundExpressionConstraint~ss~(unrefined\_compound \inv uec) \\
+\ELSE  \\
+\t1 i\_simpleExpressionConstraint~ss~(unrefined\_simple \inv uec) 
 \end{gendef}
 
 \subsubsection{refinedExpressionConstraint}
@@ -366,16 +371,16 @@ refinedExpressionConstraint == \\
 \t1 Substrate \fun refinedExpressionConstraint \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate; rec : refinedExpressionConstraint @ \\
-   i\_refinedExpressionConstraint~ss~rec = \\
-\t1 intersect~(i\_unrefinedExpressionConstraint~ss~(first~rec)) (i\_refinement~ss~(second~rec))
+  (\LET unref\_interp == (i\_unrefinedExpressionConstraint~ss~(first~rec)) @ \\
+\t1   i\_refinedExpressionConstraint~ss~rec = \\
+\t2 intersect~unref\_interp (i\_refinement~ss~(second~rec)))
 \end{gendef}
+
+Duplicate signature for recursive definitions
 \begin{gendef}
    i\_refinedExpressionConstraint' : \\
 \t1 Substrate \fun refinedExpressionConstraint' \fun Sctids\_or\_Error
 \end{gendef}
-
-
-
 
 \subsubsection{simpleExpressionConstraint}
 \begin{framed}
@@ -383,7 +388,7 @@ refinedExpressionConstraint == \\
 \end{framed}
 \begin{framed}
 \noindent
-\bnf{simpleExpressionConstraint =  [constraintOperator ws] focusConcept} \\
+\bnf{simpleExpressionConstraint =  [constraintOperator ws] focusConcept} 
 \end{framed}
 
 The interpretation of  \spec{simpleExpressionConstraint} is the application of an optional constraint 
@@ -434,13 +439,14 @@ compoundExpressionConstraint ::= \\
 \where
   \forall ss : Substrate; cec : compoundExpressionConstraint @ \\
  i\_compoundExpressionConstraint~ss~cec = \\
-   \IF cec \in \ran compound\_conj \\
-\t1 \THEN i\_conjunctionExpressionConstraint~ss~(compound\_conj \inv cec) \\
-    \ELSE \IF cec \in \ran compound\_disj \\
-\t1 \THEN i\_disjunctionExpressionConstraint~ss~(compound\_disj \inv cec) \\
-    \ELSE \IF cec \in \ran compound\_excl \\
-\t1 \THEN i\_exclusionExpressionConstraint~ss~(compound\_excl \inv cec) \\
-   \ELSE i\_compoundExpressionConstraint'~ss~(compound\_nested \inv cec)
+   \IF cec \in \ran compound\_conj \THEN  \\
+\t1 i\_conjunctionExpressionConstraint~ss~(compound\_conj \inv cec) \\
+    \ELSE \IF cec \in \ran compound\_disj \THEN \\
+\t1 i\_disjunctionExpressionConstraint~ss~(compound\_disj \inv cec) \\
+    \ELSE \IF cec \in \ran compound\_excl \THEN \\
+\t1 i\_exclusionExpressionConstraint~ss~(compound\_excl \inv cec) \\
+   \ELSE \\
+\t1 i\_compoundExpressionConstraint'~ss~(compound\_nested \inv cec)
 \end{gendef}
 \begin{gendef}
    i\_compoundExpressionConstraint ': \\
@@ -531,8 +537,9 @@ exclusionExpressionConstraint == \\
 \t2 Substrate \fun exclusionExpressionConstraint \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate; ecr : exclusionExpressionConstraint @ \\
-i\_exclusionExpressionConstraint~ss~ecr = \\
-\t1~ minus~~ (i\_subExpressionConstraint~ss~(first~ecr)) (i\_subExpressionConstraint~ss~(second~ecr))
+   (\LET first\_sec == (i\_subExpressionConstraint~ss~(first~ecr)); \\
+   \t1 second\_sec == (i\_subExpressionConstraint~ss~(second~ecr)) @ \\
+i\_exclusionExpressionConstraint~ss~ecr =  minus~~first\_sec~second\_sec)
 \end{gendef}
 
 \subsubsection{subExpressionConstraint}
@@ -560,11 +567,12 @@ subExpressionConstraint ::= \\
 \where
    \forall ss : Substrate; sec : subExpressionConstraint @ \\
 i\_subExpressionConstraint~ss~sec = \\
-   \IF sec \in \ran subExpr\_simple \\
-\t1 \THEN i\_simpleExpressionConstraint~ss~(subExpr\_simple \inv sec) \\
-    \ELSE \IF sec \in \ran subExpr\_compound \\
-\t1 \THEN i\_compoundExpressionConstraint'~ss~(subExpr\_compound \inv sec) \\
-    \ELSE i\_refinedExpressionConstraint'~ss~(subExpr\_refined \inv sec) 
+   \IF sec \in \ran subExpr\_simple \THEN \\
+   \t1 i\_simpleExpressionConstraint~ss~(subExpr\_simple \inv sec) \\
+    \ELSE \IF sec \in \ran subExpr\_compound \THEN \\
+    \t1 i\_compoundExpressionConstraint'~ss~(subExpr\_compound \inv sec) \\
+    \ELSE \\
+    \t1 i\_refinedExpressionConstraint'~ss~(subExpr\_refined \inv sec) 
 \end{gendef}
 
 \subsection{refinement}
@@ -601,11 +609,12 @@ refinementConjunctionOrDisjunction ::= \\
    \forall ss : Substrate; rfnment : refinement @ \\
     i\_refinement~ss~rfnment = \\
    (\LET lhs == i\_subRefinement~ss~(first~rfnment); rhs == second~rfnment @ \\
-   \IF \# rhs = 0 \\
-\t1 \THEN lhs \\
-    \ELSE \IF (head~rhs) \in \ran refine\_conjset \\
-\t1 \THEN intersect~lhs~(i\_conjunctionRefinementSet~ss~(refine\_conjset \inv (head~rhs))) \\
-  \ELSE union~lhs~(i\_disjunctionRefinementSet~ss~(refine\_disjset \inv (head~rhs))))
+   \IF \# rhs = 0 \THEN \\
+   \t1 lhs \\
+    \ELSE \IF (head~rhs) \in \ran refine\_conjset \THEN  \\
+    \t1 intersect~lhs~(i\_conjunctionRefinementSet~ss~(refine\_conjset \inv (head~rhs))) \\
+  \ELSE \\
+  \t1 union~lhs~(i\_disjunctionRefinementSet~ss~(refine\_disjset \inv (head~rhs))))
 \end{gendef}
 \begin{gendef}
    i\_refinement' : Substrate \fun refinement' \fun Sctids\_or\_Error
@@ -632,8 +641,8 @@ The interpretation of a \spec{conjunctionRefinementSet} is the \underline{inters
 \where
    \forall ss : Substrate;  conjset : conjunctionRefinementSet @ \\
    i\_conjunctionRefinementSet~ss~conjset = ~ \\
-   \IF tail~conjset = \langle \rangle \\
-\t1 \THEN i\_subRefinement~ss~(head~conjset) \\
+   \IF tail~conjset = \langle \rangle \THEN \\
+   \t1 i\_subRefinement~ss~(head~conjset) \\
 \ELSE \\
 \t1 intersect~(i\_subRefinement~ss~(head~conjset))~(i\_conjunctionRefinementSet~ss~(tail~conjset))
 \end{gendef}
@@ -656,8 +665,8 @@ The interpretation of a \spec{disjunctionRefinementSet} is the \underline{union}
 \where
    \forall ss : Substrate;  disjset : disjunctionRefinementSet @ \\
    i\_disjunctionRefinementSet~ss~disjset = ~ \\
-   \IF tail~disjset =  \langle \rangle \\
-\t1 \THEN i\_subRefinement~ss~(head~disjset) \\
+   \IF tail~disjset =  \langle \rangle \THEN \\
+   \t1 i\_subRefinement~ss~(head~disjset) \\
 \ELSE \\
 \t1 union~(i\_subRefinement~ss~(head~disjset))~(i\_disjunctionRefinementSet~ss~(tail~disjset))
 \end{gendef}
@@ -689,11 +698,12 @@ subRefinement ::= \\
 \where
    \forall ss : Substrate; subrefine : subRefinement @ \\
    i\_subRefinement~ss~subrefine = \\
-   \IF subrefine \in \ran subrefine\_attset \\
-\t1 \THEN i\_attributeSet~ss~(subrefine\_attset \inv subrefine) \\
-   \ELSE \IF subrefine \in \ran subrefine\_attgroup \\
-\t1 \THEN i\_attributeGroup~ss~(subrefine\_attgroup \inv subrefine) \\
-  \ELSE i\_refinement'~ss~(subrefine\_refinement \inv subrefine)
+   \IF subrefine \in \ran subrefine\_attset \THEN\\
+   \t1  i\_attributeSet~ss~(subrefine\_attset \inv subrefine) \\
+   \ELSE \IF subrefine \in \ran subrefine\_attgroup \THEN \\
+   \t1 i\_attributeGroup~ss~(subrefine\_attgroup \inv subrefine) \\
+  \ELSE \\
+  \t1 i\_refinement'~ss~(subrefine\_refinement \inv subrefine)
 \end{gendef}
 
 \subsection{attributeSet}
@@ -730,11 +740,12 @@ conjunctionOrDisjunctionAttributeSet ::= \\
    \forall ss : Substrate; attset : attributeSet @ \\
    i\_attributeSet~ss~attset = \\
    (\LET lhs == i\_subAttributeSet~ss~(first~attset); rhs == second~attset @ \\
- \IF \# rhs = 0 \\
-\t1 \THEN lhs \\
- \ELSE \IF head~rhs \in \ran attset\_conjattset \\
-\t1 \THEN intersect~lhs~(i\_conjunctionAttributeSet~ss~(attset\_conjattset \inv (head~rhs))) \\
-  \ELSE union~lhs~(i\_disjunctionAttributeSet~ss~(attset\_conjattset \inv (head~rhs))))
+ \IF \# rhs = 0 \THEN \\
+ \t1 lhs \\
+ \ELSE \IF head~rhs \in \ran attset\_conjattset \THEN \\
+ \t1  intersect~lhs~(i\_conjunctionAttributeSet~ss~(attset\_conjattset \inv (head~rhs))) \\
+  \ELSE \\
+  \t1 union~lhs~(i\_disjunctionAttributeSet~ss~(attset\_conjattset \inv (head~rhs))))
 \end{gendef}
 
 \begin{gendef}
@@ -764,8 +775,8 @@ conjunctionAttributeSet ==  \seq_1 subAttributeSet
 \where
    \forall ss : Substrate;  conjset : conjunctionAttributeSet @ \\
    i\_conjunctionAttributeSet~ss~conjset = ~ \\
-   \IF tail~conjset = \langle \rangle \\
-\t1 \THEN i\_subAttributeSet~ss~(head~conjset) \\
+   \IF tail~conjset = \langle \rangle  \THEN \\
+   \t1 i\_subAttributeSet~ss~(head~conjset) \\
 \ELSE \\
 \t1 intersect~(i\_subAttributeSet~ss~(head~conjset))~(i\_conjunctionAttributeSet~ss~(tail~conjset))
 \end{gendef}
@@ -793,8 +804,8 @@ disjunctionAttributeSet ==  \seq_1 subAttributeSet
 \where
    \forall ss : Substrate;  disjset : disjunctionAttributeSet @ \\
    i\_disjunctionAttributeSet~ss~disjset = ~ \\
-   \IF tail~disjset = \langle \rangle \\
-\t1 \THEN i\_subAttributeSet~ss~(head~disjset) \\
+   \IF tail~disjset = \langle \rangle \THEN \\
+   \t1 i\_subAttributeSet~ss~(head~disjset) \\
 \ELSE \\
 \t1 union~(i\_subAttributeSet~ss~(head~disjset))~(i\_disjunctionAttributeSet~ss~(tail~disjset))
 \end{gendef}
@@ -822,12 +833,13 @@ subAttributeSet ::= \\
 \where
    \forall ss : Substrate; subaset : subAttributeSet @ \\
    i\_subAttributeSet~ss~subaset = \\
-   \IF subaset \in \ran subaset\_attribute \\
-\t1 \THEN i\_attribute~ss~(subaset\_attribute \inv subaset) \\
-  \ELSE i\_attributeSet'~ss~(subaset\_attset \inv subaset)
+   \IF subaset \in \ran subaset\_attribute \THEN \\
+   \t1 i\_attribute~ss~(subaset\_attribute \inv subaset) \\
+  \ELSE \\
+  \t1 i\_attributeSet'~ss~(subaset\_attset \inv subaset)
 \end{gendef}
 
-\subsubsection{attribute}
+\subsection{attribute}
 \begin{framed}
 \desc{An attribute is a name-value pair expressing a single refinement of the containing expression constraint. Either the attribute value must satisfy (or not) the given expression constraint, the attribute value is compared with a given numeric value (integer or decimal) using a numeric comparison operator, or the attribute value must be equal to (or not equal to) the given string value. The attribute may optionally be preceded by a cardinality constraint, a reverse flag and/or an attribute operator.}
 \end{framed}
@@ -885,11 +897,10 @@ numericValue ::= nv\_decimal \ldata decimalValue \rdata |  nv\_integer \ldata \n
    \forall ss : Substrate; att : attribute @ \\
    i\_attribute~ss~att = \\
    (\LET att\_sctids == i\_attributeOperator~ss~att.attOper~(ss.i\_attributeName~att.name) @ \\
-   \IF att\_sctids \in \ran error \\
-\t1 \THEN att\_sctids
+   \IF att\_sctids \in \ran error \THEN \\
+   \t1 att\_sctids
 \also
-   \ELSE \IF att.opValue \in \ran attrib\_expr \\
-\t1 \THEN \\
+   \ELSE \IF att.opValue \in \ran attrib\_expr \THEN \\
 \t1 (\LET expr\_interp == \\
 \t1 i\_expressionComparisonOperator~ss~att.rf~(result\_sctids~att\_sctids)~(attrib\_expr \inv att.opValue)  @ \\
 \t2 i\_att\_cardinality~ss~att.card~expr\_interp)
@@ -906,7 +917,7 @@ numericValue ::= nv\_decimal \ldata decimalValue \rdata |  nv\_integer \ldata \n
 \t2 i\_att\_cardinality~ss~att.card~str\_interp))
 \end{gendef}
 
-\subsubsection{Attribute Cardinality Interpretation}
+\subsubsection{attribute cardinality}
 \begin{framed}
 \desc{The cardinality of an attribute represents a constraint on the minimum and maximum number of instances of the given attribute on each concept. The cardinality is enclosed in square brackets with the minimum cardinality appearing first, followed by two dots and then the maximum cardinality. The minimum cardinality must always be less than or equal to the maximum cardinality. A maximum cardinality of 'many' indicates that there is no limit on the number of times the attribute may appear on each concept.}
 \end{framed}
@@ -934,13 +945,14 @@ The interpretation of $optional[cardinality]$ in the context of an attribute is:
 \where
    \forall ss:Substrate; ocard : \optional[cardinality]; qore : Quads\_or\_Error @ \\
    i\_att\_cardinality~ss~ocard~qore = \\
-\IF qore \in \ran qerror \\
-\t1 \THEN error (qerror \inv qore) \\
-\ELSE \IF \# ocard = 0 \\
-\t1 \THEN ok~(i\_required\_cardinality~1~many~qore) \\
-\ELSE \IF first~(head~ocard) > 0 \\
-\t1 \THEN ok~(i\_required\_cardinality~(first~(head~ocard))~(second~(head~ocard))~qore) \\
-\ELSE ok~(i\_optional\_cardinality~ss~(second~(head~ocard))~qore)
+\IF qore \in \ran qerror \THEN \\
+\t1 error (qerror \inv qore) \\
+\ELSE \IF \# ocard = 0 \THEN \\
+\t1 ok~(i\_required\_cardinality~1~many~qore) \\
+\ELSE \IF first~(head~ocard) > 0 \THEN \\
+\t1 ok~(i\_required\_cardinality~(first~(head~ocard))~(second~(head~ocard))~qore) \\
+\ELSE \\
+\t1 ok~(i\_optional\_cardinality~ss~(second~(head~ocard))~qore)
 \end{gendef}
 
 $i\_required\_cardinality$ returns the set of subject or target sctids that meet the cardinality requirements
@@ -950,10 +962,11 @@ $i\_required\_cardinality$ returns the set of subject or target sctids that meet
 \where
    \forall min : \nat; max : unlimitedNat; qore : Quads\_or\_Error  @ \\
 i\_required\_cardinality~min~max~qore = \\
-\IF quad\_direction~qore = source\_direction \\
-\THEN \{subj :  \{q : quads\_for~qore @ q.s \} | \\
+\IF quad\_direction~qore = source\_direction \THEN \\
+\t1 \{subj :  \{q : quads\_for~qore @ q.s \} | \\
 \t1 evalCardinality[Quad]~min~max~\{q : quads\_for~qore | q.s = subj\} \neq \emptyset \} \\
-\ELSE \{targ :  \{q : quads\_for~qore @ t\_sctid \inv q.t \} | \\
+\ELSE \\
+\t1 \{targ :  \{q : quads\_for~qore @ t\_sctid \inv q.t \} | \\
 \t1 evalCardinality[Quad]~min~max~\{q : quads\_for~qore | (t\_sctid \inv q.t) = targ\} \neq \emptyset \}
 \end{gendef}
 
@@ -966,8 +979,7 @@ are equivalent to the set of all subject (or target) concepts in the set of quad
 \where
    \forall ss:Substrate; max : unlimitedNat; qore : Quads\_or\_Error  @ \\
 i\_optional\_cardinality~ss~max~qore = \\
-\IF quad\_direction~qore = source\_direction \\
-\THEN \\
+\IF quad\_direction~qore = source\_direction \THEN \\
 \t1 ss.concepts \setminus (\{q : quads\_for~qore @ q.s \} \setminus (i\_required\_cardinality~0~max~qore)) \\
 \ELSE \\
 \t1 ss.concepts \setminus (\{q : quads\_for~qore @ t\_sctid \inv q.t \} \setminus (i\_required\_cardinality~0~max~qore)) 
@@ -1001,132 +1013,13 @@ expressionConstraintValue ::= \\
 \where
    \forall ss : Substrate; ecv : expressionConstraintValue @ \\
    i\_expressionConstraintValue~ss~ecv = \\
-\IF ecv \in \ran expression\_simple \\
-\t1 \THEN i\_simpleExpressionConstraint~ss~(expression\_simple \inv ecv) \\
-\ELSE \IF ecv \in \ran expression\_refined \\
-\t1 \THEN i\_refinedExpressionConstraint'~ss~(expression\_refined \inv ecv) \\
-\ELSE i\_compoundExpressionConstraint~ss~(expression\_compound \inv ecv)
+\IF ecv \in \ran expression\_simple  \THEN \\
+\t1 i\_simpleExpressionConstraint~ss~(expression\_simple \inv ecv) \\
+\ELSE \IF ecv \in \ran expression\_refined \THEN \\
+\t1 i\_refinedExpressionConstraint'~ss~(expression\_refined \inv ecv) \\
+\ELSE \\
+\t1 i\_compoundExpressionConstraint~ss~(expression\_compound \inv ecv)
 \end{gendef}
-\subsubsection{expressionComparisonOperator}
-\begin{framed}
-\desc{Attributes whose value is a concept may be compared to an expression constraint using either equals ("=") or not equals ("!="). In the full syntax "<>" and "not =" (case insensitive) are also  valid ways to represent not equals.}
-\end{framed}
-
-\begin{framed}
-\noindent
-\bnf{expressionComparisonOperator = "=" / "!="}
-\end{framed}
-
-The interpretation of \spec{expressionComparisonOperator} is the set of all quads in the substrate having a target (or subject if the direction is reverse) that are (or are not) in
-the interpretation of the \spec{expressionConstraintValue}
-
-
-\begin{zed}
-expressionComparisonOperator ::= eco\_eq | eco\_neq
-\end{zed}
-
-\begin{gendef}
-   i\_expressionComparisonOperator: \\
-\t1 Substrate \fun \optional[reverseFlag] \fun \power sctId \fun \\
-\t1 (expressionComparisonOperator \cross expressionConstraintValue) \fun Quads\_or\_Error
-\where
-    \forall ss : Substrate; rf : \optional[reverseFlag]; atts : \power sctId; \\
-\t1 ec : (expressionComparisonOperator \cross expressionConstraintValue)  @ \\
-    i\_expressionComparisonOperator~ss~rf~atts~ec = \\
-    (\LET ecv == i\_expressionConstraintValue~ss~(second~ec) @ \\
- \IF ecv \in \ran error \THEN qerror(error \inv ecv) \\
- \ELSE \IF \# reverseFlag = 0 \land (first~ec =  eco\_eq) \\
- \t1 \THEN quad\_value( \{q : ss.relationships | q.t \in \ran t\_sctid \land (t\_sctid \inv q.t) \in (result\_sctids~ecv) \}, \\
- \t3 source\_direction) \\
- \ELSE \IF \# reverseFlag > 0  \land (first~ec =  eco\_eq) \\
- \t1 \THEN quad\_value(\{q : ss.relationships | q.s \in (result\_sctids~ecv) \} , \\
- \t3 targets\_direction) \\
-  \ELSE \IF \# reverseFlag = 0  \land (first~ec =  eco\_neq) \\
- \t1 \THEN quad\_value( \{q : ss.relationships | q.t \in \ran t\_sctid \land (t\_sctid \inv q.t) \notin (result\_sctids~ecv) \}, \\
- \t3 source\_direction) \\
- \ELSE quad\_value ( \{q : ss.relationships | q.s \notin (result\_sctids~ecv) \}, \\
- \t3 targets\_direction) )
- \end{gendef}
- 
- \subsubsection{numericComparisonOperator}
-\begin{framed}
-\desc{Attributes whose value is numeric (i.e. integer or decimal) may be compared to a specific concrete value using a variety of comparison operators, including equals ("="), less than ("\textless"), less than or equals ("\textless="), greater than ("\textgreater"), greater than or equals ("\textgreater=") and not equals ("!="). In the full syntax "\textless\textgreater" and "not =" (case insensitive) are also valid ways to represent not equals.}
-\end{framed}
-
-\begin{framed}
-\noindent
-\bnf{numericComparisonOperator = "=" / "!=" / "\textless=" / "\textless" / "\textgreater=" / "\textgreater"}
-\end{framed}
-
-The interpretation of \spec{numericComparisonOperator} is the set of all quads in the substrate having a  $concreteValue$ target of type $cv\_integer$ or $cv\_decimal$ that (or do not meet) the supplied 
-criteria. As concrete values cannot occur as subjects, this function returns the empty set if the reverse flag is supplied
-
-
-\begin{zed}
-numericComparisonOperator ::= nco\_eq | nco\_neq | nco\_gt | nco\_ge | nco\_lt | nco\_le
-\end{zed}
-
-\begin{gendef}
-   i\_numericComparisonOperator: \\
-\t1 Substrate \fun  \optional[reverseFlag] \fun \power sctId \fun \\
-\t1 (numericComparisonOperator \cross numericValue) \fun Quads\_or\_Error
-\where
-    \forall ss : Substrate; rf : \optional[reverseFlag]; atts : \power sctId; \\
-\t1 ncv : (numericComparisonOperator \cross numericValue)  @ \\
-    i\_numericComparisonOperator~ss~rf~atts~ncv = \\
-\IF \# rf > 0 \THEN \\
-\t1 quad\_value(\emptyset, targets\_direction) \\
-\ELSE \\
-\t1 quad\_value( \{q : ss.relationships | q.a \in atts \land q.t \in \ran t\_concrete \land  \\
-numericComparison~(t\_concrete \inv q.t)~(first~ncv) = (second~ncv) \}, source\_direction)
- \end{gendef}
- 
- Numeric comparison function. Compares a $concreteValue$ with a $numericValue$.
- 
- \textbf{TODO: Need to specify the rules for comparing integers and decimal numbers as well as decimal/decimal.  As an example, does "5.00" = "5.0"}
- \begin{gendef}
-    numericComparison: \\
-\t1 concreteValue \fun numericComparisonOperator \pfun numericValue
- \end{gendef}
- 
-\subsubsection{stringComparisonOperator}
-\begin{framed}
-\desc{Attributes whose value is numeric may be compared to an expression constraint using either equals ("=") or not equals ("!="). In the full syntax "<>" and "not =" (case insensitive) are also  valid ways to represent not equals.}
-\end{framed}
-
-\begin{framed}
-\noindent
-\bnf{stringComparisonOperator = "=" / "!="}
-\end{framed}
-
-
-\begin{zed}
-stringComparisonOperator ::= sco\_eq | sco\_neq
-\end{zed}
-
-\begin{gendef}
-   i\_stringComparisonOperator: \\
-\t1 Substrate \fun  \optional[reverseFlag] \fun \power sctId \fun \\
-\t1 (stringComparisonOperator \cross stringValue) \fun Quads\_or\_Error
-\where
-    \forall ss : Substrate; rf : \optional[reverseFlag]; atts : \power sctId; \\
-\t1 scv : (stringComparisonOperator \cross stringValue)  @ \\
-    i\_stringComparisonOperator~ss~rf~atts~scv = \\
-\IF \# rf > 0 \THEN \\
-\t1 quad\_value(\emptyset, targets\_direction) \\
-\ELSE \\
-\t1 quad\_value( \{q : ss.relationships | q.a \in atts \land q.t \in \ran t\_concrete \land \\
-stringComparison~(t\_concrete \inv q.t)~(first~scv) = (second~scv) \}, source\_direction)
- \end{gendef}
-
-
- String comparison function. Compares a $concreteValue$ with a $stringValue$.
- \begin{gendef}
-    stringComparison: \\
-\t1 concreteValue \fun stringComparisonOperator \pfun stringValue
- \end{gendef}
-
-
 
 
 
@@ -1156,10 +1049,10 @@ attribute set.
 \where
    \forall ss : Substrate; ag : attributeGroup @ \\
    i\_attributeGroup~ss~ag = \\
-   \t1  i\_group\_cardinality~(first~ag)~(i\_groupAttributeSet~ss~(second~ag))
+   \t1  i\_group\_cardinality~ss~(first~ag)~(i\_groupAttributeSet~ss~(second~ag))
 \end{gendef}
 
-\subsubsection{Attribute Group Cardinality Interpretation}
+\subsubsection{attribute group cardinality}
 The interpretation of \spec{cardinality} within the context of an attribute group is as follows:
 \begin{itemize}[noitemsep]
 \item If an error has been encountered anywhere in the process, it should be propagated.
@@ -1174,17 +1067,18 @@ The interpretation of \spec{cardinality} within the context of an attribute grou
 \where
    \forall ss: Substrate; ocard : \optional[cardinality]; idg : sctIdGroups\_or\_Error @ \\
    i\_group\_cardinality~ss~ocard~idg = \\
-   \IF idq \in \ran gerror \\
-\t1 \THEN error(gerror \inv idg)
+   \IF idg \in \ran gerror \THEN \\
+   \t1 error(gerror \inv idg)
 \also
 \ELSE (\LET gvals == group\_value \inv idg @ \\
-\t1 \IF \# ocard = 0 \\
-\t2 \THEN ok (i\_required\_group\_cardinality~1~many~gvals)
+\t1 \IF \# ocard = 0 \THEN \\
+\t2 ok (i\_required\_group\_cardinality~1~many~gvals)
 \also
-\t1 \ELSE \IF first~ocard > 0 \\
-\t2 \THEN ok (i\_required\_group\_cardinality~(first~ocard)~(second~ocard)~gvals)
+\t1 \ELSE \IF first~(head~ocard) > 0 \THEN \\
+\t2  ok (i\_required\_group\_cardinality~(first~(head~ocard))~(second~(head~ocard))~gvals)
 \also
-\t1 \ELSE ok (i\_optional\_group\_cardinality~ss~(second~ocard)~gvals ))
+\t1 \ELSE \\
+\t2 ok (i\_optional\_group\_cardinality~ss~(second~(head~ocard))~gvals ))
 \end{gendef}
 
 
@@ -1204,7 +1098,7 @@ set of all possible $sctIds$ (i.e. $ss.concepts$) minus the set of $sctids$ that
 
 \begin{gendef}
    i\_optional\_group\_cardinality : \\
-\t1 Substrate \fun unlimitedNat \fun \power sctIdGroup  \fun \power sctid
+\t1 Substrate \fun unlimitedNat \fun \power sctIdGroup  \fun \power sctId
 \where
    \forall ss:Substrate; max : unlimitedNat; groups: \power sctIdGroup  @ \\
 i\_optional\_group\_cardinality~ss~max~groups = \\
@@ -1214,7 +1108,7 @@ ss.concepts \setminus \\
 
 
 
-\subsubsection{attributeSet for Groups}
+\subsubsection{attributeSet inside a groups}
 The interpretation of an \spec{attributeSet} a group is the interpretation of the \spec{subAttributeSet}
 optionally intersected or union with additional conjunction or disjunction attribute sets.
 
@@ -1226,15 +1120,19 @@ optionally intersected or union with additional conjunction or disjunction attri
    \forall ss : Substrate; attset : attributeSet @ \\
    i\_groupAttributeSet~ss~attset = \\
    (\LET lhs == i\_groupSubAttributeSet~ss~(first~attset); rhs == second~attset @ \\
- \IF \# rhs = 0 \\
-\t1 \THEN lhs \\
- \ELSE \IF head~rhs \in \ran attset\_conjattset \\
-\t1 \THEN gintersect~lhs~(i\_groupConjunctionAttributeSet~ss~(attset\_conjattset \inv (head~rhs))) \\
-  \ELSE gunion~lhs~(i\_groupDisjunctionAttributeSet~ss~(attset\_conjattset \inv (head~rhs))))
+ \IF \# rhs = 0 \THEN \\
+ \t1 lhs \\
+ \ELSE \IF head~rhs \in \ran attset\_conjattset \THEN \\
+ \t1 gintersect~lhs~(i\_groupConjunctionAttributeSet~ss~(attset\_conjattset \inv (head~rhs))) \\
+  \ELSE \\
+  \t1 gunion~lhs~(i\_groupDisjunctionAttributeSet~ss~(attset\_conjattset \inv (head~rhs))))
+\end{gendef}
+\begin{gendef}
+   i\_groupAttributeSet' : \\
+\t1 Substrate \fun attributeSet' \fun sctIdGroups\_or\_Error
 \end{gendef}
 
-
-\subsubsection{conjunctionAttributeSet for Groups}
+\subsubsection{conjunctionAttributeSet inside a group}
 Apply the intersect operator to the interpretation of each  subAttributeSet in a group context. This is the same as the non-grouped $subAttributeSet$ with the exception that the inputs to and result of the function is $sctId$ / $groupId$ tuples rather than
 
 
@@ -1245,31 +1143,31 @@ Apply the intersect operator to the interpretation of each  subAttributeSet in a
 \where
    \forall ss : Substrate;  conjset : conjunctionAttributeSet @ \\
    i\_groupConjunctionAttributeSet~ss~conjset = ~ \\
-   \IF tail~conjset = \langle \rangle \\
-\t1 \THEN i\_groupSubAttributeSet~ss~(head~conjset) \\
+   \IF tail~conjset = \langle \rangle \THEN \\
+   \t1 i\_groupSubAttributeSet~ss~(head~conjset) \\
 \ELSE \\
 \t1 gintersect~(i\_groupSubAttributeSet~ss~(head~conjset))~(i\_groupConjunctionAttributeSet~ss~(tail~conjset))
 \end{gendef}
 
 
-\subsubsection{disjunctionAttributeSet for Groups}
+\subsubsection{disjunctionAttributeSet inside a group}
 Apply the union operator to the interpretation of each  subAttributeSet in a group context.  This is the same as the non-grouped $subAttributeSet$ with the exception that the inputs to and result of the function is $sctId$ / $groupId$ tuples rather than
 just $sctIds$.
 
 
 \begin{gendef}
     i\_groupDisjunctionAttributeSet : \\
-\t1 Substrate \fun groupDisjunctionAttributeSet \fun sctIdGroups\_or\_Error
+\t1 Substrate \fun disjunctionAttributeSet \fun sctIdGroups\_or\_Error
 \where
    \forall ss : Substrate;  disjset : disjunctionAttributeSet @ \\
    i\_groupConjunctionAttributeSet~ss~disjset = ~ \\
-   \IF tail~disjset = \langle \rangle \\
-\t1 \THEN i\_groupSubAttributeSet~ss~(head~disjset) \\
+   \IF tail~disjset = \langle \rangle \THEN \\
+   \t1  i\_groupSubAttributeSet~ss~(head~disjset) \\
 \ELSE \\
 \t1 gunion~(i\_groupSubAttributeSet~ss~(head~disjset))~(i\_groupConjunctionAttributeSet~ss~(tail~disjset))
 \end{gendef}
 
-\subsubsection{subAttributeSet for Groups}
+\subsubsection{subAttributeSet inside a group}
 This is the same as the non-grouped $subAttributeSet$ with the exception that the result of the function is $sctId$ / $groupId$ tuples rather than
 just $sctIds$.
 
@@ -1284,13 +1182,10 @@ just $sctIds$.
 \t1 \THEN i\_groupAttribute~ss~(subaset\_attribute \inv subaset) \\
   \ELSE i\_groupAttributeSet'~ss~(subaset\_attset \inv subaset)
 \end{gendef}
-\begin{gendef}
-   i\_groupSubAttributeSet: \\
-\t2 Substrate \fun subAttributeSet \fun sctIdGroups\_or\_Error 
-\end{gendef}
 
 
-\subsubsection{attribute for Groups}
+
+\subsubsection{attribute inside a group}
 The interpretation of an attribute within the context of a group is the set of $sctIds$ and the group or groups in which
 they were valid.  It is possible for the same $sctId$ to valid in the interpretation of a given attribute for more than one group.
 The union and intersection operators operate on the $sctId$ / $groupId$ tuples (ne. $sctIdGroup$).
@@ -1306,14 +1201,12 @@ The union and intersection operators operate on the $sctId$ / $groupId$ tuples (
    \IF att\_sctids \in \ran error \\
 \t1 \THEN gerror(error \inv att\_sctids)
 \also
-   \ELSE \IF att.opValue \in \ran attrib\_expr \\
-\t1 \THEN \\
+   \ELSE \IF att.opValue \in \ran attrib\_expr \THEN \\
 \t1 (\LET expr\_interp == \\
 \t1 i\_expressionComparisonOperator~ss~att.rf~(result\_sctids~att\_sctids)~(attrib\_expr \inv att.opValue)  @ \\
 \t2 i\_att\_group\_cardinality~ss~att.card~expr\_interp)
 \also
-   \ELSE \IF att.opValue \in \ran attrib\_num \\
-\t1 \THEN \\
+   \ELSE \IF att.opValue \in \ran attrib\_num  \THEN \\
 \t1 (\LET num\_interp == \\
 \t1 i\_numericComparisonOperator~ss~att.rf~(result\_sctids~att\_sctids)~(attrib\_num \inv att.opValue)  @ \\
 \t2 i\_att\_group\_cardinality~ss~att.card~num\_interp)
@@ -1324,7 +1217,7 @@ The union and intersection operators operate on the $sctId$ / $groupId$ tuples (
 \t2 i\_att\_group\_cardinality~ss~att.card~str\_interp))
 \end{gendef}
 
-\subsection{Group Attribute Cardinality}
+\subsubsection{cardinality inside a group}
 
 Cardinality is interpreted differently within the context of a a group.  In particular:
 \begin{itemize}[noitemsep]
@@ -1340,14 +1233,14 @@ $i\_att\_group\_cardinality$ takes an optional cardinality and a set of quads an
 \where
    \forall ss:Substrate; ocard : \optional[cardinality]; qore : Quads\_or\_Error @ \\
    i\_att\_group\_cardinality~ss~ocard~qore = \\
-\IF qore \in \ran qerror \\
-\t1 \THEN gerror (qerror \inv qore) 
+\IF qore \in \ran qerror \THEN \\
+\t1 gerror (qerror \inv qore) 
 \also
-\ELSE \IF \# ocard = 0 \\
-\t1 \THEN group\_value~(i\_required\_att\_group\_cardinality~1~many~qore)
+\ELSE \IF \# ocard = 0 \THEN \\
+\t1 group\_value~(i\_required\_att\_group\_cardinality~1~many~qore)
 \also
-\ELSE \IF first~(head~ocard) > 0 \\
-\t1 \THEN group\_value~(i\_required\_att\_group\_cardinality~(first~(head~ocard) )~(second~(head~ocard) )~qore)
+\ELSE \IF first~(head~ocard) > 0 \THEN \\
+\t1 group\_value~(i\_required\_att\_group\_cardinality~(first~(head~ocard) )~(second~(head~ocard) )~qore)
 \also
 \ELSE \\
 \t1 group\_value~(i\_optional\_att\_group\_cardinality~ss~(second~(head~ocard) )~qore)
@@ -1360,13 +1253,14 @@ $i\_required\_att\_group\_cardinality$ returns the set of subject or target scti
 \where
    \forall min : \nat; max : unlimitedNat; qore : Quads\_or\_Error  @ \\
 i\_required\_att\_group\_cardinality~min~max~qore = \\
-\IF quad\_direction~qore = source\_direction \\
-\THEN \\
+\IF quad\_direction~qore = source\_direction \THEN \\
 \t1 \{subjgroup :  \{q : quads\_for~qore | q.g \neq zero\_group @ (q.s, q.g) \} | \\
 \t1 evalCardinality[Quad]~min~max~ \{q : quads\_for~qore | \\
 \t2 q.s = first~subjgroup \land q.g = second~subjgroup\} \neq \emptyset \}
 \also
-\ELSE \{targgroup :  \{q : quads\_for~qore | q.g \neq zero\_group \land q.t \in \ran t\_sctid @ (t\_sctid \inv q.t , q.g) \} | \\
+\ELSE \\
+\t1 \{targgroup :  \{q : quads\_for~qore | \\
+\t2 q.g \neq zero\_group \land q.t \in \ran t\_sctid @ (t\_sctid \inv q.t , q.g) \} | \\
 \t1 evalCardinality[Quad]~min~max~ \{q : quads\_for~qore | \\
 \t2 t\_sctid \inv q.t = first~targgroup \land q.g = second~targgroup\} \neq \emptyset \}
 \end{gendef}
@@ -1379,8 +1273,7 @@ is equivalent to the set of all possible sctid / non-zero groups in the substrat
 \where
    \forall ss:Substrate; max : unlimitedNat; qore : Quads\_or\_Error  @ \\
 i\_optional\_att\_group\_cardinality~ss~max~qore = \\
-\IF quad\_direction~qore = source\_direction \\
-\THEN \\
+\IF quad\_direction~qore = source\_direction \THEN \\
 \t1  \{rel: ss.relationships | rel.g \neq zero\_group @ (rel.s, rel.g) \} \setminus \\
 \t1 \{q : quads\_for~qore | q.g \neq zero\_group @ (q.s, q.g) \} \cup \\
 \t2 i\_required\_att\_group\_cardinality~0~max~qore
@@ -1437,19 +1330,20 @@ constraintOperator ::= \\
 \where
 	\forall ss : Substrate; oco : \optional[constraintOperator]; input : Sctids\_or\_Error @ \\
 i\_constraintOperator~ss~oco~input = \\
-\t1 \IF error \inv input \in ERROR \lor \# oco = 0 \\
-\t2 \THEN input \\
-\t1 \ELSE \IF head~oco = descendantOrSelfOf~ \\
-\t2 \THEN ok (\bigcup \{id : result\_sctids~input @ \\
-\t4 completeFun~ss.descendants~id \} \cup result\_sctids~input) \\
-\t1 \ELSE \IF head~oco = descendantOf~ \\
-\t2 \THEN ok  (\bigcup \{id : result\_sctids~input @ \\
-\t4 completeFun~ss.descendants~id ~\}) \\
-\t1 \ELSE \IF head~oco = ancestorOrSelfOf~ \\
-\t2 \THEN  ok (\bigcup \{id : result\_sctids~input @ \\
-\t4 completeFun~ss.ancestors~id \} \cup result\_sctids~input) \\
-\t1 \ELSE  ok (\bigcup \{id : result\_sctids~input \\
-\t4 @ completeFun~ ss.ancestors~id ~\}) \\
+\t1 \IF error \inv input \in ERROR \lor \# oco = 0  \THEN  \\
+\t2 input \\
+\t1 \ELSE \IF head~oco = descendantOrSelfOf \THEN \\
+\t2 ok (\bigcup \{id : result\_sctids~input @ \\
+\t3 completeFun~ss.descendants~id \} \cup result\_sctids~input) \\
+\t1 \ELSE \IF head~oco = descendantOf~ \THEN \\
+\t2 ok  (\bigcup \{id : result\_sctids~input @ \\
+\t3 completeFun~ss.descendants~id ~\}) \\
+\t1 \ELSE \IF head~oco = ancestorOrSelfOf~ \THEN  \\
+\t2 ok (\bigcup \{id : result\_sctids~input @ \\
+\t3 completeFun~ss.ancestors~id \} \cup result\_sctids~input) \\
+\t1 \ELSE  \\
+\t2 ok (\bigcup \{id : result\_sctids~input \\
+\t3 @ completeFun~ ss.ancestors~id ~\}) \\
 \also
    \forall f : (sctId \pfun \power sctId); id : sctId @ completeFun~f~id = \\
 \t1\IF id \in \dom f \THEN f~id \ELSE \emptyset 
@@ -1470,8 +1364,132 @@ attributeOperator == constraintOperator \\
 i\_attributeOperator == i\_constraintOperator
 \end{zed}
 
+\subsection{expressionComparisonOperator}
+\begin{framed}
+\desc{Attributes whose value is a concept may be compared to an expression constraint using either equals ("=") or not equals ("!="). In the full syntax "<>" and "not =" (case insensitive) are also  valid ways to represent not equals.}
+\end{framed}
 
-\subsection{FocusConcept}
+\begin{framed}
+\noindent
+\bnf{expressionComparisonOperator = "=" / "!="}
+\end{framed}
+
+The interpretation of \spec{expressionComparisonOperator} is the set of all quads in the substrate having a target (or subject if the direction is reverse) that are (or are not) in
+the interpretation of the \spec{expressionConstraintValue}
+
+
+\begin{zed}
+expressionComparisonOperator ::= eco\_eq | eco\_neq
+\end{zed}
+
+\begin{gendef}
+   i\_expressionComparisonOperator: \\
+\t1 Substrate \fun \optional[reverseFlag] \fun \power sctId \fun \\
+\t1 (expressionComparisonOperator \cross expressionConstraintValue) \fun Quads\_or\_Error
+\where
+    \forall ss : Substrate; rf : \optional[reverseFlag]; atts : \power sctId; \\
+\t1 ec : (expressionComparisonOperator \cross expressionConstraintValue)  @ \\
+    i\_expressionComparisonOperator~ss~rf~atts~ec = \\
+    (\LET ecv == i\_expressionConstraintValue~ss~(second~ec) @ \\
+\t1 \IF ecv \in \ran error \THEN \\
+\t2 qerror(error \inv ecv) \\
+\t1 \ELSE \IF \# reverseFlag = 0 \land (first~ec =  eco\_eq) \THEN \\
+\t2 quad\_value( \{q : ss.relationships | \\
+\t3 q.t \in \ran t\_sctid \land (t\_sctid \inv q.t) \in (result\_sctids~ecv) \}, source\_direction) \\
+\t1 \ELSE \IF \# reverseFlag > 0  \land (first~ec =  eco\_eq) \THEN \\
+\t2 quad\_value(\{q : ss.relationships | \\
+\t3 q.s \in (result\_sctids~ecv) \} , targets\_direction) \\
+\t1  \ELSE \IF \# reverseFlag = 0  \land (first~ec =  eco\_neq) \THEN \\
+\t2 quad\_value( \{q : ss.relationships | \\
+\t3 q.t \in \ran t\_sctid \land (t\_sctid \inv q.t) \notin (result\_sctids~ecv) \}, source\_direction) \\
+\t1 \ELSE \\
+\t2 quad\_value ( \{q : ss.relationships | \\
+\t3 q.s \notin (result\_sctids~ecv) \}, targets\_direction) )
+ \end{gendef}
+ 
+ \subsection{numericComparisonOperator}
+\begin{framed}
+\desc{Attributes whose value is numeric (i.e. integer or decimal) may be compared to a specific concrete value using a variety of comparison operators, including equals ("="), less than ("\textless"), less than or equals ("\textless="), greater than ("\textgreater"), greater than or equals ("\textgreater=") and not equals ("!="). In the full syntax "\textless\textgreater" and "not =" (case insensitive) are also valid ways to represent not equals.}
+\end{framed}
+
+\begin{framed}
+\noindent
+\bnf{numericComparisonOperator = "=" / "!=" / "\textless=" / "\textless" / "\textgreater=" / "\textgreater"}
+\end{framed}
+
+The interpretation of \spec{numericComparisonOperator} is the set of all quads in the substrate having a  $concreteValue$ target of type $cv\_integer$ or $cv\_decimal$ that (or do not meet) the supplied 
+criteria. As concrete values cannot occur as subjects, this function returns the empty set if the reverse flag is supplied
+
+
+\begin{zed}
+numericComparisonOperator ::= nco\_eq | nco\_neq | nco\_gt | nco\_ge | nco\_lt | nco\_le
+\end{zed}
+
+\begin{gendef}
+   i\_numericComparisonOperator: \\
+\t1 Substrate \fun  \optional[reverseFlag] \fun \power sctId \fun \\
+\t1 (numericComparisonOperator \cross numericValue) \fun Quads\_or\_Error
+\where
+    \forall ss : Substrate; rf : \optional[reverseFlag]; atts : \power sctId; \\
+\t1 ncv : (numericComparisonOperator \cross numericValue)  @ \\
+    i\_numericComparisonOperator~ss~rf~atts~ncv = \\
+\IF \# rf > 0 \THEN \\
+\t1 quad\_value(\emptyset, targets\_direction) \\
+\ELSE \\
+\t1 quad\_value( \{q : ss.relationships | q.a \in atts \land q.t \in \ran t\_concrete \land  \\
+numericComparison~(t\_concrete \inv q.t)~(first~ncv) = (second~ncv) \}, source\_direction)
+ \end{gendef}
+ 
+ Numeric comparison function. Compares a $concreteValue$ with a $numericValue$.
+ \paragraph{}
+ \textbf{TODO:} Need to specify the rules for comparing integers and decimal numbers as well as decimal/decimal.  As an example, does "5.00" = "5.0"
+ \begin{gendef}
+    numericComparison: \\
+\t1 concreteValue \fun numericComparisonOperator \pfun numericValue
+ \end{gendef}
+ 
+\subsection{stringComparisonOperator}
+\begin{framed}
+\desc{Attributes whose value is numeric may be compared to an expression constraint using either equals ("=") or not equals ("!="). In the full syntax "<>" and "not =" (case insensitive) are also  valid ways to represent not equals.}
+\end{framed}
+
+\begin{framed}
+\noindent
+\bnf{stringComparisonOperator = "=" / "!="}
+\end{framed}
+
+
+\begin{zed}
+stringComparisonOperator ::= sco\_eq | sco\_neq
+\end{zed}
+
+\begin{gendef}
+   i\_stringComparisonOperator: \\
+\t1 Substrate \fun  \optional[reverseFlag] \fun \power sctId \fun \\
+\t1 (stringComparisonOperator \cross stringValue) \fun Quads\_or\_Error
+\where
+    \forall ss : Substrate; rf : \optional[reverseFlag]; atts : \power sctId; \\
+\t1 scv : (stringComparisonOperator \cross stringValue)  @ \\
+    i\_stringComparisonOperator~ss~rf~atts~scv = \\
+\IF \# rf > 0 \THEN \\
+\t1 quad\_value(\emptyset, targets\_direction) \\
+\ELSE \\
+\t1 quad\_value( \{q : ss.relationships | q.a \in atts \land q.t \in \ran t\_concrete \land \\
+stringComparison~(t\_concrete \inv q.t)~(first~scv) = (second~scv) \}, source\_direction)
+ \end{gendef}
+
+
+ String comparison function. Compares a $concreteValue$ with a $stringValue$.
+ \begin{gendef}
+    stringComparison: \\
+\t1 concreteValue \fun stringComparisonOperator \pfun stringValue
+ \end{gendef}
+
+
+
+
+
+\subsection{focusConcept}
 \begin{framed}
 \desc{A focus concept is a concept reference, which is optionally preceded by a member of function. A memberOf function should be used only when the conceptReference refers to a reference set concept.}
 \end{framed}
@@ -1495,8 +1513,7 @@ each element in the interpretation of \spec{conceptReference}.  If \spec{memberO
 \where
    \forall ss : Substrate; fc : focusConcept @ \\
 i\_focusConcept~ss~fc = \\
-\t1 \IF focusConcept\_c \inv fc \in conceptReference \\
-\t1\THEN \\
+\t1 \IF focusConcept\_c \inv fc \in conceptReference \THEN \\
 \t2 ss.i\_conceptReference~(focusConcept\_c~\inv fc) \\
 \t1 \ELSE \\
 \t2  i\_memberOf~ss~(ss.i\_conceptReference~(focusConcept\_m~\inv fc)) 
@@ -1511,12 +1528,13 @@ returned if (a) $refsetids$ already has an error or (b) the substrate interpreta
 \where
    \forall ss : Substrate; refsetids : Sctids\_or\_Error @ \\
 i\_memberOf~ss~refsetids= \\
-\t1 \IF refsetids \in \ran error \\
-\t2 \THEN refsetids \\
-\t1 \ELSE bigunion \{sctid: result\_sctids~refsetids @ ss.i\_refsetId~sctid \} 
+\t1 \IF refsetids \in \ran error \THEN \\
+\t2  refsetids \\
+\t1 \ELSE \\
+\t2 bigunion \{sctid: result\_sctids~refsetids @ ss.i\_refsetId~sctid \} 
 \end{gendef}
 
-
+\pagebreak
 
 \section{Types}
 This section carries various type transformations and error checking functions
@@ -1596,7 +1614,8 @@ Definition of the various functions that are performed on the result type. \\
 \t2 Sctids\_or\_Error \\
    bigunion, bigintersect : \power Sctids\_or\_Error \fun Sctids\_or\_Error \\
 \also
-   gunion, gintersect, gminus : sctIdGroups\_or\_Error \fun sctIdGroups\_or\_Error \fun sctIdGroups\_or\_Error
+   gunion, gintersect, gminus : \\
+   \t1 sctIdGroups\_or\_Error \fun sctIdGroups\_or\_Error \fun sctIdGroups\_or\_Error
 \where
    \forall x,y : Sctids\_or\_Error @ union~x~y = \\
 \t1 \IF x \in \ran error \lor  y \in \ran error \THEN firstError~\{x, y\} \\
@@ -1630,10 +1649,11 @@ Definition of the various functions that are performed on the result type. \\
 \t1 \IF x \in \ran gerror \lor y \in \ran gerror \THEN gfirstError~\{x, y\} \\
 \t1 \ELSE group\_value((group\_value \inv x) \setminus (group\_value \inv y))
 \end{gendef}
-
+\pagebreak
+\appendix
    
 
-\section{Appendix 1 -- Optional elements}
+\section{Optional elements}
 Representing optional elements of type $T$.  Representing it as a sequence allows us to
 determine absence by $\#T = 0$ and the value by $head~T$. 
 
@@ -1641,7 +1661,7 @@ determine absence by $\#T = 0$ and the value by $head~T$.
   \optional[T] == \{ s : \seq T \mid \# s \leq 1 \} 
 \end{zed}
 
-\section{Appendix 2 -- Generic cardinality evaluation}
+\section{Generic cardinality evaluation}
 \paragraph{evalCardinality}
 Evaluate the cardinality of an arbitrary set of type $T$.  If the number of elements in the set of $T$ is greater than $min$ and:
 \begin{itemize}[noitemsep]
@@ -1662,7 +1682,7 @@ evalCardinality~min~max~t = \\
 \t2 \emptyset
 \end{gendef}
 
-\section{Appendix 3 - Generic sequence function}
+\section{Generic sequence function}
 A generic function that takes:
 \begin{itemize}[noitemsep]
 \item A substrate
