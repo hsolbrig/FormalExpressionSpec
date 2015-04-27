@@ -93,19 +93,19 @@ The root of the expression constraint language is concept references:
 \begin{itemize}
 \item \spec{conceptReference} -- \desc{A conceptReference is represented by a ConceptId optionally followed by a term enclosed by a pair of "\textbar" characters. Whitespace before or after the ConceptId is ignored as is any whitespace between the initial "\textbar" characters and the first non-whitespace character in the term or between the last non-whitespace character and before second "\textbar" character.} \spec{term} is ignored for the purposes of interpretation.  
 \item \spec{conceptId} -- \desc{The ConceptId must be a valid SNOMED CT identifier for a concept. The initial digit may not be zero. The smallest number of digits is six, and the maximum is 18.}
-\item \spec{attributeName} -- \desc{The attribute name is the name of an attribute (or relationship type) to which a value is applied to refine the meaning of a containing expression. The attribute name is represented in the same way as other concept references.}
+\item \spec{attributeName} -- \desc{The attribute name is the name of an attribute (or relationship type) to which a value is applied to refine the meaning of a containing expression. The attribute name is represented in the same way as other concept references. If the attribute name is not known then a wild card may be used to represent any attribute concept in the given substrate.}
 \end{itemize}
 \begin{framed}
 \noindent
 \bnf{conceptReference = conceptId [ws "\textbar" ws term ws "\textbar"]} \\
 \bnf{conceptId = sctId} \\
-\bnf{attributeName = conceptReference}
+\bnf{attributeName = conceptReference / wildCard}
 \end{framed}
 
 \begin{zed}
 conceptReference == conceptId \cross \optional[term] \\
 conceptId == sctId \\
-attributeName == conceptReference
+attributeName ::= ancr \ldata conceptReference \rdata | anwc
 \end{zed}
 
 \subsection{Substrate}
@@ -232,7 +232,8 @@ Implementations may choose to implement ``strict'' substrates, where additional 
 A \textbf{strict\_substrate} is a substrate where:
 \begin{itemize}[noitemsep,nolistsep]
 \item If a conceptReference is not in the substrate concepts it returns an error, otherwise the set of equivalent concepts
-\item If an attribute name is not in the substrate concepts or is not a descendant of the attribute\_concept it returns an error, otherwise the set of equivalent attributes
+\item If an attribute name is a conceptReference and it is not in the substrate concepts or is not a descendant of the attribute\_concept it returns an error, otherwise the set of equivalent attributes.  If an
+attribute name is a wild card, it returns all descendants of attribute\_concept
 \item If a concept reference that is a target of a memberOf function is not in the substrate concepts or is not a descendant of the refset\_concept it returns an error, otherwise the set of equivalent refset identifiers
 \end{itemize}
 
@@ -244,11 +245,15 @@ A \textbf{strict\_substrate} is a substrate where:
 \t1 \ELSE ok~(equivalent\_concepts~(first~cr))
 \also
    \forall an : attributeName @ i\_attributeName~an = \\
-   (\LET rslt == i\_conceptReference~an @ \\
-\t1 \IF rslt \in \ran error \THEN rslt \\
-\t1 \ELSE \IF result\_sctids~rslt \subseteq (descendants~attribute\_concept)  \\
-\t2 \THEN rslt \\
-\t1 \ELSE error~unknownAttributeId)
+\IF ancr \inv an \in conceptReference \THEN \\
+\t1   (\LET rslt == i\_conceptReference~(ancr \inv an) @ \\
+\t2 \IF rslt \in \ran error \THEN rslt \\
+\t2 \ELSE \IF result\_sctids~rslt \subseteq (descendants~attribute\_concept)  \\
+\t3 \THEN rslt \\
+\t2 \ELSE \\
+\t3 error~unknownAttributeId) \\
+\ELSE \\
+\t1 ok~(descendants~attribute\_concept)
 \also
   \forall rsid : sctId @ i\_refsetId~rsid = \\
 \t1  \IF rsid \in descendants~refset\_concept  \\
@@ -258,7 +263,24 @@ A \textbf{strict\_substrate} is a substrate where:
      
  
  \subsubsection{Permissive Substrate}
-(fill in options)
+ A \textbf{permissive\_substrate} never raises an error condition.  concept references that are not in the substrate are ``discarded'' (i.e. map to the empty set).  Any valid conceptReference may be used in the position of an attribute or a refset id.  The attributeName wild card returns the set of all possible concepts.
+\begin{schema}{permissive\_substrate}
+    Substrate
+ \where
+    \forall cr : conceptReference @ i\_conceptReference~cr = \\
+\t1 \IF first~cr \notin concepts \THEN ok~ \emptyset \\
+\t1 \ELSE ok~(equivalent\_concepts~(first~cr))
+\also
+   \forall an : attributeName @ i\_attributeName~an = \\
+\IF ancr \inv an \in conceptReference \THEN \\
+\t1 i\_conceptReference~(ancr \inv an) \\
+\ELSE \\
+\t1 ok~concepts \\
+\also
+  \forall rsid : sctId @ i\_refsetId~rsid = \\
+\t1 \IF rsid \notin concepts \THEN ok~ \emptyset \\
+\t1 \ELSE ok~(equivalent\_concepts~(rsid))
+\end{schema}
 
 % ================================= Chapter 3 Interpretations ========================
 \pagebreak
@@ -1491,17 +1513,19 @@ stringComparison~(t\_concrete \inv q.t)~(first~scv) = (second~scv) \}, source\_d
 
 \subsection{focusConcept}
 \begin{framed}
-\desc{A focus concept is a concept reference, which is optionally preceded by a member of function. A memberOf function should be used only when the conceptReference refers to a reference set concept.}
-\end{framed}
-\begin{framed}
-\bnf{focusConcept = [memberOf] conceptReference}
+\desc{A focus concept is a concept reference or wild card, which is optionally preceded by a member of function. A memberOf function should be used only when the conceptReference refers to a reference set concept, or a wild card is used.}
+\desc{A wild card represents any concept in the given substrate. In the brief syntax, a wildcard is represented using the ?*? symbol. In the full syntax, the text ?ANY? (case insensitive) is also allowed.}
 \end{framed}
 
+\begin{framed}
+\bnf{focusConcept = [ memberOf ws] (conceptReference / wildCard)} 
+\end{framed}
 
 \begin{zed}
+crOrWildCard ::= cr \ldata conceptReference \rdata | wc  \\
 focusConcept ::= \\
-\t1 focusConcept\_m \ldata conceptReference \rdata | \\
-\t1 focusConcept\_c \ldata conceptReference \rdata
+\t1 focusConcept\_m \ldata crOrWildCard \rdata | \\
+\t1 focusConcept\_c \ldata crOrWildCard \rdata
 \end{zed}
 
 
@@ -1509,14 +1533,22 @@ focusConcept ::= \\
 each element in the interpretation of \spec{conceptReference}.  If \spec{memberOf} isn't specified, the interpretation is the substrate interpretations of \spec{conceptReference} itself
 
 \begin{gendef}
-   i\_focusConcept : Substrate \fun focusConcept \fun Sctids\_or\_Error
+   i\_focusConcept : Substrate \fun focusConcept \fun Sctids\_or\_Error \\
+   i\_crOrWildCard : Substrate \fun crOrWildCard \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate; fc : focusConcept @ \\
 i\_focusConcept~ss~fc = \\
-\t1 \IF focusConcept\_c \inv fc \in conceptReference \THEN \\
-\t2 ss.i\_conceptReference~(focusConcept\_c~\inv fc) \\
+\t1 \IF focusConcept\_c \inv fc \in crOrWildCard \THEN \\
+\t2 i\_crOrWildCard~ss~(focusConcept\_c~\inv fc) \\
 \t1 \ELSE \\
-\t2  i\_memberOf~ss~(ss.i\_conceptReference~(focusConcept\_m~\inv fc)) 
+\t2  i\_memberOf~ss~(i\_crOrWildCard~ss~(focusConcept\_m~\inv fc)) 
+\also
+  \forall ss : Substrate; crorwc : crOrWildCard @ \\
+i\_crOrWildCard~ss~crorwc = \\
+\t1 \IF cr \inv crorwc \in conceptReference \THEN \\
+\t2 ss.i\_conceptReference~(cr \inv crorwc) \\
+\t1 \ELSE \\
+\t2 ok~ss.concepts
 \end{gendef}
 
 \subsubsection{memberOf}
