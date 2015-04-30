@@ -1514,7 +1514,7 @@ stringComparison~(t\_concrete \inv q.t)~(first~scv) = (second~scv) \}, source\_d
 \subsection{focusConcept}
 \begin{framed}
 \desc{A focus concept is a concept reference or wild card, which is optionally preceded by a member of function. A memberOf function should be used only when the conceptReference refers to a reference set concept, or a wild card is used.}
-\desc{A wild card represents any concept in the given substrate. In the brief syntax, a wildcard is represented using the ?*? symbol. In the full syntax, the text ?ANY? (case insensitive) is also allowed.}
+\desc{A wild card represents any concept in the given substrate. In the brief syntax, a wildcard is represented using the ``*'' symbol. In the full syntax, the text ``ANY'' (case insensitive) is also allowed.}
 \end{framed}
 
 \begin{framed}
@@ -1530,40 +1530,46 @@ focusConcept ::= \\
 
 
 \textbf{Interpretation:}  If  \spec{memberOf} is present the interpretation of  \spec{focusConcept} is union the interpretation of \spec{memberOf} applied to
-each element in the interpretation of \spec{conceptReference}.  If \spec{memberOf} isn't specified, the interpretation is the substrate interpretations of \spec{conceptReference} itself
+each element in the interpretation of \spec{conceptReference}.  Note that the interpretation of \spec{wildCard} is different in the context of \spec{memberOf} than
+it is outside.  \spec{memberOf wildCard} is interpreted as the interpretation of the domain of the $refset$ function (i.e. all of the refsets in the substrate), where, without,
+it is interpreted as \emph{all} of the concepts in the system.
+
+  If \spec{memberOf} isn't specified, the interpretation is the substrate interpretations of \spec{conceptReference} itself
 
 \begin{gendef}
-   i\_focusConcept : Substrate \fun focusConcept \fun Sctids\_or\_Error \\
-   i\_crOrWildCard : Substrate \fun crOrWildCard \fun Sctids\_or\_Error
+   i\_focusConcept : Substrate \fun focusConcept \fun Sctids\_or\_Error 
 \where
    \forall ss : Substrate; fc : focusConcept @ \\
 i\_focusConcept~ss~fc = \\
-\t1 \IF focusConcept\_c \inv fc \in crOrWildCard \THEN \\
-\t2 i\_crOrWildCard~ss~(focusConcept\_c~\inv fc) \\
+\IF focusConcept\_c \inv fc \in crOrWildCard \THEN \\
+\t1 \IF cr \inv (focusConcept\_c \inv fc) \in conceptReference \THEN \\
+\t2 ss.i\_conceptReference~(cr \inv (focusConcept\_c \inv fc)) \\
 \t1 \ELSE \\
-\t2  i\_memberOf~ss~(i\_crOrWildCard~ss~(focusConcept\_m~\inv fc)) 
-\also
-  \forall ss : Substrate; crorwc : crOrWildCard @ \\
-i\_crOrWildCard~ss~crorwc = \\
-\t1 \IF cr \inv crorwc \in conceptReference \THEN \\
-\t2 ss.i\_conceptReference~(cr \inv crorwc) \\
-\t1 \ELSE \\
-\t2 ok~ss.concepts
+\t2 ok~ss.concepts \\
+ \ELSE \\
+\t1  i\_memberOf~ss~(focusConcept\_m~\inv fc)
 \end{gendef}
 
 \subsubsection{memberOf}
-\spec{memberOf} returns the union of the application of the substrate $refset$ function to each of the supplied reference set identifiers.  An error is
+\spec{memberOf} returns the union of the application of the substrate $refset$ function to a wild card or the  the supplied reference set identifiers.  An error is
 returned if (a) $refsetids$ already has an error or (b) the substrate interpretation of a given refsetId returns an error.
 
 \begin{gendef}
-   i\_memberOf : Substrate \fun Sctids\_or\_Error \fun Sctids\_or\_Error 
+   i\_memberOf : Substrate \fun crOrWildCard \fun Sctids\_or\_Error 
 \where
-   \forall ss : Substrate; refsetids : Sctids\_or\_Error @ \\
-i\_memberOf~ss~refsetids= \\
-\t1 \IF refsetids \in \ran error \THEN \\
-\t2  refsetids \\
+   \forall ss : Substrate; crorwc : crOrWildCard @ \\
+   \t1 i\_memberOf~ss~crorwc= \\
+(\LET refsetids == \\
+\t1 \IF cr \inv crorwc \in conceptReference \\
+\t1 \THEN \\
+\t2 ss.i\_conceptReference(cr \inv crorwc) \\
 \t1 \ELSE \\
-\t2 bigunion \{sctid: result\_sctids~refsetids @ ss.i\_refsetId~sctid \} 
+\t2 ok~(ss.descendants~refset\_concept) @ \\
+\t1 \IF refsetids \in \ran error \\
+\t1 \THEN \\
+\t2 refsetids \\
+\t1 \ELSE \\
+\t2 bigunion \{sctid: result\_sctids~refsetids @ ss.i\_refsetId~sctid \} )
 \end{gendef}
 
 \pagebreak
