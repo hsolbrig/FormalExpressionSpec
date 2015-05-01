@@ -1247,7 +1247,8 @@ Cardinality is interpreted differently within the context of a a group.  In part
 \item A sctid can pass in the context of more than one group.  Intersections, unions, etc. apply to sctid's in the \emph{same} group.
 \end{itemize}
 
-$i\_att\_group\_cardinality$ takes an optional cardinality and a set of quads and returns a list sctids and the groups in which they passed the cardinality constraint.
+$i\_att\_group\_cardinality$ takes an optional cardinality and a set of quads and returns a list sctids and the groups in which they passed the cardinality constraint.  The cardinality
+of each zero group is evaluated separately, but only a single entry is created in the passing list if \emph{any} of the singleton groups passes.
 
 \begin{gendef}
    i\_att\_group\_cardinality : \\
