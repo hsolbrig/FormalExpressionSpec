@@ -1059,7 +1059,7 @@ attributeGroup == \optional[cardinality] \cross attributeSet
 \end{zed}
 
 The difference between the interpretation of an \spec{attributeGroup} and an \spec{attributeSet} is that, within an \spec{attributeGroup} all of the 
-qualifying \spec{sctIds} must belong to the same \textit{non-zero} group.  Outside, a \spec{sctId} would qualify an conjunction if one group passed the first match
+qualifying \spec{sctIds} must belong to the same group \footnote{The zero group is a special case, where each quad in a zero group is viewed as its own unique group}.  Outside, a \spec{sctId} would qualify an conjunction if one group passed the first match
 and a different one the second.  \emph{Within} a group, however, conjunctions and disjunctions only count if they both apply in the same group.  This means
 that we have to re-interpret the meaning of \spec{attributeSet} on down in terms of $IDGroup$s rather than $Quads$
 
@@ -1243,8 +1243,8 @@ The union and intersection operators operate on the $sctId$ / $groupId$ tuples (
 
 Cardinality is interpreted differently within the context of a a group.  In particular:
 \begin{itemize}[noitemsep]
-\item Only non-zero groups are evaluated. 
-\item A sctid can pass in the context of more than one group
+\item Zero groups are treated as "singletons" -- every quad with a zero group is treated as a group unto itself.
+\item A sctid can pass in the context of more than one group.  Intersections, unions, etc. apply to sctid's in the \emph{same} group.
 \end{itemize}
 
 $i\_att\_group\_cardinality$ takes an optional cardinality and a set of quads and returns a list sctids and the groups in which they passed the cardinality constraint.
@@ -1277,14 +1277,21 @@ $i\_required\_att\_group\_cardinality$ returns the set of subject or target scti
 i\_required\_att\_group\_cardinality~min~max~qore = \\
 \IF quad\_direction~qore = source\_direction \THEN \\
 \t1 \{subjgroup :  \{q : quads\_for~qore | q.g \neq zero\_group @ (q.s, q.g) \} | \\
-\t1 evalCardinality[Quad]~min~max~ \{q : quads\_for~qore | \\
-\t2 q.s = first~subjgroup \land q.g = second~subjgroup\} \neq \emptyset \}
+\t2 evalCardinality[Quad]~min~max~ \{q : quads\_for~qore | \\
+\t3 q.s = first~subjgroup \land q.g = second~subjgroup\} \neq \emptyset \}  \\
+\t4 \cup \\
+\t1 \{q : quads\_for~qore | q.g = zero\_group \land  \\
+\t2 evalCardinality[Quad]~min~max~\{q\} \neq \emptyset @ (q.s, q.g) \} \\
 \also
 \ELSE \\
 \t1 \{targgroup :  \{q : quads\_for~qore | \\
-\t2 q.g \neq zero\_group \land q.t \in \ran t\_sctid @ (t\_sctid \inv q.t , q.g) \} | \\
-\t1 evalCardinality[Quad]~min~max~ \{q : quads\_for~qore | \\
-\t2 t\_sctid \inv q.t = first~targgroup \land q.g = second~targgroup\} \neq \emptyset \}
+\t2 q.g \neq zero\_group \land q.t \in \ran t\_sctid @ (t\_sctid \inv q.t, q.g) \} | \\
+\t2 evalCardinality[Quad]~min~max~ \{q : quads\_for~qore | \\
+\t3 t\_sctid \inv q.t = first~targgroup \land \\
+\t3 q.g = second~targgroup\} \neq \emptyset \} \\
+\t4 \cup \\
+\t1 \{q : quads\_for~qore | q.g = zero\_group \land  \\
+\t2 evalCardinality[Quad]~min~max~\{q\} \neq \emptyset @ (t\_sctid \inv q.t, q.g) \} \\
 \end{gendef}
 
 $i\_optional\_att\_group\_cardinality$ returns the set of subject or target sctids along with all of the corresponding groups that \emph{fail} the cardinality test.  The failing list
