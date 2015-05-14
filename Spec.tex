@@ -28,17 +28,17 @@ are defined as lexical components in the specification.
 \noindent
 \bnf{sctId = digitNonZero 5*17( digit )} \\
 \bnf{term = 1*nonwsNonPipe *( 1*SP 1*nonwsNonPipe )} \\
-\bnf{numericValue =  QM stringValue QM / "\#" numericValue ( decimalValue / integerValue)} \\
+\bnf{numericValue =  QM stringValue QM / ``\#'' numericValue ( decimalValue / integerValue)} \\
 \bnf{stringValue =  QM 1*(anyNonEscapedChar / escapedChar) QM} \\
-\bnf{integerValue = ( ["-"/"+"] digitNonZero *digit ) / zero} \\
-\bnf{decimalValue = integerValue "." 1*digit} \\
+\bnf{integerValue = ( [``-''/``+''] digitNonZero *digit ) / zero} \\
+\bnf{decimalValue = integerValue ``.'' 1*digit} \\
 \bnf{nonNegativeIntegerValue = (digitNonZero *digit ) / zero}
 \end{framed}
 \begin{itemize}[noitemsep]
 \item \spec{sctId} -- \desc{A SNOMED CT id is used to represent an attribute id or a concept id.  The initial digit may not be zero. The smallest number of digits is six, and the maximum is 18.}
-\item \spec{term} --  \desc{The term must be the term from a SNOMED CT description that is associated with the concept identified by the preceding concept identifier. For example, the term could be the preferred description, or the preferred description associated with a particular translation. The term may include valid UTF-8 characters except for the pipe "\textbar" character. The term begins with the first non-whitespace character following the starting "\textbar" character and ends with the last non-whitespace character preceding the next "\textbar" character.}
-\item \spec{stringValue} -- \desc{A string value includes one or more of any printable ASCII characters enclosed in quotation marks. Quotes and backslash characters within the string must be preceded by the escape character ("\textbackslash").}
-\item \spec{$\num$} -- built-in $Z$ equivalent of \spec{integerValue}. \desc{An integer may be positive, negative or zero. Positive integers optionally start with a plus sign ("+"), followed by a non-zero digit followed by zero to many additional digits. Negative integers begin with a minus sign ("-") followed by a non-zero digit and zero to many additional digits.}
+\item \spec{term} --  \desc{The term must be the term from a SNOMED CT description that is associated with the concept identified by the preceding concept identifier. For example, the term could be the preferred description, or the preferred description associated with a particular translation. The term may include valid UTF-8 characters except for the pipe ``\textbar'' character. The term begins with the first non-whitespace character following the starting ``\textbar'' character and ends with the last non-whitespace character preceding the next ``\textbar'' character.}
+\item \spec{stringValue} -- \desc{A string value includes one or more of any printable ASCII characters enclosed in quotation marks. Quotes and backslash characters within the string must be preceded by the escape character (``\textbackslash'').}
+\item \spec{$\num$} -- built-in $Z$ equivalent of \spec{integerValue}. \desc{An integer may be positive, negative or zero. Positive integers optionally start with a plus sign (``+''), followed by a non-zero digit followed by zero to many additional digits. Negative integers begin with a minus sign (``-'') followed by a non-zero digit and zero to many additional digits.}
 \item \spec{decimalValue} --  \desc{A decimal value starts with an integer. This is followed by a decimal point and one to many digits.}
 \item \spec{$\nat$} -- built-in $Z$ equivalent of \spec{nonNegativeIntegerValue}
 \item \spec{groupId} -- a role group identifier.  (Not explicated in the specification, but needed)
@@ -91,13 +91,13 @@ only appear in the zero group, and the target of an $is\_a$ attribute must be a 
 \subsubsection{conceptReference}
 The root of the expression constraint language is concept references:
 \begin{itemize}
-\item \spec{conceptReference} -- \desc{A conceptReference is represented by a ConceptId optionally followed by a term enclosed by a pair of "\textbar" characters. Whitespace before or after the ConceptId is ignored as is any whitespace between the initial "\textbar" characters and the first non-whitespace character in the term or between the last non-whitespace character and before second "\textbar" character.} \spec{term} is ignored for the purposes of interpretation.  
+\item \spec{conceptReference} -- \desc{A conceptReference is represented by a ConceptId optionally followed by a term enclosed by a pair of ``\textbar'' characters. Whitespace before or after the ConceptId is ignored as is any whitespace between the initial ``\textbar'' characters and the first non-whitespace character in the term or between the last non-whitespace character and before second ``\textbar'' character.} \spec{term} is ignored for the purposes of interpretation.  
 \item \spec{conceptId} -- \desc{The ConceptId must be a valid SNOMED CT identifier for a concept. The initial digit may not be zero. The smallest number of digits is six, and the maximum is 18.}
 \item \spec{attributeName} -- \desc{The attribute name is the name of an attribute (or relationship type) to which a value is applied to refine the meaning of a containing expression. The attribute name is represented in the same way as other concept references. If the attribute name is not known then a wild card may be used to represent any attribute concept in the given substrate.}
 \end{itemize}
 \begin{framed}
 \noindent
-\bnf{conceptReference = conceptId [ws "\textbar" ws term ws "\textbar"]} \\
+\bnf{conceptReference = conceptId [ws ``\textbar'' ws term ws ``\textbar'']} \\
 \bnf{conceptId = sctId} \\
 \bnf{attributeName = conceptReference / wildCard}
 \end{framed}
@@ -373,7 +373,7 @@ unrefinedExpressionConstraint ::= \\
 \end{framed}
 \begin{framed}
 \noindent
-\bnf{refinedExpressionConstraint = unrefinedExpressionConstraint ws ":" ws refinement / "(" ws refinedExpressionConstraint ws ")"}
+\bnf{refinedExpressionConstraint = unrefinedExpressionConstraint ws ``:'' ws refinement / ``('' ws refinedExpressionConstraint ws ``)''}
 \end{framed}
 
 The interpretation of \spec{refinedExpressionConstraint} is the \underline{intersection} of the interpretation of
@@ -441,7 +441,7 @@ i\_simpleExpressionConstraint~ss~sec =  \\
 \bnf{	compoundExpressionConstraint = conjunctionExpressionConstraint / 
                                disjunctionExpressionConstraint / 
                                exclusionExpressionConstraint / 			
-                               "(" ws compoundExpressionConstraint ws ")"}
+                               ``('' ws compoundExpressionConstraint ws ``)''}
 \end{framed}
 
 The interpretation of a $compoundExpressionConstraint$ is the interpretation the conjunction, disjunction or exclusion of nested compound constraint.
@@ -479,7 +479,7 @@ compoundExpressionConstraint ::= \\
 
 \subsubsection{conjunctionExpressionConstraint}
 \begin{framed}
-\desc{A conjunction expression constraint combines two or more expression constraints with a conjunction ("and") operator. More than one conjunction may be used without brackets. However any compound expression constraint (using a different binary operator) that appears within a conjunction expression constraint must be enclosed by brackets.}
+\desc{A conjunction expression constraint combines two or more expression constraints with a conjunction (``and'') operator. More than one conjunction may be used without brackets. However any compound expression constraint (using a different binary operator) that appears within a conjunction expression constraint must be enclosed by brackets.}
 \end{framed}
 
 \begin{framed}
@@ -508,7 +508,7 @@ i\_conjunctionExpressionConstraint~ss~cecr = \\
 
 \subsubsection{disjunctionExpressionConstraint}
 \begin{framed}
-\desc{A disjunction expression constraint combines two or more expression constraints with a disjunction ("or") operator. More than one disjunction may be used without brackets. However any compound expression constraint (using a different binary operator) that appears within a disjunction expression constraint must be enclosed by brackets.}
+\desc{A disjunction expression constraint combines two or more expression constraints with a disjunction (``or'') operator. More than one disjunction may be used without brackets. However any compound expression constraint (using a different binary operator) that appears within a disjunction expression constraint must be enclosed by brackets.}
 \end{framed}
 
 \begin{framed}
@@ -538,7 +538,7 @@ i\_disjunctionExpressionConstraint~ss~decr = \\
 
 \subsubsection{exclusionExpressionConstraint}
 \begin{framed}
-\desc{An exclusion expression constraint combines two expression constrains with an exclusion ("minus") operator. A single exclusion operator may be used without brackets. However when the operands of the exclusion expression constraint are compound, these compound expression constraints must be enclosed by brackets.}
+\desc{An exclusion expression constraint combines two expression constrains with an exclusion (``minus'') operator. A single exclusion operator may be used without brackets. However when the operands of the exclusion expression constraint are compound, these compound expression constraints must be enclosed by brackets.}
 \end{framed}
 
 \begin{framed}
@@ -571,7 +571,7 @@ i\_exclusionExpressionConstraint~ss~ecr =  minus~~first\_sec~second\_sec)
 
 \begin{framed}
 \noindent
-\bnf{subExpressionConstraint = simpleExpressionConstraint / "(" ws (compoundExpressionConstraint / refinedExpressionConstraint)  ws ")"}
+\bnf{subExpressionConstraint = simpleExpressionConstraint / ``('' ws (compoundExpressionConstraint / refinedExpressionConstraint)  ws ``)''}
 \end{framed}
 
 The interpretation of \spec{subExpressionConstraint} is  the interpretation the \spec{simpleExpressionConstraint} \spec{compoundExpressionConstraint} or \spec{refinedExpressionConstraint}
@@ -701,7 +701,7 @@ The interpretation of a \spec{disjunctionRefinementSet} is the \underline{union}
 
 \begin{framed}
 \noindent
-\bnf{subRefinement = attributeSet / attributeGroup / "(" ws refinement ws ")"}
+\bnf{subRefinement = attributeSet / attributeGroup / ``('' ws refinement ws ``)''}
 \end{framed}
 
 The interpretation of a \spec{subRefinement} is the interpretation of the corresponding \spec{attributeSet}, \spec{attributeGroup} or \spec{refinement}.
@@ -838,7 +838,7 @@ disjunctionAttributeSet ==  \seq_1 subAttributeSet
 \end{framed}
 \begin{framed}
 \noindent
-\bnf{subAttributeSet = attribute / "(" ws attributeSet ws ")"}
+\bnf{subAttributeSet = attribute / ``('' ws attributeSet ws ``)''}
 \end{framed}
 
 The interpretation of a \spec{subAttributeSet} is either the interpretation of the \spec{attribute} or the interpretation of the \spec{attributeSet}.
@@ -872,7 +872,7 @@ subAttributeSet ::= \\
 			(expressionComparisonOperator ws expressionConstraintValue /
 			 numericComparisonOperator ws numericValue / 		
 			 stringComparisonOperator ws stringValue}
-\bnf{numericValue =  "\#" ( decimalValue / integerValue)}
+\bnf{numericValue =  ``\#'' ( decimalValue / integerValue)}
 \end{framed}
 
 Conceptually, the interpretation of \spec{attribute} consists of the following steps:
@@ -944,7 +944,7 @@ numericValue ::= nv\_decimal \ldata decimalValue \rdata |  nv\_integer \ldata \n
 \desc{The cardinality of an attribute represents a constraint on the minimum and maximum number of instances of the given attribute on each concept. The cardinality is enclosed in square brackets with the minimum cardinality appearing first, followed by two dots and then the maximum cardinality. The minimum cardinality must always be less than or equal to the maximum cardinality. A maximum cardinality of 'many' indicates that there is no limit on the number of times the attribute may appear on each concept.}
 \end{framed}
 \begin{framed}
-\bnf{cardinality = "[" nonNegativeIntegerValue to (nonNegativeIntegerValue / many) "]"}
+\bnf{cardinality = ``['' nonNegativeIntegerValue to (nonNegativeIntegerValue / many) ``]''}
 \end{framed}
 
 \begin{zed}
@@ -1016,7 +1016,7 @@ i\_optional\_cardinality~ss~max~qore = \\
 
 \begin{framed}
 \noindent
-\bnf{expressionConstraintValue = simpleExpressionConstraint / "(" ws (refinedExpressionConstraint / compoundExpressionConstraint) ws ")"}
+\bnf{expressionConstraintValue = simpleExpressionConstraint / ``('' ws (refinedExpressionConstraint / compoundExpressionConstraint) ws ``)''}
 \end{framed}
 
 The interpretation of \spec{expressionConstraintValue} is the interpretation of the corresponding \spec{simpleExpressionConstraint}, \spec{refinedExpressionConstraint} or
@@ -1051,7 +1051,7 @@ expressionConstraintValue ::= \\
 \end{framed}
 \begin{framed}
 \noindent
-\bnf{attributeGroup = [cardinality ws] "\{" ws attributeSet ws "\}"}
+\bnf{attributeGroup = [cardinality ws] ``\{'' ws attributeSet ws ``\}''}
 \end{framed}
 
 \begin{zed}
@@ -1243,12 +1243,11 @@ The union and intersection operators operate on the $sctId$ / $groupId$ tuples (
 
 Cardinality is interpreted differently within the context of a a group.  In particular:
 \begin{itemize}[noitemsep]
-\item Zero groups are treated as "singletons" -- every quad with a zero group is treated as a group unto itself.
+\item Zero groups are treated as ``singletons'' -- every quad with a zero group is treated as a group unto itself.
 \item A sctid can pass in the context of more than one group.  Intersections, unions, etc. apply to sctid's in the \emph{same} group.
 \end{itemize}
 
-$i\_att\_group\_cardinality$ takes an optional cardinality and a set of quads and returns a list sctids and the groups in which they passed the cardinality constraint.  The cardinality
-of each zero group is evaluated separately, but only a single entry is created in the passing list if \emph{any} of the singleton groups passes.
+$i\_att\_group\_cardinality$ takes an optional cardinality and a set of quads and returns a list sctids and the groups in which they passed the cardinality constraint.
 
 \begin{gendef}
    i\_att\_group\_cardinality : \\
@@ -1396,12 +1395,12 @@ i\_attributeOperator == i\_constraintOperator
 
 \subsection{expressionComparisonOperator}
 \begin{framed}
-\desc{Attributes whose value is a concept may be compared to an expression constraint using either equals ("=") or not equals ("!="). In the full syntax "<>" and "not =" (case insensitive) are also  valid ways to represent not equals.}
+\desc{Attributes whose value is a concept may be compared to an expression constraint using either equals (``='') or not equals (``!=''). In the full syntax ``<>'' and ``not ='' (case insensitive) are also  valid ways to represent not equals.}
 \end{framed}
 
 \begin{framed}
 \noindent
-\bnf{expressionComparisonOperator = "=" / "!="}
+\bnf{expressionComparisonOperator = ``='' / ``!=''}
 \end{framed}
 
 The interpretation of \spec{expressionComparisonOperator} is the set of all quads in the substrate having a target (or subject if the direction is reverse) that are (or are not) in
@@ -1439,12 +1438,12 @@ expressionComparisonOperator ::= eco\_eq | eco\_neq
  
  \subsection{numericComparisonOperator}
 \begin{framed}
-\desc{Attributes whose value is numeric (i.e. integer or decimal) may be compared to a specific concrete value using a variety of comparison operators, including equals ("="), less than ("\textless"), less than or equals ("\textless="), greater than ("\textgreater"), greater than or equals ("\textgreater=") and not equals ("!="). In the full syntax "\textless\textgreater" and "not =" (case insensitive) are also valid ways to represent not equals.}
+\desc{Attributes whose value is numeric (i.e. integer or decimal) may be compared to a specific concrete value using a variety of comparison operators, including equals (``=''), less than (``\textless''), less than or equals (``\textless=''), greater than (``\textgreater''), greater than or equals (``\textgreater='') and not equals (``!=''). In the full syntax ``\textless\textgreater'' and ``not ='' (case insensitive) are also valid ways to represent not equals.}
 \end{framed}
 
 \begin{framed}
 \noindent
-\bnf{numericComparisonOperator = "=" / "!=" / "\textless=" / "\textless" / "\textgreater=" / "\textgreater"}
+\bnf{numericComparisonOperator = ``='' / ``!='' / ``\textless='' / ``\textless'' / ``\textgreater='' / ``\textgreater''}
 \end{framed}
 
 The interpretation of \spec{numericComparisonOperator} is the set of all quads in the substrate having a  $concreteValue$ target of type $cv\_integer$ or $cv\_decimal$ that (or do not meet) the supplied 
@@ -1472,7 +1471,7 @@ numericComparison~(t\_concrete \inv q.t)~(first~ncv) = (second~ncv) \}, source\_
  
  Numeric comparison function. Compares a $concreteValue$ with a $numericValue$.
  \paragraph{}
- \textbf{TODO:} Need to specify the rules for comparing integers and decimal numbers as well as decimal/decimal.  As an example, does "5.00" = "5.0"
+ \textbf{TODO:} Need to specify the rules for comparing integers and decimal numbers as well as decimal/decimal.  As an example, does ``5.00'' = ``5.0''
  \begin{gendef}
     numericComparison: \\
 \t1 concreteValue \fun numericComparisonOperator \pfun numericValue
@@ -1480,12 +1479,12 @@ numericComparison~(t\_concrete \inv q.t)~(first~ncv) = (second~ncv) \}, source\_
  
 \subsection{stringComparisonOperator}
 \begin{framed}
-\desc{Attributes whose value is numeric may be compared to an expression constraint using either equals ("=") or not equals ("!="). In the full syntax "<>" and "not =" (case insensitive) are also  valid ways to represent not equals.}
+\desc{Attributes whose value is numeric may be compared to an expression constraint using either equals (``='') or not equals (``!=''). In the full syntax ``<>'' and ``not ='' (case insensitive) are also  valid ways to represent not equals.}
 \end{framed}
 
 \begin{framed}
 \noindent
-\bnf{stringComparisonOperator = "=" / "!="}
+\bnf{stringComparisonOperator = ``='' / ``!=''}
 \end{framed}
 
 
