@@ -325,7 +325,7 @@ expressionConstraint ::= \\
 \end{zed}
 
 
-\begin{gendef}
+\begin{axdef}
    i\_expressionConstraint : \\
 \t2 Substrate \fun expressionConstraint \fun Sctids\_or\_Error
 \where
@@ -335,7 +335,7 @@ expressionConstraint ::= \\
 \t1 i\_refinedExpressionConstraint~ss~(expcons\_refined \inv ec) \\
    \ELSE \\
 \t1 i\_unrefinedExpressionConstraint~ss~(expcons\_unrefined \inv ec) 
-\end{gendef}
+\end{axdef}
 
 \subsubsection{unrefinedExpressionConstraint}
 \begin{framed}
@@ -354,7 +354,7 @@ unrefinedExpressionConstraint ::= \\
 \t2 unrefined\_compound \ldata compoundExpressionConstraint \rdata | \\
 \t2 unrefined\_simple \ldata simpleExpressionConstraint \rdata
 \end{zed}
-\begin{gendef}
+\begin{axdef}
    i\_unrefinedExpressionConstraint : \\
 \t2 Substrate \fun unrefinedExpressionConstraint \fun Sctids\_or\_Error
 \where
@@ -365,7 +365,7 @@ unrefinedExpressionConstraint ::= \\
  \t1 i\_compoundExpressionConstraint~ss~(unrefined\_compound \inv uec) \\
 \ELSE  \\
 \t1 i\_simpleExpressionConstraint~ss~(unrefined\_simple \inv uec) 
-\end{gendef}
+\end{axdef}
 
 \subsubsection{refinedExpressionConstraint}
 \begin{framed}
@@ -388,7 +388,7 @@ refinedExpressionConstraint == \\
 [refinedExpressionConstraint']
 \end{zed}
 
-\begin{gendef}
+\begin{axdef}
    i\_refinedExpressionConstraint : \\
 \t1 Substrate \fun refinedExpressionConstraint \fun Sctids\_or\_Error
 \where
@@ -396,13 +396,13 @@ refinedExpressionConstraint == \\
   (\LET unref\_interp == (i\_unrefinedExpressionConstraint~ss~(first~rec)) @ \\
 \t1   i\_refinedExpressionConstraint~ss~rec = \\
 \t2 intersect~unref\_interp (i\_refinement~ss~(second~rec)))
-\end{gendef}
+\end{axdef}
 
 Duplicate signature for recursive definitions
-\begin{gendef}
+\begin{axdef}
    i\_refinedExpressionConstraint' : \\
 \t1 Substrate \fun refinedExpressionConstraint' \fun Sctids\_or\_Error
-\end{gendef}
+\end{axdef}
 
 \subsubsection{simpleExpressionConstraint}
 \begin{framed}
@@ -421,14 +421,14 @@ The interpretation of an error is the error.
 simpleExpressionConstraint == \optional[constraintOperator] \cross focusConcept \\
 \end{zed} 
 
-\begin{gendef}
+\begin{axdef}
    i\_simpleExpressionConstraint : \\
 \t2 Substrate \fun simpleExpressionConstraint \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate; sec : simpleExpressionConstraint @ \\
 i\_simpleExpressionConstraint~ss~sec =  \\
 \t2 i\_constraintOperator~ss~(first~sec)~(i\_focusConcept~ss~(second~sec))
-\end{gendef}
+\end{axdef}
 
 
 \subsubsection{compoundExpressionConstraint}
@@ -451,11 +451,11 @@ compoundExpressionConstraint ::= \\
 \t2 compound\_conj \ldata conjunctionExpressionConstraint \rdata | \\
 \t2 compound\_disj \ldata disjunctionExpressionConstraint \rdata | \\
 \t2 compound\_excl \ldata exclusionExpressionConstraint \rdata | \\
-\t2 compound\_nested \ldata compoundExpressionConstraint' \rdata \\
+\t2 compound\_nested \ldata compoundExpressionConstraint \rdata \\
 [compoundExpressionConstraint']
 \end{zed}
 
-\begin{gendef}
+\begin{axdef}
    i\_compoundExpressionConstraint : \\
 \t2 Substrate \fun compoundExpressionConstraint \fun Sctids\_or\_Error \\
 \where
@@ -468,12 +468,12 @@ compoundExpressionConstraint ::= \\
     \ELSE \IF cec \in \ran compound\_excl \THEN \\
 \t1 i\_exclusionExpressionConstraint~ss~(compound\_excl \inv cec) \\
    \ELSE \\
-\t1 i\_compoundExpressionConstraint'~ss~(compound\_nested \inv cec)
-\end{gendef}
-\begin{gendef}
+\t1 i\_compoundExpressionConstraint~ss~(compound\_nested \inv cec)
+\end{axdef}
+\begin{axdef}
    i\_compoundExpressionConstraint ': \\
 \t2 Substrate \fun compoundExpressionConstraint' \fun Sctids\_or\_Error
-\end{gendef}
+\end{axdef}
 
 
 
@@ -497,14 +497,14 @@ conjunctionExpressionConstraint == \\
 
 Apply the intersection operator to the interpretation of each  subExpressionConstraint
 
-\begin{gendef}
+\begin{axdef}
     i\_conjunctionExpressionConstraint : \\
 \t1 Substrate \fun conjunctionExpressionConstraint \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate;  cecr : conjunctionExpressionConstraint @ \\
 i\_conjunctionExpressionConstraint~ss~cecr = \\
 \t1 applyToSequence~ss~i\_subExpressionConstraint~intersect~cecr
-\end{gendef}
+\end{axdef}
 
 \subsubsection{disjunctionExpressionConstraint}
 \begin{framed}
@@ -524,14 +524,14 @@ disjunctionExpressionConstraint == \\
 \spec{disjunctionExpressionConstraint} is interpreted as the \underline{union} of the interpretations of the
 \spec{subExpressionConstraints}.
 
-\begin{gendef}
+\begin{axdef}
     i\_disjunctionExpressionConstraint : \\
 \t1 Substrate \fun disjunctionExpressionConstraint \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate;  decr : disjunctionExpressionConstraint @ \\
 i\_disjunctionExpressionConstraint~ss~decr = \\
 \t1 applyToSequence~ss~i\_subExpressionConstraint~union~decr
-\end{gendef}
+\end{axdef}
 
 
 
@@ -554,7 +554,7 @@ exclusionExpressionConstraint == \\
 \t2subExpressionConstraint \cross subExpressionConstraint
 \end{zed}
 
-\begin{gendef}
+\begin{axdef}
     i\_exclusionExpressionConstraint : \\
 \t2 Substrate \fun exclusionExpressionConstraint \fun Sctids\_or\_Error
 \where
@@ -562,7 +562,7 @@ exclusionExpressionConstraint == \\
    (\LET first\_sec == (i\_subExpressionConstraint~ss~(first~ecr)); \\
    \t1 second\_sec == (i\_subExpressionConstraint~ss~(second~ecr)) @ \\
 i\_exclusionExpressionConstraint~ss~ecr =  minus~~first\_sec~second\_sec)
-\end{gendef}
+\end{axdef}
 
 \subsubsection{subExpressionConstraint}
 \begin{framed}
@@ -583,7 +583,7 @@ subExpressionConstraint ::= \\
 \t1 subExpr\_refined \ldata refinedExpressionConstraint' \rdata
 \end{zed}
 
-\begin{gendef}
+\begin{axdef}
    i\_subExpressionConstraint : \\
 \t2 Substrate \fun subExpressionConstraint \fun Sctids\_or\_Error
 \where
@@ -595,7 +595,7 @@ i\_subExpressionConstraint~ss~sec = \\
     \t1 i\_compoundExpressionConstraint'~ss~(subExpr\_compound \inv sec) \\
     \ELSE \\
     \t1 i\_refinedExpressionConstraint'~ss~(subExpr\_refined \inv sec) 
-\end{gendef}
+\end{axdef}
 
 \subsection{refinement}
 \begin{framed}
@@ -625,7 +625,7 @@ refinementConjunctionOrDisjunction ::= \\
 
 
 
-\begin{gendef}
+\begin{axdef}
    i\_refinement : Substrate \fun refinement \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate; rfnment : refinement @ \\
@@ -637,10 +637,10 @@ refinementConjunctionOrDisjunction ::= \\
     \t1 intersect~lhs~(i\_conjunctionRefinementSet~ss~(refine\_conjset \inv (head~rhs))) \\
   \ELSE \\
   \t1 union~lhs~(i\_disjunctionRefinementSet~ss~(refine\_disjset \inv (head~rhs))))
-\end{gendef}
-\begin{gendef}
+\end{axdef}
+\begin{axdef}
    i\_refinement' : Substrate \fun refinement' \fun Sctids\_or\_Error
-\end{gendef}
+\end{axdef}
 
 \subsubsection{conjunctionRefinementSet}
 \begin{framed}
@@ -657,7 +657,7 @@ conjunctionRefinementSet == \seq_1 subRefinement
 
 The interpretation of a \spec{conjunctionRefinementSet} is the \underline{intersection} of the interpretation of the \spec{subrefinements}.
 
-\begin{gendef}
+\begin{axdef}
     i\_conjunctionRefinementSet : \\
 \t1 Substrate \fun conjunctionRefinementSet \fun Sctids\_or\_Error
 \where
@@ -667,7 +667,7 @@ The interpretation of a \spec{conjunctionRefinementSet} is the \underline{inters
    \t1 i\_subRefinement~ss~(head~conjset) \\
 \ELSE \\
 \t1 intersect~(i\_subRefinement~ss~(head~conjset))~(i\_conjunctionRefinementSet~ss~(tail~conjset))
-\end{gendef}
+\end{axdef}
 
 \subsubsection{disjunctionRefinementSet}
 \begin{framed}
@@ -681,7 +681,7 @@ disjunctionRefinementSet == \seq_1 subRefinement
 
 The interpretation of a \spec{disjunctionRefinementSet} is the \underline{union} of the interpretation of the \spec{subrefinements}.
 
-\begin{gendef}
+\begin{axdef}
     i\_disjunctionRefinementSet : \\
 \t1 Substrate \fun disjunctionRefinementSet \fun Sctids\_or\_Error
 \where
@@ -691,7 +691,7 @@ The interpretation of a \spec{disjunctionRefinementSet} is the \underline{union}
    \t1 i\_subRefinement~ss~(head~disjset) \\
 \ELSE \\
 \t1 union~(i\_subRefinement~ss~(head~disjset))~(i\_disjunctionRefinementSet~ss~(tail~disjset))
-\end{gendef}
+\end{axdef}
 
 
 \subsubsection{subRefinement}
@@ -714,7 +714,7 @@ subRefinement ::= \\
 \end{zed}
 
 
-\begin{gendef}
+\begin{axdef}
    i\_subRefinement : \\
 \t2 Substrate \fun subRefinement \fun Sctids\_or\_Error
 \where
@@ -726,7 +726,7 @@ subRefinement ::= \\
    \t1 i\_attributeGroup~ss~(subrefine\_attgroup \inv subrefine) \\
   \ELSE \\
   \t1 i\_refinement'~ss~(subrefine\_refinement \inv subrefine)
-\end{gendef}
+\end{axdef}
 
 \subsection{attributeSet}
 \begin{framed}
@@ -755,7 +755,7 @@ conjunctionOrDisjunctionAttributeSet ::= \\
 \t1 attset\_disjattset \ldata disjunctionAttributeSet \rdata
 \end{zed}
 
-\begin{gendef}
+\begin{axdef}
    i\_attributeSet : \\
 \t1 Substrate \fun attributeSet \fun Sctids\_or\_Error
 \where
@@ -768,12 +768,12 @@ conjunctionOrDisjunctionAttributeSet ::= \\
  \t1  intersect~lhs~(i\_conjunctionAttributeSet~ss~(attset\_conjattset \inv (head~rhs))) \\
   \ELSE \\
   \t1 union~lhs~(i\_disjunctionAttributeSet~ss~(attset\_conjattset \inv (head~rhs))))
-\end{gendef}
+\end{axdef}
 
-\begin{gendef}
+\begin{axdef}
    i\_attributeSet' : \\
 \t1 Substrate \fun attributeSet' \fun Sctids\_or\_Error
-\end{gendef}
+\end{axdef}
 
 \subsubsection{conjunctionAttributeSet}
 \begin{framed}
@@ -791,7 +791,7 @@ The interpretation of a \spec{conjunctionAttributeSet } is the \underline{inters
 conjunctionAttributeSet ==  \seq_1 subAttributeSet 
 \end{zed}
 
-\begin{gendef}
+\begin{axdef}
     i\_conjunctionAttributeSet : \\
 \t1 Substrate \fun conjunctionAttributeSet \fun Sctids\_or\_Error
 \where
@@ -801,7 +801,7 @@ conjunctionAttributeSet ==  \seq_1 subAttributeSet
    \t1 i\_subAttributeSet~ss~(head~conjset) \\
 \ELSE \\
 \t1 intersect~(i\_subAttributeSet~ss~(head~conjset))~(i\_conjunctionAttributeSet~ss~(tail~conjset))
-\end{gendef}
+\end{axdef}
 
 
 \subsubsection{disjunctionAttributeSet}
@@ -820,7 +820,7 @@ The interpretation of a \spec{disjunctionAttributeSet } is the \underline{union}
 disjunctionAttributeSet ==  \seq_1 subAttributeSet 
 \end{zed}
 
-\begin{gendef}
+\begin{axdef}
     i\_disjunctionAttributeSet : \\
 \t1 Substrate \fun disjunctionAttributeSet \fun Sctids\_or\_Error
 \where
@@ -830,7 +830,7 @@ disjunctionAttributeSet ==  \seq_1 subAttributeSet
    \t1 i\_subAttributeSet~ss~(head~disjset) \\
 \ELSE \\
 \t1 union~(i\_subAttributeSet~ss~(head~disjset))~(i\_disjunctionAttributeSet~ss~(tail~disjset))
-\end{gendef}
+\end{axdef}
 
 \subsubsection{subAttributeSet}
 \begin{framed}
@@ -849,7 +849,7 @@ subAttributeSet ::= \\
 \t1 subaset\_attset \ldata attributeSet' \rdata
 \end{zed}
 
-\begin{gendef}
+\begin{axdef}
    i\_subAttributeSet : \\
 \t2 Substrate \fun subAttributeSet \fun Sctids\_or\_Error
 \where
@@ -859,7 +859,7 @@ subAttributeSet ::= \\
    \t1 i\_attribute~ss~(subaset\_attribute \inv subaset) \\
   \ELSE \\
   \t1 i\_attributeSet'~ss~(subaset\_attset \inv subaset)
-\end{gendef}
+\end{axdef}
 
 \subsection{attribute}
 \begin{framed}
@@ -912,7 +912,7 @@ numericValue ::= nv\_decimal \ldata decimalValue \rdata |  nv\_integer \ldata \n
 [reverseFlag] 
 \end{zed}
 
-\begin{gendef}
+\begin{axdef}
    i\_attribute : \\
 \t1 Substrate  \fun attribute \fun Sctids\_or\_Error
 \where
@@ -937,7 +937,7 @@ numericValue ::= nv\_decimal \ldata decimalValue \rdata |  nv\_integer \ldata \n
 \t1 (\LET str\_interp == \\
 \t1 i\_stringComparisonOperator~ss~att.rf~(result\_sctids~att\_sctids)~(attrib\_str \inv att.opValue)  @ \\
 \t2 i\_att\_cardinality~ss~att.card~str\_interp))
-\end{gendef}
+\end{axdef}
 
 \subsubsection{attribute cardinality}
 \begin{framed}
@@ -949,8 +949,12 @@ numericValue ::= nv\_decimal \ldata decimalValue \rdata |  nv\_integer \ldata \n
 
 \begin{zed}
 unlimitedNat ::= num \ldata \nat \rdata | many \\
-cardinality == \nat \cross unlimitedNat \\
 \end{zed}
+\begin{schema}{cardinality}
+   min : \nat;
+   max : unlimitedNat \\
+\end{schema}
+   
    
 The interpretation of $optional[cardinality]$ in the context of an attribute is:
 \begin{enumerate}[noitemsep]
@@ -961,7 +965,7 @@ The interpretation of $optional[cardinality]$ in the context of an attribute is:
 \end{enumerate}
 
 
-\begin{gendef}
+\begin{axdef}
    i\_att\_cardinality : \\
 \t1 Substrate \fun \optional[cardinality] \fun Quads\_or\_Error \fun Sctids\_or\_Error
 \where
@@ -971,14 +975,15 @@ The interpretation of $optional[cardinality]$ in the context of an attribute is:
 \t1 error (qerror \inv qore) \\
 \ELSE \IF \# ocard = 0 \THEN \\
 \t1 ok~(i\_required\_cardinality~1~many~qore) \\
-\ELSE \IF first~(head~ocard) > 0 \THEN \\
-\t1 ok~(i\_required\_cardinality~(first~(head~ocard))~(second~(head~ocard))~qore) \\
-\ELSE \\
-\t1 ok~(i\_optional\_cardinality~ss~(second~(head~ocard))~qore)
-\end{gendef}
+\ELSE (\LET card == head~ocard @ \\
+\t1 \IF card.min > 0 \THEN \\
+\t2 ok~(i\_required\_cardinality~card.min~card.max~qore) \\
+\t1 \ELSE \\
+\t2 ok~(i\_optional\_cardinality~ss~card.max~qore))
+\end{axdef}
 
 $i\_required\_cardinality$ returns the set of subject or target sctids that meet the cardinality requirements
-\begin{gendef}
+\begin{axdef}
    i\_required\_cardinality : \\
 \t1 \nat \fun unlimitedNat \fun Quads\_or\_Error \ \fun \power sctId
 \where
@@ -990,12 +995,12 @@ i\_required\_cardinality~min~max~qore = \\
 \ELSE \\
 \t1 \{targ :  \{q : quads\_for~qore @ t\_sctid \inv q.t \} | \\
 \t1 evalCardinality[Quad]~min~max~\{q : quads\_for~qore | (t\_sctid \inv q.t) = targ\} \neq \emptyset \}
-\end{gendef}
+\end{axdef}
 
 $i\_optional\_cardinality$ returns all of the concepts in the substrate that don't \emph{fail} the cardinality test.  The failing concepts
 are equivalent to the set of all subject (or target) concepts in the set of quads minus the set of concepts that pass.
 
-\begin{gendef}
+\begin{axdef}
    i\_optional\_cardinality : \\
 \t1 Substrate \fun unlimitedNat \fun Quads\_or\_Error \ \fun \power sctId
 \where
@@ -1005,7 +1010,7 @@ i\_optional\_cardinality~ss~max~qore = \\
 \t1 ss.concepts \setminus (\{q : quads\_for~qore @ q.s \} \setminus (i\_required\_cardinality~0~max~qore)) \\
 \ELSE \\
 \t1 ss.concepts \setminus (\{q : quads\_for~qore @ t\_sctid \inv q.t \} \setminus (i\_required\_cardinality~0~max~qore)) 
-\end{gendef}
+\end{axdef}
 
 
 
@@ -1029,7 +1034,7 @@ expressionConstraintValue ::= \\
 \t1 expression\_compound \ldata compoundExpressionConstraint \rdata
 \end{zed}
 
-\begin{gendef}
+\begin{axdef}
    i\_expressionConstraintValue : \\
 \t1 Substrate \fun expressionConstraintValue \fun Sctids\_or\_Error
 \where
@@ -1041,7 +1046,7 @@ expressionConstraintValue ::= \\
 \t1 i\_refinedExpressionConstraint'~ss~(expression\_refined \inv ecv) \\
 \ELSE \\
 \t1 i\_compoundExpressionConstraint~ss~(expression\_compound \inv ecv)
-\end{gendef}
+\end{axdef}
 
 
 
@@ -1066,24 +1071,24 @@ that we have to re-interpret the meaning of \spec{attributeSet} on down in terms
 The interpretation of an attribute group is the application of a cardinality constraint to all of the $sctId$s that pass the grouped 
 attribute set.
 
-\begin{gendef}
+\begin{axdef}
    i\_attributeGroup : Substrate \fun attributeGroup \fun Sctids\_or\_Error
 \where
    \forall ss : Substrate; ag : attributeGroup @ \\
    i\_attributeGroup~ss~ag = \\
    \t1  i\_group\_cardinality~ss~(first~ag)~(i\_groupAttributeSet~ss~(second~ag))
-\end{gendef}
+\end{axdef}
 
 \subsubsection{attribute group cardinality}
 The interpretation of \spec{cardinality} within the context of an attribute group is as follows:
 \begin{itemize}[noitemsep]
 \item If an error has been encountered anywhere in the process, it should be propagated.
 \item If the cardinality is omitted, it is interpreted as [1 .. *]
-\item If the minimum cardinality is \textgreater then return the set of sctids with that appear at least $min$ and at most $max$ groups
+\item If the minimum cardinality is \textgreater  0 then return the set of sctids with that appear at least $min$ and at most $max$ groups
 \item If the minimum cardinality is 0 then return every sctid that doesn't fail the max cardinality
 \end{itemize}
 
-\begin{gendef}
+\begin{axdef}
    i\_group\_cardinality: \\
 \t1 Substrate \fun \optional[cardinality] \fun sctIdGroups\_or\_Error \fun Sctids\_or\_Error
 \where
@@ -1096,16 +1101,17 @@ The interpretation of \spec{cardinality} within the context of an attribute grou
 \t1 \IF \# ocard = 0 \THEN \\
 \t2 ok (i\_required\_group\_cardinality~1~many~gvals)
 \also
-\t1 \ELSE \IF first~(head~ocard) > 0 \THEN \\
-\t2  ok (i\_required\_group\_cardinality~(first~(head~ocard))~(second~(head~ocard))~gvals)
+\t1 \ELSE (\LET card == head~ocard @ \\
+\t2  \IF card.min > 0 \THEN \\
+\t3  ok (i\_required\_group\_cardinality~card.min~card.max~gvals)
 \also
-\t1 \ELSE \\
-\t2 ok (i\_optional\_group\_cardinality~ss~(second~(head~ocard))~gvals ))
-\end{gendef}
+\t2 \ELSE \\
+\t3 ok (i\_optional\_group\_cardinality~ss~card.max~gvals )))
+\end{axdef}
 
 
 $i\_required\_group\_cardinality$ returns the set  $sctids$ that pass in at least $min$ groups and at most $max$ groups
-\begin{gendef}
+\begin{axdef}
    i\_required\_group\_cardinality : \\
 \t1 \nat \fun unlimitedNat \fun \power sctIdGroup \fun \power sctId
 \where
@@ -1113,12 +1119,12 @@ $i\_required\_group\_cardinality$ returns the set  $sctids$ that pass in at leas
 i\_required\_group\_cardinality~min~max~groups = \\
 \{sctid :  \{ s : groups @ first~s \} | \\
 \t1 evalCardinality[sctIdGroup]~min~max \{g : groups | first~g = sctid \} \neq \emptyset \}
-\end{gendef}
+\end{axdef}
 
 $i\_optional\_group\_cardinality$ returns the set of $sctids$ that pass in at most $max$ groups, which is equivalent to the
 set of all possible $sctIds$ (i.e. $ss.concepts$) minus the set of $sctids$ that pass in more than $max$ groups.
 
-\begin{gendef}
+\begin{axdef}
    i\_optional\_group\_cardinality : \\
 \t1 Substrate \fun unlimitedNat \fun \power sctIdGroup  \fun \power sctId
 \where
@@ -1126,7 +1132,7 @@ set of all possible $sctIds$ (i.e. $ss.concepts$) minus the set of $sctids$ that
 i\_optional\_group\_cardinality~ss~max~groups = \\
 ss.concepts \setminus \\
 \t1 (\{ s : groups @ first~s \} \setminus (i\_required\_group\_cardinality~0~max~groups)) 
-\end{gendef}
+\end{axdef}
 
 
 
@@ -1135,7 +1141,7 @@ The interpretation of an \spec{attributeSet} a group is the interpretation of th
 optionally intersected or union with additional conjunction or disjunction attribute sets.
 
 
-\begin{gendef}
+\begin{axdef}
    i\_groupAttributeSet : \\
 \t1 Substrate \fun attributeSet \fun sctIdGroups\_or\_Error
 \where
@@ -1148,18 +1154,18 @@ optionally intersected or union with additional conjunction or disjunction attri
  \t1 gintersect~lhs~(i\_groupConjunctionAttributeSet~ss~(attset\_conjattset \inv (head~rhs))) \\
   \ELSE \\
   \t1 gunion~lhs~(i\_groupDisjunctionAttributeSet~ss~(attset\_conjattset \inv (head~rhs))))
-\end{gendef}
-\begin{gendef}
+\end{axdef}
+\begin{axdef}
    i\_groupAttributeSet' : \\
 \t1 Substrate \fun attributeSet' \fun sctIdGroups\_or\_Error
-\end{gendef}
+\end{axdef}
 
 \subsubsection{conjunctionAttributeSet inside a group}
 Apply the intersect operator to the interpretation of each  subAttributeSet in a group context. This is the same as the non-grouped $subAttributeSet$ with the exception that the inputs to and result of the function is $sctId$ / $groupId$ tuples rather than
 
 
 
-\begin{gendef}
+\begin{axdef}
     i\_groupConjunctionAttributeSet : \\
 \t1 Substrate \fun conjunctionAttributeSet \fun sctIdGroups\_or\_Error
 \where
@@ -1169,7 +1175,7 @@ Apply the intersect operator to the interpretation of each  subAttributeSet in a
    \t1 i\_groupSubAttributeSet~ss~(head~conjset) \\
 \ELSE \\
 \t1 gintersect~(i\_groupSubAttributeSet~ss~(head~conjset))~(i\_groupConjunctionAttributeSet~ss~(tail~conjset))
-\end{gendef}
+\end{axdef}
 
 
 \subsubsection{disjunctionAttributeSet inside a group}
@@ -1177,7 +1183,7 @@ Apply the union operator to the interpretation of each  subAttributeSet in a gro
 just $sctIds$.
 
 
-\begin{gendef}
+\begin{axdef}
     i\_groupDisjunctionAttributeSet : \\
 \t1 Substrate \fun disjunctionAttributeSet \fun sctIdGroups\_or\_Error
 \where
@@ -1187,14 +1193,14 @@ just $sctIds$.
    \t1  i\_groupSubAttributeSet~ss~(head~disjset) \\
 \ELSE \\
 \t1 gunion~(i\_groupSubAttributeSet~ss~(head~disjset))~(i\_groupConjunctionAttributeSet~ss~(tail~disjset))
-\end{gendef}
+\end{axdef}
 
 \subsubsection{subAttributeSet inside a group}
 This is the same as the non-grouped $subAttributeSet$ with the exception that the result of the function is $sctId$ / $groupId$ tuples rather than
 just $sctIds$.
 
 
-\begin{gendef}
+\begin{axdef}
    i\_groupSubAttributeSet : \\
 \t2 Substrate \fun subAttributeSet \fun sctIdGroups\_or\_Error 
 \where
@@ -1203,7 +1209,7 @@ just $sctIds$.
    \IF subaset \in \ran subaset\_attribute \\
 \t1 \THEN i\_groupAttribute~ss~(subaset\_attribute \inv subaset) \\
   \ELSE i\_groupAttributeSet'~ss~(subaset\_attset \inv subaset)
-\end{gendef}
+\end{axdef}
 
 
 
@@ -1213,7 +1219,7 @@ they were valid.  It is possible for the same $sctId$ to valid in the interpreta
 The union and intersection operators operate on the $sctId$ / $groupId$ tuples (ne. $sctIdGroup$).
 
 
-\begin{gendef}
+\begin{axdef}
    i\_groupAttribute : \\
 \t1 Substrate  \fun attribute \fun sctIdGroups\_or\_Error 
 \where
@@ -1237,7 +1243,7 @@ The union and intersection operators operate on the $sctId$ / $groupId$ tuples (
 \t1 (\LET str\_interp == \\
 \t1 i\_stringComparisonOperator~ss~att.rf~(result\_sctids~att\_sctids)~(attrib\_str \inv att.opValue)  @ \\
 \t2 i\_att\_group\_cardinality~ss~att.card~str\_interp))
-\end{gendef}
+\end{axdef}
 
 \subsubsection{cardinality inside a group}
 
@@ -1247,9 +1253,10 @@ Cardinality is interpreted differently within the context of a a group.  In part
 \item A sctid can pass in the context of more than one group.  Intersections, unions, etc. apply to sctid's in the \emph{same} group.
 \end{itemize}
 
-$i\_att\_group\_cardinality$ takes an optional cardinality and a set of quads and returns a list sctids and the groups in which they passed the cardinality constraint.
+$i\_att\_group\_cardinality$ takes an optional cardinality and a set of quads and returns a list sctids and the corresponding groups in which they passed the cardinality constraint.  Note that, in the case
+of the zero group, the actual $Quad$ that passed is associated with the sctid rather than the group identifier itself.
 
-\begin{gendef}
+\begin{axdef}
    i\_att\_group\_cardinality : \\
 \t1 Substrate \fun \optional[cardinality] \fun Quads\_or\_Error \fun sctIdGroups\_or\_Error
 \where
@@ -1261,57 +1268,60 @@ $i\_att\_group\_cardinality$ takes an optional cardinality and a set of quads an
 \ELSE \IF \# ocard = 0 \THEN \\
 \t1 group\_value~(i\_required\_att\_group\_cardinality~1~many~qore)
 \also
-\ELSE \IF first~(head~ocard) > 0 \THEN \\
-\t1 group\_value~(i\_required\_att\_group\_cardinality~(first~(head~ocard) )~(second~(head~ocard) )~qore)
+\ELSE (\LET card == head~ocard @ \\
+\t1 \IF card.min > 0 \THEN \\
+\t1 group\_value~(i\_required\_att\_group\_cardinality~card.min~card.max~qore)
 \also
 \ELSE \\
-\t1 group\_value~(i\_optional\_att\_group\_cardinality~ss~(second~(head~ocard) )~qore)
-\end{gendef}
+\t1 group\_value~(i\_optional\_att\_group\_cardinality~ss~card.max~qore))
+\end{axdef}
 
-$i\_required\_att\_group\_cardinality$ returns the set of subject or target sctids combined with the group(s) in which they qualified
-\begin{gendef}
+\noindent
+$i\_required\_att\_group\_cardinality$ returns the set of subject or target sctids combined with the group(s) (or $Quads$) in which they qualified
+\begin{axdef}
    i\_required\_att\_group\_cardinality : \\
 \t1 \nat \fun unlimitedNat \fun Quads\_or\_Error \ \fun \power sctIdGroup
 \where
    \forall min : \nat; max : unlimitedNat; qore : Quads\_or\_Error  @ \\
 i\_required\_att\_group\_cardinality~min~max~qore = \\
 \IF quad\_direction~qore = source\_direction \THEN \\
-\t1 \{subjgroup :  \{q : quads\_for~qore | q.g \neq zero\_group @ (q.s, q.g) \} | \\
+\t1 \{subjgroup :  \{q : quads\_for~qore | q.g \neq zero\_group @ (q.s, quadGroup~q) \} | \\
 \t2 evalCardinality[Quad]~min~max~ \{q : quads\_for~qore | \\
-\t3 q.s = first~subjgroup \land q.g = second~subjgroup\} \neq \emptyset \}  \\
+\t3 q.s = first~subjgroup \land q.g = (ug \inv (second~subjgroup))\} \neq \emptyset \}  \\
 \t4 \cup \\
 \t1 \{q : quads\_for~qore | q.g = zero\_group \land  \\
-\t2 evalCardinality[Quad]~min~max~\{q\} \neq \emptyset @ (q.s, q.g) \} \\
+\t2 evalCardinality[Quad]~min~max~\{q\} \neq \emptyset @ (q.s, quadGroup~q) \} \\
 \also
 \ELSE \\
 \t1 \{targgroup :  \{q : quads\_for~qore | \\
-\t2 q.g \neq zero\_group \land q.t \in \ran t\_sctid @ (t\_sctid \inv q.t, q.g) \} | \\
+\t2 q.g \neq zero\_group \land q.t \in \ran t\_sctid @ (t\_sctid \inv q.t, quadGroup~q) \} | \\
 \t2 evalCardinality[Quad]~min~max~ \{q : quads\_for~qore | \\
 \t3 t\_sctid \inv q.t = first~targgroup \land \\
-\t3 q.g = second~targgroup\} \neq \emptyset \} \\
+\t3 q.g = (ug \inv (second~targgroup))\} \neq \emptyset \} \\
 \t4 \cup \\
 \t1 \{q : quads\_for~qore | q.g = zero\_group \land  \\
-\t2 evalCardinality[Quad]~min~max~\{q\} \neq \emptyset @ (t\_sctid \inv q.t, q.g) \} \\
-\end{gendef}
+\t2 evalCardinality[Quad]~min~max~\{q\} \neq \emptyset @ (t\_sctid \inv q.t, quadGroup~q) \} \\
+\end{axdef}
 
+\noindent
 $i\_optional\_att\_group\_cardinality$ returns the set of subject or target sctids along with all of the corresponding groups that \emph{fail} the cardinality test.  The failing list
 is equivalent to the set of all possible sctid / non-zero groups in the substrate minus the set of sctid / non-zero groups that fail the maximum cardinality. The set of failures is determined by removing the set of passing tuples from the total possible set in the supplied quads.
-\begin{gendef}
+\begin{axdef}
    i\_optional\_att\_group\_cardinality : \\
 \t1 Substrate \fun unlimitedNat \fun Quads\_or\_Error \ \fun \power sctIdGroup
 \where
    \forall ss:Substrate; max : unlimitedNat; qore : Quads\_or\_Error  @ \\
 i\_optional\_att\_group\_cardinality~ss~max~qore = \\
 \IF quad\_direction~qore = source\_direction \THEN \\
-\t1  \{rel: ss.relationships | rel.g \neq zero\_group @ (rel.s, rel.g) \} \setminus \\
-\t1 \{q : quads\_for~qore | q.g \neq zero\_group @ (q.s, q.g) \} \cup \\
+\t1  (\{rel: ss.relationships @ (rel.s, quadGroup~rel) \}~  \setminus \\
+\t1 \{q : quads\_for~qore @ (q.s, quadGroup~q) \} )~ ~  \cup \\
 \t2 i\_required\_att\_group\_cardinality~0~max~qore
 \also
 \ELSE \\
-\t1  \{rel: ss.relationships | rel.g \neq zero\_group \land rel.t \in \ran t\_sctid @ (t\_sctid \inv rel.t, rel.g) \} \setminus \\
-\t1 \{q : quads\_for~qore | q.g \neq zero\_group @ (t\_sctid \inv q.t , q.g) \}  \cup \\
+\t1  (\{rel: ss.relationships | rel.t \in \ran t\_sctid @ (t\_sctid \inv rel.t, quadGroup~rel) \}~  \setminus \\
+\t1 \{q : quads\_for~qore | q.g \neq zero\_group @ (t\_sctid \inv q.t , quadGroup~q) \})~ ~  \cup \\
 \t2 i\_required\_att\_group\_cardinality~0~max~qore
-\end{gendef}
+\end{axdef}
 
 
 % =========================================== Section 4 ===============================================
@@ -1351,7 +1361,7 @@ constraintOperator ::= \\
 \end{zed}
 
 
-\begin{gendef}
+\begin{axdef}
    i\_constraintOperator : \\
 \t1 Substrate \fun \optional[constraintOperator] \fun Sctids\_or\_Error \fun Sctids\_or\_Error
 \also
@@ -1376,7 +1386,7 @@ i\_constraintOperator~ss~oco~input = \\
 \also
    \forall f : (sctId \pfun \power sctId); id : sctId @ completeFun~f~id = \\
 \t1\IF id \in \dom f \THEN f~id \ELSE \emptyset 
-\end{gendef}
+\end{axdef}
 
 \subsection{attributeOperator}
 \begin{framed}
@@ -1411,7 +1421,7 @@ the interpretation of the \spec{expressionConstraintValue}
 expressionComparisonOperator ::= eco\_eq | eco\_neq
 \end{zed}
 
-\begin{gendef}
+\begin{axdef}
    i\_expressionComparisonOperator: \\
 \t1 Substrate \fun \optional[reverseFlag] \fun \power sctId \fun \\
 \t1 (expressionComparisonOperator \cross expressionConstraintValue) \fun Quads\_or\_Error
@@ -1434,7 +1444,7 @@ expressionComparisonOperator ::= eco\_eq | eco\_neq
 \t1 \ELSE \\
 \t2 quad\_value ( \{q : ss.relationships | \\
 \t3 q.s \notin (result\_sctids~ecv) \}, targets\_direction) )
- \end{gendef}
+ \end{axdef}
  
  \subsection{numericComparisonOperator}
 \begin{framed}
@@ -1454,7 +1464,7 @@ criteria. As concrete values cannot occur as subjects, this function returns the
 numericComparisonOperator ::= nco\_eq | nco\_neq | nco\_gt | nco\_ge | nco\_lt | nco\_le
 \end{zed}
 
-\begin{gendef}
+\begin{axdef}
    i\_numericComparisonOperator: \\
 \t1 Substrate \fun  \optional[reverseFlag] \fun \power sctId \fun \\
 \t1 (numericComparisonOperator \cross numericValue) \fun Quads\_or\_Error
@@ -1467,15 +1477,15 @@ numericComparisonOperator ::= nco\_eq | nco\_neq | nco\_gt | nco\_ge | nco\_lt |
 \ELSE \\
 \t1 quad\_value( \{q : ss.relationships | q.a \in atts \land q.t \in \ran t\_concrete \land  \\
 numericComparison~(t\_concrete \inv q.t)~(first~ncv) = (second~ncv) \}, source\_direction)
- \end{gendef}
+ \end{axdef}
  
  Numeric comparison function. Compares a $concreteValue$ with a $numericValue$.
  \paragraph{}
  \textbf{TODO:} Need to specify the rules for comparing integers and decimal numbers as well as decimal/decimal.  As an example, does ``5.00'' = ``5.0''
- \begin{gendef}
+ \begin{axdef}
     numericComparison: \\
 \t1 concreteValue \fun numericComparisonOperator \pfun numericValue
- \end{gendef}
+ \end{axdef}
  
 \subsection{stringComparisonOperator}
 \begin{framed}
@@ -1492,7 +1502,7 @@ numericComparison~(t\_concrete \inv q.t)~(first~ncv) = (second~ncv) \}, source\_
 stringComparisonOperator ::= sco\_eq | sco\_neq
 \end{zed}
 
-\begin{gendef}
+\begin{axdef}
    i\_stringComparisonOperator: \\
 \t1 Substrate \fun  \optional[reverseFlag] \fun \power sctId \fun \\
 \t1 (stringComparisonOperator \cross stringValue) \fun Quads\_or\_Error
@@ -1505,14 +1515,14 @@ stringComparisonOperator ::= sco\_eq | sco\_neq
 \ELSE \\
 \t1 quad\_value( \{q : ss.relationships | q.a \in atts \land q.t \in \ran t\_concrete \land \\
 stringComparison~(t\_concrete \inv q.t)~(first~scv) = (second~scv) \}, source\_direction)
- \end{gendef}
+ \end{axdef}
 
 
  String comparison function. Compares a $concreteValue$ with a $stringValue$.
- \begin{gendef}
+ \begin{axdef}
     stringComparison: \\
 \t1 concreteValue \fun stringComparisonOperator \pfun stringValue
- \end{gendef}
+ \end{axdef}
 
 
 
@@ -1543,7 +1553,7 @@ it is interpreted as \emph{all} of the concepts in the system.
 
   If \spec{memberOf} isn't specified, the interpretation is the substrate interpretations of \spec{conceptReference} itself
 
-\begin{gendef}
+\begin{axdef}
    i\_focusConcept : Substrate \fun focusConcept \fun Sctids\_or\_Error 
 \where
    \forall ss : Substrate; fc : focusConcept @ \\
@@ -1555,13 +1565,13 @@ i\_focusConcept~ss~fc = \\
 \t2 ok~ss.concepts \\
  \ELSE \\
 \t1  i\_memberOf~ss~(focusConcept\_m~\inv fc)
-\end{gendef}
+\end{axdef}
 
 \subsubsection{memberOf}
 \spec{memberOf} returns the union of the application of the substrate $refset$ function to a wild card or the  the supplied reference set identifiers.  An error is
 returned if (a) $refsetids$ already has an error or (b) the substrate interpretation of a given refsetId returns an error.
 
-\begin{gendef}
+\begin{axdef}
    i\_memberOf : Substrate \fun crOrWildCard \fun Sctids\_or\_Error 
 \where
    \forall ss : Substrate; crorwc : crOrWildCard @ \\
@@ -1577,7 +1587,7 @@ returned if (a) $refsetids$ already has an error or (b) the substrate interpreta
 \t2 refsetids \\
 \t1 \ELSE \\
 \t2 bigunion \{sctid: result\_sctids~refsetids @ ss.i\_refsetId~sctid \} )
-\end{gendef}
+\end{axdef}
 
 \pagebreak
 
@@ -1600,16 +1610,42 @@ Quads\_or\_Error ::= quad\_value \ldata \power Quad \cross direction \rdata | qe
 \end{zed}
 
 \subsubsection{sctIdGroups}
-A $sctIdGroup$ is the combination of an $sctId$ and a non-zero $groupId$.  The set of all possbile $sctIdGroups$ in a given substrate would be the union of all relationship
-subjects combined with the non-zero relationship groups in which they appear in the substrate relationships.
+The $groupId$ identifies a set of one or more quads associated with the same subject.  The zero group, however, is treated differently,
+where each individual quad is treated as a group unto itself.  To implement this, we have to assign some sort of reproducible secondary "group" identifier to zero
+groups.  While actual implementations will probably use a secondary identifier such as the RF2 relationship sctid, for the purposes of this specification we use
+the quad itself as the unique identity of the "group".  This is represented by the $uniqueGroupId$ construct below:
 
+\begin{zed}
+uniqueGroupId ::= ug \ldata groupId \rdata  | zg \ldata Quad \rdata
+\end{zed}
+
+
+The $sctidGroup$ represents a subject or target $sctid$s that meet the requirements of an attribute or attribute set within the context of a group.  Each $sctidGroup$ entry carries
+with the $sctid$ that passed along with the group identifier of the group in which it passed, or the whole Quad in the case of zero groups.of the specific group in which it passed. The $sctidGroup$ construct
+is used for unions, intersections and differences within the context of a specific group. \\
+
+\noindent
 $sctIdGroups\_or\_Error$ represents a set of $sctIdGroups$ or an error condition
 
 \begin{zed}
-sctIdGroup == sctId \cross groupId \\
+sctIdGroup == sctId \cross uniqueGroupId \\
 sctIdGroups\_or\_Error ::= group\_value \ldata \power sctIdGroup \rdata | \\
 \t2 gerror \ldata ERROR \rdata
 \end{zed}
+
+The $quadGroup$ function converts a $Quad$ to a corresponding $uniqueGroupId$, where the result is the $groupId$ of the quad if the group is non-zero, and the quad itself
+when the group is zero.
+
+\begin{axdef}
+quadGroup : Quad \fun uniqueGroupId \\
+\where 
+\forall q: Quad @ quadGroup~q =  \\
+\t1 \IF q.g \neq zero\_group \THEN \\
+\t2 ug~q.g \\
+\t1 \ELSE \\
+\t2 zg~q 
+\end{axdef}
+
 
 \subsection{Result transformations}
 \begin{itemize}[noitemsep,nolistsep]
@@ -1617,7 +1653,7 @@ sctIdGroups\_or\_Error ::= group\_value \ldata \power sctIdGroup \rdata | \\
 \item \textbf{quads\_for} -- the set of quads in a $Quads\_or\_Error$ or an empty set if there is an error
 \item \textbf{quad\_direction} -- the direction of a $Quads\_or\_Error$ result.  Undefined if error
 \end{itemize}
-\begin{gendef}
+\begin{axdef}
    result\_sctids: Sctids\_or\_Error \fun \power sctId \\
    quads\_for: Quads\_or\_Error \fun \power Quad  \\
    quad\_direction: Quads\_or\_Error \pfun direction \\
@@ -1632,7 +1668,7 @@ sctIdGroups\_or\_Error ::= group\_value \ldata \power sctIdGroup \rdata | \\
 \also
    \forall q : Quads\_or\_Error @ quad\_direction~q = \\
 \t1 second~(quad\_value \inv q)
-\end{gendef}
+\end{axdef}
 
 
 
@@ -1651,7 +1687,7 @@ Definition of the various functions that are performed on the result type. \\
 \item \textbf{bigintersect} -- return the intersection a set of $Sctids\_or\_Error$ types, propagating errors if they exist, else returning the intersection of all of  the sctId sets.
 \end{itemize}
 
-\begin{gendef}
+\begin{axdef}
    firstError : \power Sctids\_or\_Error \fun Sctids\_or\_Error \\
    gfirstError : \power sctIdGroups\_or\_Error \fun sctIdGroups\_or\_Error
 \also
@@ -1693,7 +1729,7 @@ Definition of the various functions that are performed on the result type. \\
 \forall x,y : sctIdGroups\_or\_Error @ gminus~x~y = \\
 \t1 \IF x \in \ran gerror \lor y \in \ran gerror \THEN gfirstError~\{x, y\} \\
 \t1 \ELSE group\_value((group\_value \inv x) \setminus (group\_value \inv y))
-\end{gendef}
+\end{axdef}
 \pagebreak
 \appendix
    
