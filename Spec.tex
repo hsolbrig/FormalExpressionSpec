@@ -767,7 +767,7 @@ conjunctionOrDisjunctionAttributeSet ::= \\
  \ELSE \IF head~rhs \in \ran attset\_conjattset \THEN \\
  \t1  intersect~lhs~(i\_conjunctionAttributeSet~ss~(attset\_conjattset \inv (head~rhs))) \\
   \ELSE \\
-  \t1 union~lhs~(i\_disjunctionAttributeSet~ss~(attset\_conjattset \inv (head~rhs))))
+  \t1 union~lhs~(i\_disjunctionAttributeSet~ss~(attset\_disjattset \inv (head~rhs))))
 \end{axdef}
 
 \begin{axdef}
@@ -1136,7 +1136,7 @@ ss.concepts \setminus \\
 
 
 
-\subsubsection{attributeSet inside a groups}
+\subsubsection{attributeSet inside a group}
 The interpretation of an \spec{attributeSet} a group is the interpretation of the \spec{subAttributeSet}
 optionally intersected or union with additional conjunction or disjunction attribute sets.
 
@@ -1153,7 +1153,7 @@ optionally intersected or union with additional conjunction or disjunction attri
  \ELSE \IF head~rhs \in \ran attset\_conjattset \THEN \\
  \t1 gintersect~lhs~(i\_groupConjunctionAttributeSet~ss~(attset\_conjattset \inv (head~rhs))) \\
   \ELSE \\
-  \t1 gunion~lhs~(i\_groupDisjunctionAttributeSet~ss~(attset\_conjattset \inv (head~rhs))))
+  \t1 gunion~lhs~(i\_groupDisjunctionAttributeSet~ss~(attset\_disjattset \inv (head~rhs))))
 \end{axdef}
 \begin{axdef}
    i\_groupAttributeSet' : \\
@@ -1285,22 +1285,22 @@ $i\_required\_att\_group\_cardinality$ returns the set of subject or target scti
    \forall min : \nat; max : unlimitedNat; qore : Quads\_or\_Error  @ \\
 i\_required\_att\_group\_cardinality~min~max~qore = \\
 \IF quad\_direction~qore = source\_direction \THEN \\
-\t1 \{subjgroup :  \{q : quads\_for~qore | q.g \neq zero\_group @ (q.s, quadGroup~q) \} | \\
+\t1 \{subjgroup :  \{q : quads\_for~qore | q.g \neq zero\_group @ (q.s, ug~ q.g) \} | \\
 \t2 evalCardinality[Quad]~min~max~ \{q : quads\_for~qore | \\
 \t3 q.s = first~subjgroup \land q.g = (ug \inv (second~subjgroup))\} \neq \emptyset \}  \\
 \t4 \cup \\
 \t1 \{q : quads\_for~qore | q.g = zero\_group \land  \\
-\t2 evalCardinality[Quad]~min~max~\{q\} \neq \emptyset @ (q.s, quadGroup~q) \} \\
+\t2 evalCardinality[Quad]~min~max~\{q\} \neq \emptyset @ (q.s, zg~ q) \} \\
 \also
 \ELSE \\
 \t1 \{targgroup :  \{q : quads\_for~qore | \\
-\t2 q.g \neq zero\_group \land q.t \in \ran t\_sctid @ (t\_sctid \inv q.t, quadGroup~q) \} | \\
+\t2 q.g \neq zero\_group \land q.t \in \ran t\_sctid @ (t\_sctid \inv q.t, ug~q.g) \} | \\
 \t2 evalCardinality[Quad]~min~max~ \{q : quads\_for~qore | \\
 \t3 t\_sctid \inv q.t = first~targgroup \land \\
 \t3 q.g = (ug \inv (second~targgroup))\} \neq \emptyset \} \\
 \t4 \cup \\
 \t1 \{q : quads\_for~qore | q.g = zero\_group \land  \\
-\t2 evalCardinality[Quad]~min~max~\{q\} \neq \emptyset @ (t\_sctid \inv q.t, quadGroup~q) \} \\
+\t2 evalCardinality[Quad]~min~max~\{q\} \neq \emptyset @ (t\_sctid \inv q.t, zg~q) \} \\
 \end{axdef}
 
 \noindent
@@ -1405,7 +1405,7 @@ i\_attributeOperator == i\_constraintOperator
 
 \subsection{expressionComparisonOperator}
 \begin{framed}
-\desc{Attributes whose value is a concept may be compared to an expression constraint using either equals (``='') or not equals (``!=''). In the full syntax ``<>'' and ``not ='' (case insensitive) are also  valid ways to represent not equals.}
+\desc{Attributes whose value is a concept may be compared to an expression constraint using either equals (``='') or not equals (``!=''). In the full syntax ``\textless\textgreater'' and ``not ='' (case insensitive) are also  valid ways to represent not equals.}
 \end{framed}
 
 \begin{framed}
