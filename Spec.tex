@@ -1285,22 +1285,22 @@ $i\_required\_att\_group\_cardinality$ returns the set of subject or target scti
    \forall min : \nat; max : unlimitedNat; qore : Quads\_or\_Error  @ \\
 i\_required\_att\_group\_cardinality~min~max~qore = \\
 \IF quad\_direction~qore = source\_direction \THEN \\
-\t1 \{subjgroup :  \{q : quads\_for~qore | q.g \neq zero\_group @ (q.s, ug~ q.g) \} | \\
+\t1 \{subjgroup :  \{q : quads\_for~qore | q.g \neq zero\_group @ (q.s, quadGroup~ q) \} | \\
 \t2 evalCardinality[Quad]~min~max~ \{q : quads\_for~qore | \\
 \t3 q.s = first~subjgroup \land q.g = (ug \inv (second~subjgroup))\} \neq \emptyset \}  \\
 \t4 \cup \\
 \t1 \{q : quads\_for~qore | q.g = zero\_group \land  \\
-\t2 evalCardinality[Quad]~min~max~\{q\} \neq \emptyset @ (q.s, zg~ q) \} \\
+\t2 evalCardinality[Quad]~min~max~\{q\} \neq \emptyset @ (q.s, quadGroup~ q) \} \\
 \also
 \ELSE \\
 \t1 \{targgroup :  \{q : quads\_for~qore | \\
-\t2 q.g \neq zero\_group \land q.t \in \ran t\_sctid @ (t\_sctid \inv q.t, ug~q.g) \} | \\
+\t2 q.g \neq zero\_group \land q.t \in \ran t\_sctid @ (t\_sctid \inv q.t, quadGroup~ q) \} | \\
 \t2 evalCardinality[Quad]~min~max~ \{q : quads\_for~qore | \\
 \t3 t\_sctid \inv q.t = first~targgroup \land \\
 \t3 q.g = (ug \inv (second~targgroup))\} \neq \emptyset \} \\
 \t4 \cup \\
 \t1 \{q : quads\_for~qore | q.g = zero\_group \land  \\
-\t2 evalCardinality[Quad]~min~max~\{q\} \neq \emptyset @ (t\_sctid \inv q.t, zg~q) \} \\
+\t2 evalCardinality[Quad]~min~max~\{q\} \neq \emptyset @ (t\_sctid \inv q.t, quadGroup~ q) \} \\
 \end{axdef}
 
 \noindent
