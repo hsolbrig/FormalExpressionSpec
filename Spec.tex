@@ -1421,6 +1421,7 @@ the interpretation of the \spec{expressionConstraintValue}
 expressionComparisonOperator ::= eco\_eq | eco\_neq
 \end{zed}
 
+\textbf{QUESTION:} does neq include attribute or not?
 \begin{axdef}
    i\_expressionComparisonOperator: \\
 \t1 Substrate \fun \optional[reverseFlag] \fun \power sctId \fun \\
@@ -1432,18 +1433,18 @@ expressionComparisonOperator ::= eco\_eq | eco\_neq
     (\LET ecv == i\_expressionConstraintValue~ss~(second~ec) @ \\
 \t1 \IF ecv \in \ran error \THEN \\
 \t2 qerror(error \inv ecv) \\
-\t1 \ELSE \IF \# reverseFlag = 0 \land (first~ec =  eco\_eq) \THEN \\
+\t1 \ELSE \IF \# rf = 0 \land (first~ec =  eco\_eq) \THEN \\
 \t2 quad\_value( \{q : ss.relationships | \\
-\t3 q.t \in \ran t\_sctid \land (t\_sctid \inv q.t) \in (result\_sctids~ecv) \}, source\_direction) \\
-\t1 \ELSE \IF \# reverseFlag > 0  \land (first~ec =  eco\_eq) \THEN \\
+\t3 q.a \in atts \land q.t \in \ran t\_sctid \land (t\_sctid \inv q.t) \in (result\_sctids~ecv) \}, source\_direction) \\
+\t1 \ELSE \IF \# rf > 0  \land (first~ec =  eco\_eq) \THEN \\
 \t2 quad\_value(\{q : ss.relationships | \\
-\t3 q.s \in (result\_sctids~ecv) \} , targets\_direction) \\
-\t1  \ELSE \IF \# reverseFlag = 0  \land (first~ec =  eco\_neq) \THEN \\
+\t3 q.a \in atts \land q.s \in (result\_sctids~ecv) \} , targets\_direction) \\
+\t1  \ELSE \IF \# rf = 0  \land (first~ec =  eco\_neq) \THEN \\
 \t2 quad\_value( \{q : ss.relationships | \\
-\t3 q.t \in \ran t\_sctid \land (t\_sctid \inv q.t) \notin (result\_sctids~ecv) \}, source\_direction) \\
+\t3 q.a \in atts \land q.t \in \ran t\_sctid \land (t\_sctid \inv q.t) \notin (result\_sctids~ecv) \}, source\_direction) \\
 \t1 \ELSE \\
 \t2 quad\_value ( \{q : ss.relationships | \\
-\t3 q.s \notin (result\_sctids~ecv) \}, targets\_direction) )
+\t3 q.a \in atts \land q.s \notin (result\_sctids~ecv) \}, targets\_direction) )
  \end{axdef}
  
  \subsection{numericComparisonOperator}
