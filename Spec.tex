@@ -762,7 +762,7 @@ conjunctionOrDisjunctionAttributeSet ::= \\
    \forall ss : Substrate; attset : attributeSet @ \\
    i\_attributeSet~ss~attset = \\
    (\LET lhs == i\_subAttributeSet~ss~(first~attset); rhs == second~attset @ \\
- \IF \# rhs = 0 \THEN \\
+ \IF lhs \in \ran error \lor \# rhs = 0 \THEN \\
  \t1 lhs \\
  \ELSE \IF head~rhs \in \ran attset\_conjattset \THEN \\
  \t1  intersect~lhs~(i\_conjunctionAttributeSet~ss~(attset\_conjattset \inv (head~rhs))) \\
@@ -1369,7 +1369,7 @@ constraintOperator ::= \\
 \where
 	\forall ss : Substrate; oco : \optional[constraintOperator]; input : Sctids\_or\_Error @ \\
 i\_constraintOperator~ss~oco~input = \\
-\t1 \IF error \inv input \in ERROR \lor \# oco = 0  \THEN  \\
+\t1 \IF input \in \ran error  \lor \# oco = 0  \THEN  \\
 \t2 input \\
 \t1 \ELSE \IF head~oco = descendantOrSelfOf \THEN \\
 \t2 ok (\bigcup \{id : result\_sctids~input @ \\
