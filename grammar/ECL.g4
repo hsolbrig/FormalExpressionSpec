@@ -30,7 +30,7 @@ conjunctionExpressionConstraint : subExpressionConstraint (conjunction subExpres
 disjunctionExpressionConstraint : subExpressionConstraint (disjunction subExpressionConstraint)+ ;
 
 // exclusionExpressionConstraint = subExpressionConstraint ws exclusion ws 	subExpressionConstraint
-exclusionExpressionConstraint : subExpressionConstraint exclusion subExpressionConstraint ;
+exclusionExpressionConstraint : subExpressionConstraint exclusionExpressionConstraint : subExpressionConstraint exclusion subExpressionConstraint ; subExpressionConstraint ;
 
 //subExpressionConstraint = simpleExpressionConstraint /
 // 	"(" ws (compoundExpressionConstraint / refinedExpressionConstraint) ws ")"
