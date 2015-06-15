@@ -175,10 +175,6 @@ The formal definition of substrate follows. The expressions below assert that:
    descendants : sctId \pfun \power sctId \\
    ancestors : sctId \pfun \power sctId \\
 \also
-   groups : \power groupId \\
-   subjects : \power sctId \\
-   targets : \power target
-\also
    i\_conceptReference : conceptReference \fun Sctids\_or\_Error \\
    i\_attributeName : attributeName \fun Sctids\_or\_Error \\
    i\_refsetId : sctId \fun Sctids\_or\_Error
@@ -214,10 +210,6 @@ The formal definition of substrate follows. The expressions below assert that:
    \forall t : concepts @ \\
 \t2 ancestors~t = parentsOf~ t \cup \bigcup \{s : parentsOf~ t @ ancestors~s\} \\
    \forall t : concepts @ t \notin ancestors~t
-\also
-   groups = \{r : relationships @ r.g \} \\
-   subjects = \{r : relationships @ r.s \} \\
-   targets = \{r : relationships @ r.t \}
 \also
    \forall cr\_interp : \ran i\_conceptReference | cr\_interp \in \ran ok @ \\
 \t2 result\_sctids~cr\_interp \subseteq concepts \\
