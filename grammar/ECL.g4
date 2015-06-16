@@ -27,10 +27,10 @@ compoundExpressionConstraint : conjunctionExpressionConstraint
 conjunctionExpressionConstraint : subExpressionConstraint (conjunction subExpressionConstraint)+ ;
 
 // disjunctionExpressionConstraint = subExpressionConstraint 1*(ws disjunction ws subExpressionConstraint)
-disjunctionExpressionConstraint : subExpressionConstraint (disjunction subExpressionConstraint)+ ;
+disjunctionExpressionConstraint : subExpressionConstraint (disjunction subExpressionConstraint) ;
 
 // exclusionExpressionConstraint = subExpressionConstraint ws exclusion ws 	subExpressionConstraint
-exclusionExpressionConstraint : subExpressionConstraint exclusionExpressionConstraint : subExpressionConstraint exclusion subExpressionConstraint ; subExpressionConstraint ;
+exclusionExpressionConstraint : subExpressionConstraint exclusion subExpressionConstraint ;
 
 //subExpressionConstraint = simpleExpressionConstraint /
 // 	"(" ws (compoundExpressionConstraint / refinedExpressionConstraint) ws ")"
@@ -154,15 +154,14 @@ attribute : cardinality? reverseFlag? attributeOperator? attributeName
           ;
 
 // cardinality = "[" nonNegativeIntegerValue to (nonNegativeIntegerValue / many) "]"
-cardinality : '[' NONNEGATIVEINTEGERVALUE TO (NONNEGATIVEINTEGERVALUE | many) ']' ;
+cardinality : '[' NONNEGATIVEINTEGERVALUE TO (NONNEGATIVEINTEGERVALUE | MANY) ']' ;
 NONNEGATIVEINTEGERVALUE : '0' | DIGITNONZERO DIGIT* ;
 
 // to = ".." / (mws ("t"/"T") ("o"/"O") mws)
 TO	:	'..' | (T O) ;
 
 // many = "*" / ( ("m"/"M") ("a"/"A") ("n"/"N") ("y"/"Y"))
-many : '*' | MANY ;
-MANY : (M A N Y) ;
+MANY : STAR | (M A N Y) ;
 
 // reverseFlag =  ( ("r"/"R") ("e"/"E") ("v"/"V") ("e"/"E") ("r"/"R") ("s"/"S") ("e"/"E") ("o"/"O") ("f"/"F")) / "R"
 reverseFlag : REVERSEFLAG ;
@@ -181,15 +180,15 @@ expressionConstraintValue : simpleExpressionConstraint
                           ;
 
 // expressionComparisonOperator = "=" / "!=" / ("n"/"N") ("o"/"O") ("t"/"T") ws "=" / "<>"
-expressionComparisonOperator : '=' | NEQ ;
-NEQ : '!=' | (N O T ' ' '=') | '<>' ;
+expressionComparisonOperator : '=' | neq ;
+neq : '!=' | '[Nn] [Oo] [Tt] =' | '<>' ;
 
 // numericComparisonOperator = "=" / "!=" / ("n"/"N") ("o"/"O") ("t"/"T") ws "=" / "<>" / "<=" / 	"<" / ">=" / ">"
-numericComparisonOperator : '=' | NEQ | '<' '='? | '>' '='? ;
+numericComparisonOperator : '=' | neq | '<' '='? | '>' '='? ;
 
 
 // stringComparisonOperator = "=" / "!=" / ("n"/"N") ("o"/"O") ("t"/"T") ws "=" / "<>"
-stringComparisonOperator : '=' | NEQ ;
+stringComparisonOperator : '=' | neq ;
 
 // numericValue =  "#" ( decimalValue / integerValue)
 // integerValue = ( ["-"/"+"] digitNonZero *digit ) / zero
