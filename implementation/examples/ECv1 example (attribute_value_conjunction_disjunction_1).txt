@@ -1,0 +1,2 @@
+^ 1111000000132 |allergy event reference set|: 246075003 |causative agent| =
+(< 373873005 |pharmaceutical / biologic product| OR < 105590001 |substance|)

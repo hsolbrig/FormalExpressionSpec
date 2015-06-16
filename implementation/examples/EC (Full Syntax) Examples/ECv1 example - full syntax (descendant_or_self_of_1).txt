@@ -1,0 +1,1 @@
+descendantOrSelfOf 404684003 |clinical finding|

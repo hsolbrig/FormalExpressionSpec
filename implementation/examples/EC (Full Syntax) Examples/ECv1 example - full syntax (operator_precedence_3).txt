@@ -1,0 +1,2 @@
+descendantOf 19829001|disorder of lung| OR memberOf 152725851000154106|cardiology reference set| OR
+memberOf 450976002|disorders and diseases reference set for GP/FP reason for encounter|
