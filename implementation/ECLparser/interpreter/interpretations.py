@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2014, Mayo Clinic
+# Copyright (c) 2015, Mayo Clinic
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification,
@@ -27,7 +27,7 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from ECLparser.z import N, Set
+from ECLparser.z.z import N, Set
 
 from ECLparser.interpreter.base_types import applyToSequence, intersect, union, Quads_or_Error, result_sctids, many, \
     unlimitedNat, quad_direction, sctId, quads_for, sctIdGroups_or_Error, evalCardinality, minus, gintersect, gunion, \

@@ -175,6 +175,11 @@ class ECLVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by ECLParser#many.
+    def visitMany(self, ctx):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by ECLParser#reverseFlag.
     def visitReverseFlag(self, ctx):
         return self.visitChildren(ctx)
@@ -197,11 +202,6 @@ class ECLVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ECLParser#expressionComparisonOperator.
     def visitExpressionComparisonOperator(self, ctx):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by ECLParser#neq.
-    def visitNeq(self, ctx):
         return self.visitChildren(ctx)
 
 

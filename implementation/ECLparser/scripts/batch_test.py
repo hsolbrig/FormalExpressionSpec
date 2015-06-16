@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2014, Mayo Clinic
+# Copyright (c) 2015, Mayo Clinic
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification,
@@ -38,8 +38,9 @@ ss = RF2_Substrate()
 def main(argv: list):
     _curdir = os.path.join(os.getcwd(), os.path.dirname(__file__))
     sys.path.append(os.path.join(_curdir, '../../ECLparser/parser'))
+    sys.path.append(os.path.join(_curdir, '../../ECLparser/parser_impl'))
     sys.path.append(os.path.join(_curdir, '../..'))
-    from ECLparser.bin.TestRig_mod import build_argparser, parse_args, do_parse
+    from ECLparser.scripts.TestRig_mod import build_argparser, parse_args, do_parse
 
     parser_args = build_argparser()
     parser_args.add_argument("-i", "--interp", help="Interpret output", action="store_true")
@@ -51,16 +52,17 @@ def main(argv: list):
             if not fn.startswith('.') and (not opts.file or fn.startswith(opts.file)):
                 print("PARSING: " + fn)
                 result = do_parse(opts, FileStream(os.path.join(dirpath, fn)))
-                # print('\t' + (str(result) if result else 'ERROR') + '\n')
-                rval = i_expressionConstraint(ss, result)
-                if rval.inran('ok'):
-                    print(set(rval.ok) if len(rval.ok) < 100 else ("%s items returned" % len(rval.ok)))
+                if not result:
+                    print("FAILED")
+                elif opts.interp:
+                    rval = i_expressionConstraint(ss, result)
+                    if rval.inran('ok'):
+                        print(set(rval.ok) if len(rval.ok) < 100 else ("%s items returned" % len(rval.ok)))
+                    else:
+                        print("ERROR")
                 else:
-                    print("ERROR")
-    # result = do_parse(opts)
-    # print(result if result else "Parsing failed")
-    # if opts.interp and result:
-    #     print(interp(result))
+                    print("Success")
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])
