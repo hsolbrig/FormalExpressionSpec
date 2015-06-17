@@ -57,7 +57,6 @@ class Optional(Seq):
 Quad = Schema(lambda q: q.a != is_a or (q.g == 0 and q.t.inran('t_sctid')),
               s=sctId, a=sctId, t=target, g=groupId)
 
-
 # 2.1.2 ConceptReference
 conceptId = sctId
 conceptReference = CrossProduct(conceptId, Optional(term))
@@ -81,11 +80,11 @@ simpleExpressionConstraint = Forward()
 refinedExpressionConstraint = Forward()
 compoundExpressionConstraint = Forward()
 expressionConstraintValue = FreeType(expression_simple=simpleExpressionConstraint,
-                                       expression_refined=refinedExpressionConstraint,
-                                       expression_compound=compoundExpressionConstraint)
+                                     expression_refined=refinedExpressionConstraint,
+                                     expression_compound=compoundExpressionConstraint)
 
 numericValue = FreeType(nv_decimal=decimalValue,
-                          nv_integer=N)
+                        nv_integer=N)
 
 
 # 4.3 expressionComparisonOperator
@@ -139,12 +138,12 @@ attributeOperator = constraintOperator
 
 # 3.5 attribute
 attribute = Schema(card=Optional(cardinality), rf=Optional(reverseFlags),
-                     attrOper=Optional(constraintOperator), name=attributeName, opValue=attributeOperatorValue)
+                   attrOper=Optional(constraintOperator), name=attributeName, opValue=attributeOperatorValue)
 
 # 3.4.3 subAttributeSet
 attributeSet = Forward()
 subAttributeSet = FreeType(subaset_attribute=attribute,
-                             subaset_attset=attributeSet)
+                           subaset_attset=attributeSet)
 
 # 3.4.2 disjuncstionAttributeSet
 disjunctionAttributeSet = Seq_1(subAttributeSet)
@@ -165,8 +164,8 @@ attributeGroup = CrossProduct(Optional(cardinality), attributeSet)
 # 3.3.3 subRefinement
 refinement = Forward()
 subRefinement = FreeType(subrefine_attset=attributeSet,
-                           subrefine_attgroup=attributeGroup,
-                           subrefine_refinement=refinement)
+                         subrefine_attgroup=attributeGroup,
+                         subrefine_refinement=refinement)
 
 
 # 3.3.1 conjunctionRefinementSet
@@ -177,14 +176,14 @@ disjunctionRefinementSet = Seq_1(subRefinement)
 
 # 3.3 refinement
 refinementConjunctionOrDisjunction = FreeType(refine_conjset=conjunctionRefinementSet,
-                                                refine_disjset=disjunctionRefinementSet)
+                                              refine_disjset=disjunctionRefinementSet)
 refinement << CrossProduct(subRefinement, Optional(refinementConjunctionOrDisjunction))
 
 # 3.2.8 subExpressionConstraint
 subExpressionConstraint = Forward()
 subExpressionConstraint << FreeType(subExpr_simple=simpleExpressionConstraint,
-                                      subExpr_compound=compoundExpressionConstraint,
-                                      subExpr_refined=refinedExpressionConstraint)
+                                    subExpr_compound=compoundExpressionConstraint,
+                                    subExpr_refined=refinedExpressionConstraint)
 
 # 3.2.7 exclusionExpressionConstraint
 exclusionExpressionConstraint = CrossProduct(subExpressionConstraint,

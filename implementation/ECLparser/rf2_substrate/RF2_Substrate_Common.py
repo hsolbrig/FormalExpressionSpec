@@ -123,6 +123,10 @@ class RF2_Substrate_Common:
     def __iter__(self):
         return self.iter(self._execute_query(self._query), self._data_type)
 
+    @property
+    def v(self):
+        return self
+
     class iter:
         def __init__(self, q, typ):
             self._v = q

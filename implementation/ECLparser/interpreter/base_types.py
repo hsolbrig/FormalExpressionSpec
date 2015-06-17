@@ -75,7 +75,8 @@ def gfirst_error(x: Seq(sctIdGroups_or_Error)) -> sctIdGroups_or_Error:
 def union(x: Sctids_or_Error, y: Sctids_or_Error) -> Sctids_or_Error:
     if x.inran('error') or y.inran('error'):
         return first_error(Seq(Sctids_or_Error)(x, y))
-    return Sctids_or_Error(ok=x.ok.union(y.ok))
+    # return Sctids_or_Error(ok=x.ok.union(y.ok))
+    return Sctids_or_Error(ok=x.ok | y.ok)
 
 
 def intersect(x: Sctids_or_Error, y: Sctids_or_Error) -> Sctids_or_Error:
@@ -83,11 +84,11 @@ def intersect(x: Sctids_or_Error, y: Sctids_or_Error) -> Sctids_or_Error:
         return first_error(Seq(Sctids_or_Error)(x, y))
     return Sctids_or_Error(ok=x.ok.intersect(y.ok))
 
-
 def minus(x: Sctids_or_Error, y: Sctids_or_Error) -> Sctids_or_Error:
     if x.inran('error') or y.inran('error'):
         return first_error(Seq(Sctids_or_Error)(x, y))
-    return Sctids_or_Error(ok=x.ok.difference(y.ok))
+    # return Sctids_or_Error(ok=x.ok.difference(y.ok))
+    return Sctids_or_Error(ok=x.ok - y.ok)
 
 
 def bigunion(x: Seq(Sctids_or_Error)) -> Sctids_or_Error:

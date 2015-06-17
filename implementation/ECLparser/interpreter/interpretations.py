@@ -38,7 +38,7 @@ from ECLparser.datatypes import source_direction, Optional, cardinality, express
     compoundExpressionConstraint, conjunctionExpressionConstraint, disjunctionExpressionConstraint, \
     exclusionExpressionConstraint, subExpressionConstraint, refinement, conjunctionRefinementSet, \
     disjunctionRefinementSet, subRefinement, attributeSet, conjunctionAttributeSet, disjunctionAttributeSet, \
-    subAttributeSet, attribute, expressionConstraintValue, attributeGroup, sctIdGroup
+    subAttributeSet, attribute, expressionConstraintValue, attributeGroup, sctIdGroup, targets_direction
 
 from ECLparser.test_substrate.substrate import Substrate, Sctids_or_Error
 
@@ -60,7 +60,8 @@ def i_unrefinedExpressionConstraint(ss: Substrate, uec: unrefinedExpressionConst
 # 3.2.2 refinedExpressionConstraint
 def i_refinedExpressionConstraint(ss: Substrate, rec: refinedExpressionConstraint) -> Sctids_or_Error:
     unref_interp = i_unrefinedExpressionConstraint(ss, rec.first)
-    return intersect(unref_interp, i_refinement(ss, rec.second))
+    rhs = i_refinement(ss, rec.second)
+    return intersect(unref_interp, rhs)
 
 
 # 3.2.3 simpleExpressionConstraint
@@ -101,6 +102,7 @@ def i_subExpressionConstraint(ss: Substrate, sec: subExpressionConstraint) -> Sc
 
 
 # 3.3 refinement
+# refinement << CrossProduct(subRefinement, Optional(refinementConjunctionOrDisjunction))
 def i_refinement(ss: Substrate, rfnment: refinement) -> Sctids_or_Error:
     lhs = i_subRefinement(ss, rfnment.first)
     rhs = rfnment.second
@@ -129,6 +131,13 @@ def i_subRefinement(ss: Substrate, subrefine: subRefinement) -> Sctids_or_Error:
 
 
 # 3.4 attributeSet
+# attribute = Schema(card=Optional(cardinality), rf=Optional(reverseFlags),
+#                    attrOper=Optional(constraintOperator), name=attributeName, opValue=attributeOperatorValue)
+#
+# # 3.4.3 subAttributeSet
+# attributeSet = Forward()
+# subAttributeSet = FreeType(subaset_attribute=attribute,
+#                            subaset_attset=attributeSet)
 def i_attributeSet(ss: Substrate, attset: attributeSet) -> Sctids_or_Error:
     lhs = i_subAttributeSet(ss, attset.first)
     rhs = attset.second
@@ -190,12 +199,9 @@ def i_att_cardinality(ss: Substrate, ocard: Optional(cardinality), qore: Quads_o
 
 
 def i_required_cardinality(min_: N, max_: unlimitedNat, qore: Quads_or_Error) -> Set(sctId):
-    if quad_direction(qore) == source_direction:
-        return Set(sctId)([q.s for q in quads_for(qore).v if
-                           evalCardinality(min_, max_, [q2 for q2 in quads_for(qore).v if q2.s == q.s])])
-    else:
-        return Set(sctId)([q.t.t_sctid for q in quads_for(qore) if q.t.inran('t_sctid') and
-                          evalCardinality(min_, max_, [q2 for q2 in quads_for(qore).v if q2.t.t_sctid == q.t.t_sctid])])
+    return quads_for(qore).i_required_cardinality(int(min_),
+                                                  None if max_.inran('many') else int(max_.num),
+                                                  quad_direction(qore) == targets_direction)
 
 
 def i_optional_cardinality(ss: Substrate, max_: unlimitedNat, qore: Quads_or_Error) -> Set(sctId):

@@ -59,7 +59,7 @@ class SctidGroups(RF2_Substrate_Common):
         super().__init__()
         self._len = None                # number of elements
         self._query = "SELECT DISTINCT r.%s AS id, IF(r.relationshipGroup > 0, r.relationshipGroup, r.id) AS gid" \
-                      " FROM (%s) as r" % ('sourceId' if source_quads.rf else 'destinationId', source_quads.as_sql())
+                      " FROM (%s) AS r" % ('destinationId' if source_quads.rf else 'sourceId', source_quads.as_sql())
 
     def to_sctids(self):
         return Sctids(filtr=("id in (select sg.id from (%s) as sg) " % self.as_sql()))

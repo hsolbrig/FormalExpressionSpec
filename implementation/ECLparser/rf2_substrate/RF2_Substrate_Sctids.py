@@ -62,10 +62,9 @@ class Sctids(_Instance, Set):
         :param query: A complete query -- result of and, or or minus
         """
         Set.__init__(self, Sctids)
-        _Instance.__init__(self, sctid)
-        self._type = sctid
+        _Instance.__init__(self, Sctids)
         self._val = self
-        self._type = Sctids
+        self._type = sctid
         self._len = None                # number of elements
         if query is not None:
             self._query = query

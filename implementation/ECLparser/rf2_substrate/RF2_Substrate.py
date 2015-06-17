@@ -69,7 +69,6 @@ class RF2_Substrate(Substrate):
         return RF2_Substrate_ConstraintOperators.ancestors(RF2_Substrate_Sctids.Sctids(s))
 
     def i_conceptReference(self, cr: conceptReference) -> Sctids_or_Error:
-        print("HERE")
         return Sctids_or_Error(ok=self.equivalent_concepts(cr.first)) if cr.first in self._concepts else \
                Sctids_or_Error(error=unknownConceptReference)
 

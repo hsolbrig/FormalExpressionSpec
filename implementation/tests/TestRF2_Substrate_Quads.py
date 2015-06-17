@@ -49,28 +49,28 @@ class RF2_SubstrateTestCase(unittest.TestCase):
         self.assertEqual(ngroups, len(t1))
 
     def test_constructors(self):
-        t1 = Quads(rf=True, atts=Sctids(118170007), eq=True, ecv=Sctids({116154003, 32712000}))
+        t1 = Quads(rf=False, atts=Sctids(118170007), eq=True, ecv=Sctids({116154003, 32712000}))
         self._test_result(t1, 10)
-        t1 = Quads(rf=False, atts=Sctids(118170007), eq=True, ecv=Sctids({119306004, 258647001, 431776009}))
+        t1 = Quads(rf=True, atts=Sctids(118170007), eq=True, ecv=Sctids({119306004, 258647001, 431776009}))
         self._test_result(t1, 3)
-        t1 = Quads(rf=True, atts=Sctids(116680003), eq=False, ecv=Sctids({116154003, 32712000}))
+        t1 = Quads(rf=False, atts=Sctids(116680003), eq=False, ecv=Sctids({116154003, 32712000}))
         self._test_result(t1, 64)
-        t1 = Quads(rf=True, atts=Sctids({116680003, 363699004}), eq=False, ecv=Sctids({116154003, 32712000}))
+        t1 = Quads(rf=False, atts=Sctids({116680003, 363699004}), eq=False, ecv=Sctids({116154003, 32712000}))
         self._test_result(t1, 19)
         t1 = Quads()
         self.assertTrue(930350 < len(t1))
 
     def test_to_sctids(self):
-        t1 = Quads(rf=True, atts=Sctids(116680003), eq=False, ecv=Sctids({116154003, 32712000}))
+        t1 = Quads(rf=False, atts=Sctids(116680003), eq=False, ecv=Sctids({116154003, 32712000}))
         self._test_result(t1, 64)
         c1 = t1.to_sctids()
         self.assertEqual(
             "SELECT id FROM concept_ss WHERE active=1  AND locked = 0 AND "
-            "(id IN (SELECT r.sourceId FROM (SELECT id, sourceId, typeId, destinationId, relationshipGroup "
+            "(id IN (SELECT DISTINCT r.sourceId FROM (SELECT id, sourceId, typeId, destinationId, relationshipGroup "
             "FROM relationship_ss WHERE typeId NOT IN (SELECT id FROM concept_ss WHERE active=1  "
             "AND locked = 0 AND (id IN (116680003))) AND destinationId IN "
             "(SELECT id FROM concept_ss WHERE active=1  AND locked = 0 AND "
-            "(id IN (32712000,116154003))) AND active=1 AND locked=0) AS r) )", c1.as_sql())
+            "(id IN (32712000,116154003))) AND active=1 AND locked=0) AS r))", c1.as_sql())
         self.assertEqual({119306004, 258647001, 39668000, 225115005, 241026003, 241027007, 241029005, 427219009,
                           427479001, 315028004, 47956003, 241030000, 241028002, 433043005, 241031001, 44267002,
                           287727009, 179005009, 179006005, 432875004, 304846008, 50686003, 406155005, 431842009,
@@ -80,3 +80,6 @@ class RF2_SubstrateTestCase(unittest.TestCase):
                           439781002, 447388001, 431776009, 432243007, 698956007, 119299002, 122561005, 122584003,
                           122588000, 122590004, 122583009, 440493002}, set(c1))
 
+    def test_member_bug(self):
+        a = Quads(False, Sctids(116676008), True, Sctids(79654002))
+        Set(Quad).has_member(a)

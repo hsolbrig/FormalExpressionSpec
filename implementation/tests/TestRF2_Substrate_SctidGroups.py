@@ -49,12 +49,12 @@ class RF2_SubstrateSctidGroupTestCase(unittest.TestCase):
         self.assertEqual(nentries, len(t1))
 
     def test_constructors(self):
-        q1 = Quads(rf=True, atts=Sctids(118170007), eq=True, ecv=Sctids({116154003, 32712000}))
+        q1 = Quads(rf=False, atts=Sctids(118170007), eq=True, ecv=Sctids({116154003, 32712000}))
         t1 = SctidGroups(q1)
         self._test_result(t1, 10)
 
     def test_to_sctids(self):
-        q1 = Quads(rf=True, atts=Sctids(116680003), eq=False, ecv=Sctids({116154003, 32712000}))
+        q1 = Quads(rf=False, atts=Sctids(116680003), eq=False, ecv=Sctids({116154003, 32712000}))
         t1 = SctidGroups(q1)
         self._test_result(t1, 64)
         c1 = t1.to_sctids()

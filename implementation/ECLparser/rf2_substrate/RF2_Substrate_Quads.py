@@ -26,21 +26,22 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
-
+from ECLparser.datatypes import Quad, sctId, target, groupId
 
 from ECLparser.rf2_substrate.RF2_Substrate_Sctids import Sctids
 from ECLparser.rf2_substrate.RF2_Substrate_Common import *
 
 from rf2db.db.RF2RelationshipFile import RelationshipDB
+from ECLparser.z import Set
+from ECLparser.z.z import _Instance
 
 
-class Quad:
+
+class RF2_Quad(Quad.SchemaInstance):
     def __init__(self, e):
+        Quad.SchemaInstance.__init__(self, Quad, s=sctId(e[1]), a=sctId(e[2]), t=target(t_sctid=sctId(e[3])), g=groupId(e[4]))
         self.id = e[0]
-        self.s = e[1]
-        self.a = e[2]
-        self.t = e[3]
-        self.g = e[4]
+
 
     def __str__(self):
         return "[id:%s, s:%s, a:%s, t:%s, g:%s]" % (self.id, self.s, self.a, self.t, self.g)
@@ -61,12 +62,21 @@ class Quad:
 #     q.a ∈ atts ∧ q.s ∈/( result sctids ecv)},targets direction))
 
 
-class Quads(RF2_Substrate_Common):
+class Set_Quad(Set):
+    def __init__(self):
+        Set.__init__(self, Quads)
+        self._type = Quads
+
+    def has_member(self, other):
+        return isinstance(other, Quads)
+
+
+class Quads(RF2_Substrate_Common, _Instance, Set):
     _db = RelationshipDB()
     _andSTMT = "SELECT DISTINCT t1.id FROM (%s) AS t1 JOIN (%s) AS t2 ON t1.id = t2.id"
     _orSTMT = "SELECT DISTINCT t.id FROM ((%s) UNION (%s)) as t"
     _minusSTMT = "SELECT DISTINCT t1.id FROM (%s) AS t1 LEFT JOIN (%s) AS t2 ON t1.id = t2.id WHERE t2.id IS NULL"
-    _data_type = Quad
+    _data_type = RF2_Quad
 
     def __init__(self, rf: bool=False, atts: Sctids=None, eq: bool=True, ecv: Sctids=None):
         """
@@ -77,7 +87,12 @@ class Quads(RF2_Substrate_Common):
         :param ecv: sources / destinations for testing
         :return:
         """
-        super().__init__()
+        Set.__init__(self, Quads)
+        _Instance.__init__(self, RF2_Quad)
+        RF2_Substrate_Common.__init__(self)
+        self._val = self
+        self._type = Quads
+
         self._len = None                # number of elements
         self._query = "SELECT id, sourceId, typeId, destinationId, relationshipGroup FROM %s" % RelationshipDB.fname()
         self._query += " WHERE "
@@ -85,19 +100,28 @@ class Quads(RF2_Substrate_Common):
             self._query += (("typeId IN (%s)" % atts.as_sql()) if eq else
                             ("typeId NOT IN (%s)" % atts.as_sql())) + " AND "
         if ecv:
-            self._query += (("destinationId IN (%s)" % ecv.as_sql()) if rf else
-                            ("sourceId IN (%s)" % ecv.as_sql())) + " AND "
+            self._query += (("sourceId IN (%s)" % ecv.as_sql()) if rf else
+                            ("destinationId IN (%s)" % ecv.as_sql())) + " AND "
         self._query += "active=1 AND locked=0"
         self.rf = rf
 
     def to_sctids(self):
-        return Sctids(filtr=("id IN (SELECT r.sourceId FROM (%s) AS r) " % self.as_sql()) if self.rf else
-                              ("id IN (SELECT r.destinationId FROM (%s) AS r)" % self.as_sql()))
+        return Sctids(filtr=("id IN (SELECT DISTINCT r.destinationId FROM (%s) AS r) " % self.as_sql()) if self.rf else
+                            ("id IN (SELECT DISTINCT r.sourceId FROM (%s) AS r)" % self.as_sql()))
 
-    def __contains__(self, item: Quad) -> bool:
+    def __contains__(self, item: RF2_Quad) -> bool:
         query = "SELECT count(t.id) FROM %s" % RelationshipDB.fname()
         query += " WHERE " + \
                  "t.sourceId = %s AND t.destinationId = %s AND t.typeId = %s and t.relationshipGroupId = %s" % \
                  (item.s, item.t, item.a, item.g)
         query += " FROM (%s) as t" % self.as_sql()
         return int(list(self._execute_query(self._countSTMT % query))[0]) > 0
+
+    def i_required_cardinality(self, min_, max_, rf):
+        src = 'destinationId' if rf else 'sourceId'
+        sql = self.as_sql()
+        query = "SELECT u.%(src)s FROM (SELECT t.%(src)s, COUNT(t.id) AS c FROM" \
+                " (%(sql)s) AS t GROUP BY t.%(src)s) AS u WHERE " % vars()
+        query += ("u.c >= %s AND " % min_) if min_ > 1 else '1'
+        query += ("u.c <= %s" % max_) if max_ else '1'
+        return Sctids(filtr=query)
