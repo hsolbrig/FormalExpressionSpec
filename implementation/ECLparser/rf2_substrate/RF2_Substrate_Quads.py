@@ -120,8 +120,14 @@ class Quads(RF2_Substrate_Common, _Instance, Set):
     def i_required_cardinality(self, min_, max_, rf):
         src = 'destinationId' if rf else 'sourceId'
         sql = self.as_sql()
-        query = "SELECT u.%(src)s FROM (SELECT t.%(src)s, COUNT(t.id) AS c FROM" \
-                " (%(sql)s) AS t GROUP BY t.%(src)s) AS u WHERE " % vars()
-        query += ("u.c >= %s AND " % min_) if min_ > 1 else '1'
-        query += ("u.c <= %s" % max_) if max_ else '1'
-        return Sctids(filtr=query)
+        query = "SELECT DISTINCT rc.%s AS id FROM  " % src
+        if min_ <= 1 and not max_:
+            query += "(%s) " % sql
+        else:
+            query += "(SELECT c.%s, COUNT(c.id) AS c FROM (%s) AS c " % (src, sql)
+            query += "GROUP BY c.%s) WHERE "
+            query += "COUNT(c.id) >= %s" % min_ if min_ > 1 else "1"
+            query += " AND "
+            query += "COUNT(c.id) <= %s" % max_ if max_ else "1"
+        query += "AS rc"
+        return Sctids(query=query)

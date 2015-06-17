@@ -188,20 +188,20 @@ def i_attribute(ss: Substrate, att: attribute) -> Sctids_or_Error:
 # 3.5.1 attribue cardinality
 def i_att_cardinality(ss: Substrate, ocard: Optional(cardinality), qore: Quads_or_Error) -> Sctids_or_Error:
     if qore.inran('qerror'):
-        rval = Sctids_or_Error(error = qore.qerror)
+        rval = Sctids_or_Error(error=qore.qerror)
     elif ocard.is_empty:
-        rval = Sctids_or_Error(ok = i_required_cardinality(N(1), many, qore))
+        rval = Sctids_or_Error(ok=i_required_cardinality(N(1), many, qore))
     else:
         card = ocard.head
-        rval = Sctids_or_Error(ok = i_required_cardinality(card.min, card.max, qore) if card.min > 0 else \
-            i_optional_cardinality(ss, card.max, qore))
+        rval = Sctids_or_Error(ok=i_required_cardinality(card.min, card.max, qore) if card.min > 0 else \
+                                  i_optional_cardinality(ss, card.max, qore))
     return rval
 
 
 def i_required_cardinality(min_: N, max_: unlimitedNat, qore: Quads_or_Error) -> Set(sctId):
     return quads_for(qore).i_required_cardinality(int(min_),
                                                   None if max_.inran('many') else int(max_.num),
-                                                  quad_direction(qore) == targets_direction)
+                                                  quad_direction(qore) == source_direction)
 
 
 def i_optional_cardinality(ss: Substrate, max_: unlimitedNat, qore: Quads_or_Error) -> Set(sctId):
