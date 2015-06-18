@@ -31,20 +31,20 @@ from ECLparser.rf2_substrate.RF2_Substrate_Sctids import Sctids
 
 _transitive_query = "SELECT DISTINCT t1.%s AS id FROM transitive_ss AS t1 JOIN (%s) AS t2" \
                     " ON t1.%s = t2.id WHERE t1.locked = 0"
-_self_query = "SELECT * FROM %s UNION %s"
+_self_query = "SELECT u.id FROM ((%s) UNION (%s)) AS u"
 
 
-def descendants(query: Sctids) -> Sctids:
+def descendants_of(query: Sctids) -> Sctids:
     return Sctids(query=_transitive_query % ('child', query.as_sql(), 'parent'))
 
 
-def descendantsOrSelf(query: Sctids) -> Sctids:
+def descendantsOrSelf_of(query: Sctids) -> Sctids:
     return Sctids(query=_self_query % (_transitive_query % ('child', query.as_sql(), 'parent'), query.as_sql()))
 
 
-def ancestors(query: Sctids) -> Sctids:
+def ancestors_of(query: Sctids) -> Sctids:
     return Sctids(query=_transitive_query % ('parent', query.as_sql(), 'child'))
 
 
-def ancestorsOrSelf(query: Sctids) -> Sctids:
+def ancestorsOrSelf_of(query: Sctids) -> Sctids:
     return Sctids(query=_self_query % (_transitive_query % ('parent', query.as_sql(), 'child'), query.as_sql()))

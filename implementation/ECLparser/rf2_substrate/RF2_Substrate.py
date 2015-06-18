@@ -30,10 +30,13 @@ import os
 
 from ECLparser.datatypes import sctId, Sctids_or_Error, conceptReference, unknownConceptReference, attributeName,\
     attribute_concept, unknownAttributeId, refset_concept, unknownRefsetId
-from ECLparser.rf2_substrate import RF2_Substrate_Sctids, RF2_Substrate_Quads, RF2_Substrate_ConstraintOperators
+from ECLparser.rf2_substrate import RF2_Substrate_Sctids, RF2_Substrate_Quads, RF2_Substrate_ConstraintOperators,\
+    RF2_Substrate_SctidGroups
 from rf2db.db.RF2FileCommon import rf2_values
 from ECLparser.interpreter.substrate import Substrate
 
+# If True, missing concepts are ignored.  If false, they are validated
+permissive = True
 
 class RF2_Substrate(Substrate):
     def __init__(self, configfile=None):
@@ -57,7 +60,7 @@ class RF2_Substrate(Substrate):
         :param s:
         :return:
         """
-        return RF2_Substrate_Sctids.Sctids(RF2_Substrate_Sctids.Sctids(s))
+        return RF2_Substrate_Sctids.Sctids(s if permissive else RF2_Substrate_Sctids.Sctids(s))
 
     def refsets(self, _: sctId) -> RF2_Substrate_Sctids.Sctids:
         return []
@@ -69,13 +72,13 @@ class RF2_Substrate(Substrate):
         return RF2_Substrate_ConstraintOperators.ancestors(RF2_Substrate_Sctids.Sctids(s))
 
     def i_conceptReference(self, cr: conceptReference) -> Sctids_or_Error:
-        return Sctids_or_Error(ok=self.equivalent_concepts(cr.first)) if cr.first in self._concepts else \
+        return Sctids_or_Error(ok=self.equivalent_concepts(cr.first)) if permissive or cr.first in self._concepts else \
                Sctids_or_Error(error=unknownConceptReference)
 
     def i_attributeName(self, an: attributeName) -> Sctids_or_Error:
         return Sctids_or_Error(ok=self.equivalent_concepts(an.ancr.first)) \
-            if an.ancr.first in self.descendants(attribute_concept) else Sctids_or_Error(error=unknownAttributeId)
+            if permissive or an.ancr.first in self.descendants(attribute_concept) else Sctids_or_Error(error=unknownAttributeId)
 
     def i_refsetId(self, rsid: conceptReference) -> Sctids_or_Error:
         return Sctids_or_Error(ok=self.equivalent_concepts(rsid.first)) \
-            if rsid.first in self.descendants(refset_concept) else Sctids_or_Error(error=unknownRefsetId)
+            if permissive or rsid.first in self.descendants(refset_concept) else Sctids_or_Error(error=unknownRefsetId)

@@ -55,11 +55,20 @@ def main(argv: list):
                 if not result:
                     print("FAILED")
                 elif opts.interp:
-                    rval = i_expressionConstraint(ss, result)
-                    if rval.inran('ok'):
-                        print(set(rval.ok) if len(rval.ok) < 100 else ("%s items returned" % len(rval.ok)))
-                    else:
-                        print("ERROR")
+                    # try:
+                        rval = i_expressionConstraint(ss, result)
+                        if rval.inran('ok'):
+                            print(set(rval.ok) if len(rval.ok) < 100 else ("%s items returned" % len(rval.ok)))
+                        else:
+                            print("ERROR")
+                    # except Exception as e:
+                    #     print("EXCEPTION!")
+                    #     print("=" * 40)
+                    #     print(open(os.path.join(dirpath, fn)).read())
+                    #     print("-" * 40)
+                    #     print(rval.ok.as_sql())
+                    #     print(e)
+                    #     print("=" * 40)
                 else:
                     print("Success")
 

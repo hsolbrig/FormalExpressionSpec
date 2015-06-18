@@ -26,6 +26,7 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
+from ECLparser.rf2_substrate.RF2_Substrate_ConstraintOperators import descendants_of, ancestors_of
 from ECLparser.rf2_substrate.RF2_Substrate_Quads import Quads
 from ECLparser.z.z import Set, CrossProduct
 
@@ -40,17 +41,23 @@ from ECLparser.interpreter.base_types import result_sctids, bigunion
 def i_constraintOperator(ss: Substrate, oco: Optional(constraintOperator), input_: Sctids_or_Error) -> Sctids_or_Error:
     if input_.inran('error') or oco.is_empty:
         return input_
+    input_ = input_.ok
+    # TODO: Because we aren't doing equivalence, we can be sure (?) that the targets are always a singleton
     if oco.head == descendantOrSelfOf:
-        return Sctids_or_Error(ok=Set.SetInstance.bigcup(Set(sctId), [ss.descendants(id_) for id_ in
-                                                                      result_sctids(input_)]).union(result_sctids(input_)))
+        rval = input_ | descendants_of(input_)
+        # return Sctids_or_Error(ok=Set.SetInstance.bigcup(Set(sctId), [ss.descendants(id_) for id_ in
+        #                                                               result_sctids(input_)]).union(result_sctids(input_)))
     elif oco.head == descendantOf:
-        return Sctids_or_Error(ok=Set.SetInstance.bigcup(Set(sctId), [ss.descendants(id_) for id_ in
-                                                                      result_sctids(input_)]))
+        rval = descendants_of(input_)
+        # return Sctids_or_Error(ok=Set.SetInstance.bigcup(Set(sctId), ss.descendants(result_sctids(input_))))
     elif oco.head == ancestorOrSelfOf:
-        return Sctids_or_Error(ok=Set.SetInstance.bigcup(Set(sctId), [ss.ancestors(id_) for id_ in
-                                                                      result_sctids(input_)]).union(result_sctids(input_)))
+        rval = input_ | ancestors_of(input_)
+        # return Sctids_or_Error(ok=Set.SetInstance.bigcup(Set(sctId), [ss.ancestors(id_) for id_ in
+        #                                                               result_sctids(input_)]).union(result_sctids(input_)))
     else:
-        return Sctids_or_Error(ok=Set.SetInstance.bigcup(Set(sctId), [ss.ancestors(id_) for id_ in result_sctids(input_)]))
+        rval = ancestors_of(input_)
+        # return Sctids_or_Error(ok=Set.SetInstance.bigcup(Set(sctId), [ss.ancestors(id_) for id_ in result_sctids(input_)]))
+    return Sctids_or_Error(ok=rval)
 
 # Completefun isn't used in this situation, as we leave it to the ancestors/descendants function to address this
 
@@ -65,7 +72,6 @@ def i_expressionComparisonOperator(ss: Substrate, rf: Optional(reverseFlag), att
         return Quads_or_Error(qerror=ecv.error)
     else:
         a = Quads(not rf.is_empty, atts, ec.first == eco_eq, ecv.ok)
-        Set(Quad).has_member(a)
         b = CrossProduct(Set(Quad), direction)(a, source_direction if not rf.is_empty else targets_direction)
         c = Quads_or_Error(quad_value=b)
         return c

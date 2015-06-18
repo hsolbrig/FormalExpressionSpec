@@ -38,7 +38,7 @@ from ECLparser.datatypes import source_direction, Optional, cardinality, express
     compoundExpressionConstraint, conjunctionExpressionConstraint, disjunctionExpressionConstraint, \
     exclusionExpressionConstraint, subExpressionConstraint, refinement, conjunctionRefinementSet, \
     disjunctionRefinementSet, subRefinement, attributeSet, conjunctionAttributeSet, disjunctionAttributeSet, \
-    subAttributeSet, attribute, expressionConstraintValue, attributeGroup, sctIdGroup, targets_direction
+    subAttributeSet, attribute, expressionConstraintValue, attributeGroup, sctIdGroup
 
 from ECLparser.test_substrate.substrate import Substrate, Sctids_or_Error
 
@@ -106,9 +106,12 @@ def i_subExpressionConstraint(ss: Substrate, sec: subExpressionConstraint) -> Sc
 def i_refinement(ss: Substrate, rfnment: refinement) -> Sctids_or_Error:
     lhs = i_subRefinement(ss, rfnment.first)
     rhs = rfnment.second
-    return lhs if rhs.is_empty else \
-           intersect(lhs, i_conjunctionRefinementSet(ss, rhs.head.refine_conjset)) if rhs.head.inran('refine_conjset') else \
-           union(lhs, i_disjunctionRefinementSet(ss, rhs.head.refine_disjset))
+    if rhs.is_empty or lhs.inran('error'):
+        return lhs
+    if rhs.head.inran('refine_conjset'):
+        return intersect(lhs, i_conjunctionRefinementSet(ss, rhs.head.refine_conjset))
+    else:
+        return union(lhs, i_disjunctionRefinementSet(ss, rhs.head.refine_disjset))
 
 
 # 3.3.1 conjunctionRefinementSet
@@ -125,9 +128,12 @@ def i_disjunctionRefinementSet(ss: Substrate, disjset: disjunctionRefinementSet)
 
 # 3.3.3 subRefinement
 def i_subRefinement(ss: Substrate, subrefine: subRefinement) -> Sctids_or_Error:
-    return i_attributeSet(ss, subrefine.subrefine_attset) if subrefine.inran('subrefine_attset') else \
-           i_attributeGroup(ss, subrefine.subrefine_attgroup) if subrefine.inran('subrefine_attgroup') else \
-           i_refinement(ss, subrefine.subrefine_refinement)
+    if subrefine.inran('subrefine_attset'):
+        return i_attributeSet(ss, subrefine.subrefine_attset)
+    elif subrefine.inran('subrefine_attgroup'):
+        return i_attributeGroup(ss, subrefine.subrefine_attgroup)
+    else:
+        return i_refinement(ss, subrefine.subrefine_refinement)
 
 
 # 3.4 attributeSet
@@ -141,10 +147,12 @@ def i_subRefinement(ss: Substrate, subrefine: subRefinement) -> Sctids_or_Error:
 def i_attributeSet(ss: Substrate, attset: attributeSet) -> Sctids_or_Error:
     lhs = i_subAttributeSet(ss, attset.first)
     rhs = attset.second
-    return lhs if rhs.is_empty or lhs.inran('error') else \
-           intersect(lhs, i_conjunctionAttributeSet(ss, rhs.head.attset_conjattset)) \
-               if rhs.head.inran('attset_conjattset') else \
-           union(lhs, i_disjunctionAttributeSet(ss, rhs.head.attset.disjattset))
+    if rhs.is_empty or lhs.inran('error'):
+        return lhs
+    elif rhs.head.inran('attset_conjattset'):
+        return intersect(lhs, i_conjunctionAttributeSet(ss, rhs.head.attset_conjattset))
+    else:
+        return union(lhs, i_disjunctionAttributeSet(ss, rhs.head.attset.disjattset))
 
 
 # 3.4.1 conjunctionAttributeSet
@@ -161,8 +169,10 @@ def i_disjunctionAttributeSet(ss: Substrate, disjset: disjunctionAttributeSet) -
 
 # 3.4.3 subAttributeSet
 def i_subAttributeSet(ss: Substrate, subaset: subAttributeSet) -> Sctids_or_Error:
-    return i_attribute(ss, subaset.subaset_attribute) if subaset.inran('subaset_attribute') else \
-           i_attributeSet(ss, subaset.subast_attset)
+    if subaset.inran('subaset_attribute'):
+        return i_attribute(ss, subaset.subaset_attribute)
+    else:
+        return i_attributeSet(ss, subaset.subast_attset)
 
 
 # 3.5 attribute
@@ -193,8 +203,8 @@ def i_att_cardinality(ss: Substrate, ocard: Optional(cardinality), qore: Quads_o
         rval = Sctids_or_Error(ok=i_required_cardinality(N(1), many, qore))
     else:
         card = ocard.head
-        rval = Sctids_or_Error(ok=i_required_cardinality(card.min, card.max, qore) if card.min > 0 else \
-                                  i_optional_cardinality(ss, card.max, qore))
+        rval = Sctids_or_Error(ok=i_required_cardinality(card.min_, card.max_, qore) if card.min_ > 0 else
+                               i_optional_cardinality(ss, card.max_, qore))
     return rval
 
 
@@ -205,18 +215,16 @@ def i_required_cardinality(min_: N, max_: unlimitedNat, qore: Quads_or_Error) ->
 
 
 def i_optional_cardinality(ss: Substrate, max_: unlimitedNat, qore: Quads_or_Error) -> Set(sctId):
-    if quad_direction(qore) == source_direction:
-        minus(ss.concepts, minus(Set(sctId)([q.s for q in quads_for(qore).v]), i_required_cardinality(N(0), max_, qore)))
-    else:
-        minus(ss.concepts, minus(Set(sctId)([q.t.t_sctid for q in quads_for(qore).v
-                                             if q.t.inran('t_sctid')]), i_required_cardinality(N(0), max_, qore)))
+    return quads_for(qore).i_optional_cardinality(ss,
+                                                  None if max_.inran('many') else int(max_.num),
+                                                  quad_direction(qore) == source_direction)
 
 
 # 3.5.2 espressionConstraintValue
 def i_expressionConstraintValue(ss: Substrate, ecv: expressionConstraintValue) -> Sctids_or_Error:
     return i_simpleExpressionConstraint(ss, ecv.expression_simple) if ecv.inran('expression_simple') else \
-           i_refinedExpressionConstraint(ss, ecv.expression_refined) if ecv.inran('expression_refined') else \
-           i_compoundExpressionConstraint(ss, ecv.expression_compound)
+        i_refinedExpressionConstraint(ss, ecv.expression_refined) if ecv.inran('expression_refined') else \
+        i_compoundExpressionConstraint(ss, ecv.expression_compound)
 
 
 # 3.6 attributeGroup
@@ -226,18 +234,25 @@ def i_attributeGroup(ss: Substrate, ag: attributeGroup) -> Sctids_or_Error:
 
 # 3.6.1 attribute group cardinality
 def i_group_cardinality(ss: Substrate, ocard: Optional(cardinality), idg: sctIdGroups_or_Error) -> Sctids_or_Error:
-    return Sctids_or_Error(error=idg.gerror) if idg.inran('gerror') else \
-           Sctids_or_Error(ok=i_required_group_cardinality(N(1), many, idg.group_value)) if ocard.is_empty else \
-           Sctids_or_Error(ok=i_required_group_cardinality(ocard.head.min, ocard.head.max,
-                                                            idg.group_value)) if ocard.head.min > 0 else \
-           Sctids_or_Error(ok=i_optional_group_cardinality(ss, ocard.head.max, idg.group_value))
+    if idg.inran('gerror'):
+        return Sctids_or_Error(error=idg.gerror)
+    gv = idg.group_value
+    if ocard.is_empty:
+        rval = gv.i_required_group_cardinality(N(1), many, idg.group_value)
+    else:
+        card = ocard.head
+        if card.min_ > 0:
+            rval = gv.i_required_group_cardinality(card.min_, card.max_, idg.group_value)
+        else:
+            rval = gv.i_optional_group_cardinality(ss, card.max_, idg.group_value)
+    return Sctids_or_Error(ok=rval)
 
-
+# not called in RF2 substrate
 def i_required_group_cardinality(min_: N, max_: unlimitedNat, groups: Set(sctIdGroup)) -> Set(sctId):
     return Set(sctId)(
         [s.first for s in groups.v if evalCardinality(min_, max_, [g for g in groups.v if g.first == s.first])])
 
-
+# not called in RF2 substrate
 def i_optional_group_cardinality(ss: Substrate, max_: unlimitedNat, groups: Set(sctId)) -> Set(sctId):
     return Set(sctId)(
         minus(ss.concepts, minus(Set(sctId)([s.first for s in groups]),
@@ -290,13 +305,21 @@ def i_groupAttribute(ss: Substrate, att: attribute) -> sctIdGroups_or_Error:
 
 # 3.6.7 cardinality inside a group
 def i_att_group_cardinality(ss: Substrate, ocard: Optional(cardinality), qore: Quads_or_Error) -> sctIdGroups_or_Error:
-    return sctIdGroups_or_Error(gerror=qore.qerror) if qore.inran('qerror') else \
-           sctIdGroups_or_Error(group_value=i_required_att_group_cardinality(N(1), many, qore)) if ocard.is_empty else \
-           sctIdGroups_or_Error(group_value=i_required_att_group_cardinality(ocard.head.min, ocard.head.max,
-                                                                              qore)) if ocard.head.min > 0 else \
-           sctIdGroups_or_Error(group_value=i_optional_att_group_cardinality(ss, ocard.head.max, qore))
+    if qore.inran('qerror'):
+        return sctIdGroups_or_Error(error=qore.qerror)
+    qv = quads_for(qore)
+    if ocard.is_empty:
+        rval = qv.i_required_att_group_cardinality(N(1), many, qore)
+    else:
+        card = ocard.head
+        if card.min_ > 0:
+            rval = qv.i_required_att_group_cardinality(card.min_, card.max_, qore)
+        else:
+            rval = qv.i_optional_att_group_cardinality(ss, card.max_, qore)
+    return sctIdGroups_or_Error(group_value=rval)
 
 
+# Should not get called in RF2 substrate
 def i_required_att_group_cardinality(min_: N, max_: unlimitedNat, qore: Quads_or_Error) -> Set(sctIdGroup):
     if quad_direction(qore) == source_direction:
         nzg = set([q for q in quads_for(qore).v if q.g != zero_group])
@@ -314,6 +337,7 @@ def i_required_att_group_cardinality(min_: N, max_: unlimitedNat, qore: Quads_or
         return Set(sctIdGroup(nzg_pass + zg_pass))
 
 
+# should not get called in RF2 substrate
 def i_optional_att_group_cardinality(ss: Substrate, max_: unlimitedNat, qore: Quads_or_Error) -> Set(sctIdGroup):
     if quad_direction(qore) == source_direction:
         return Set(sctIdGroup)(minus([sctIdGroup(rel.s, quadGroup(rel)) for rel in ss.relationships],

@@ -52,7 +52,7 @@ class RF2_Substrate_Common:
         return db
 
     def as_sql(self):
-        return self._query
+        return '\n' + self._query + '\n'
 
     def __len__(self) -> int:
         """
@@ -107,6 +107,9 @@ class RF2_Substrate_Common:
         """
         return type(self)(query=self._andSTMT % (self._query, other.as_sql()))
 
+    def intersect(self, other):
+        return self & other
+
     def __or__(self, other):
         """ Return the union of the sctids in self and other
         :param other: a generator for a set of sctids
@@ -114,8 +117,14 @@ class RF2_Substrate_Common:
         """
         return type(self)(query=self._orSTMT % (self._query, other.as_sql()))
 
+    def union(self, other):
+        return self | other
+
     def __sub__(self, other):
         return type(self)(query=self._minusSTMT % (self._query, other.as_sql()))
+
+    def minus(self, other):
+        return self - other
 
     def __xor__(self, other):
         return (self | other) - (self & other)

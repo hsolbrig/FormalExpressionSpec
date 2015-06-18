@@ -235,10 +235,12 @@ class Set(_MetaType):
     def has_member(self, other):
         if isinstance(other, Set.SetInstance):
             other = other.v
-        return ((isinstance(self._type, _MetaType) and all(self._type.has_member(v) for v in other)) or
+        # TODO: type checking loosened to prevent unnecessary queries
+        # return ((isinstance(self._type, _MetaType) and all(self._type.has_member(v) for v in other)) or
+        return (isinstance(self._type, _MetaType) or
                 (isinstance(self._type, type) and issubclass(self._type, _Z_Builtin) and all(
-                    self._type.has_member(v) for v in other)) or
-                all(isinstance(v, self._type) for v in other)) and len(other) >= self.minlen
+                    self._type.has_member(v) for v in other)) or True)
+                # all(isinstance(v, self._type) for v in other)) and len(other) >= self.minlen
 
     class SetInstance(_Instance):
         def __init__(self, cls, *val):

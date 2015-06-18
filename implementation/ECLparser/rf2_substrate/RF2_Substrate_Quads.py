@@ -27,6 +27,7 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 from ECLparser.datatypes import Quad, sctId, target, groupId
+from ECLparser.rf2_substrate.RF2_Substrate_SctidGroups import SctidGroups
 
 from ECLparser.rf2_substrate.RF2_Substrate_Sctids import Sctids
 from ECLparser.rf2_substrate.RF2_Substrate_Common import *
@@ -75,16 +76,17 @@ class Quads(RF2_Substrate_Common, _Instance, Set):
     _db = RelationshipDB()
     _andSTMT = "SELECT DISTINCT t1.id FROM (%s) AS t1 JOIN (%s) AS t2 ON t1.id = t2.id"
     _orSTMT = "SELECT DISTINCT t.id FROM ((%s) UNION (%s)) as t"
-    _minusSTMT = "SELECT DISTINCT t1.id FROM (%s) AS t1 LEFT JOIN (%s) AS t2 ON t1.id = t2.id WHERE t2.id IS NULL"
+    _minusSTMT = "SELECT DISTINCT t1.id FROM (%s) AS t1 WHERE t1.id NOT IN (%s)"
     _data_type = RF2_Quad
 
-    def __init__(self, rf: bool=False, atts: Sctids=None, eq: bool=True, ecv: Sctids=None):
+    def __init__(self, rf: bool=False, atts: Sctids=None, eq: bool=True, ecv: Sctids=None, query=None):
         """
         Construct a set of quads from
         :param rf: reverse flag.  If true ecv applies to source.  If false, destination
         :param atts: attributes (types)
         :param eq: If true, test for equal, if false, for not equal
         :param ecv: sources / destinations for testing
+        :param query:  query to use instead of constructing.  Still need rf
         :return:
         """
         Set.__init__(self, Quads)
@@ -94,40 +96,68 @@ class Quads(RF2_Substrate_Common, _Instance, Set):
         self._type = Quads
 
         self._len = None                # number of elements
-        self._query = "SELECT id, sourceId, typeId, destinationId, relationshipGroup FROM %s" % RelationshipDB.fname()
-        self._query += " WHERE "
-        if atts:
-            self._query += (("typeId IN (%s)" % atts.as_sql()) if eq else
-                            ("typeId NOT IN (%s)" % atts.as_sql())) + " AND "
-        if ecv:
-            self._query += (("sourceId IN (%s)" % ecv.as_sql()) if rf else
-                            ("destinationId IN (%s)" % ecv.as_sql())) + " AND "
-        self._query += "active=1 AND locked=0"
+        if query:
+            self._query = query
+        else:
+            self._query = "SELECT id, sourceId, typeId, destinationId, gid FROM %s" % RelationshipDB.fname() + '_ext'
+            self._query += " WHERE "
+            if atts is not None:
+                self._query += (("typeId IN (%s)" % atts.as_sql()) if eq else
+                                ("typeId NOT IN (%s)" % atts.as_sql())) + " AND "
+            if ecv is not None:
+                self._query += (("sourceId IN (%s)" % ecv.as_sql()) if rf else
+                                ("destinationId IN (%s)" % ecv.as_sql())) + " AND "
+            self._query += "active=1 AND locked=0"
         self.rf = rf
 
     def to_sctids(self):
-        return Sctids(filtr=("id IN (SELECT DISTINCT r.destinationId FROM (%s) AS r) " % self.as_sql()) if self.rf else
-                            ("id IN (SELECT DISTINCT r.sourceId FROM (%s) AS r)" % self.as_sql()))
+        return Sctids(filtr=("id IN (SELECT DISTINCT r.destinationId as id FROM (%s) AS r) " % self.as_sql()) if self.rf else
+                            ("id IN (SELECT DISTINCT r.sourceId as id FROM (%s) AS r)" % self.as_sql()))
+
+    def to_SctidGroups(self, rf):
+        return SctidGroups(query=self.as_sql(), rf=rf)
 
     def __contains__(self, item: RF2_Quad) -> bool:
         query = "SELECT count(t.id) FROM %s" % RelationshipDB.fname()
         query += " WHERE " + \
-                 "t.sourceId = %s AND t.destinationId = %s AND t.typeId = %s and t.relationshipGroupId = %s" % \
+                 "t.sourceId = %s AND t.destinationId = %s AND t.typeId = %s and t.gid = %s" % \
                  (item.s, item.t, item.a, item.g)
         query += " FROM (%s) as t" % self.as_sql()
         return int(list(self._execute_query(self._countSTMT % query))[0]) > 0
 
+    # Convert Quads to Sctids
     def i_required_cardinality(self, min_, max_, rf):
         src = 'destinationId' if rf else 'sourceId'
         sql = self.as_sql()
         query = "SELECT DISTINCT rc.%s AS id FROM  " % src
         if min_ <= 1 and not max_:
-            query += "(%s) " % sql
+            query += "(%s) AS rc" % sql
         else:
-            query += "(SELECT c.%s, COUNT(c.id) AS c FROM (%s) AS c " % (src, sql)
-            query += "GROUP BY c.%s) WHERE "
-            query += "COUNT(c.id) >= %s" % min_ if min_ > 1 else "1"
+            query += "(SELECT c.%s, count(c.id) AS cnt FROM (%s) AS c " % (src, sql)
+            query += "GROUP BY c.%s) AS rc WHERE " % src
+            query += "rc.cnt >= %s" % min_ if min_ > 1 else "1"
             query += " AND "
-            query += "COUNT(c.id) <= %s" % max_ if max_ else "1"
-        query += "AS rc"
+            query += "rc.cnt <= %s" % max_ if max_ and max_.inran('num') else "1"
         return Sctids(query=query)
+
+    # Convert quads to Sctids
+    def i_optional_cardinality(self, ss, max_, rf):
+        return Sctids() - (Sctids(query=self.as_sql()) - self.i_required_cardinality(0, max_, rf))
+
+    # Convert Quads to SctidGroups
+    def i_required_att_group_cardinality(self, min_, max_, rf):
+        src = 'destinationId' if rf else 'sourceId'
+        if min_ <= 1 and not max_ or max_.inran('many'):        # no further
+            query = self.as_sql()
+        else:
+            query = "SELECT DISTINCT rc.%s AS id, rc.gid FROM " % src
+            query += "(SELECT %s, gid, count(rc.id) as cnt FROM (%s) AS rc" % (src, self.as_sql())
+            query += " GROUP BY %s, gid) WHERE " % src
+            query += " rc.cnt >= %s " % min_ if min_ > 1 else "1"
+            query += " AND rc.cnt <= %s " % max_ if max_ and max_.inran('num') else ''
+        return SctidGroups(query=query, rf=rf)
+
+    # Convert Quads to SctidGroups
+    def i_optional_att_group_cardinality(self, ss, max_, rf):
+        return SctidGroups(rf=rf) - (SctidGroups(query=self.as_sql(), rf=rf) -
+                                     self.i_required_att_group_cardinality(0, max_, rf))

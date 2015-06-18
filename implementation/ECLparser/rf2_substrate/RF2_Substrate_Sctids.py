@@ -42,7 +42,7 @@ def _v(**kwargs):
 _countSTMT = "SELECT count(t.id) FROM (%s) AS t"
 _andSTMT = "SELECT DISTINCT t1.id FROM (%s) AS t1 JOIN (%s) AS t2 ON t1.id = t2.id"
 _orSTMT = "SELECT DISTINCT t.id FROM ((%s) UNION (%s)) as t"
-_minusSTMT = "SELECT DISTINCT t1.id FROM (%s) AS t1 LEFT JOIN (%s) AS t2 ON t1.id = t2.id WHERE t2.id IS NULL"
+_minusSTMT = "SELECT DISTINCT t1.id FROM (%s) AS t1 WHERE t1.id NOT IN (%s)"
 
 class Set_Sctids(Set):
     def __init__(self):
@@ -88,7 +88,7 @@ class Sctids(_Instance, Set):
         return db.ResultsGenerator(db)
 
     def as_sql(self):
-        return self._query
+        return '\n' + self._query + '\n'
 
     def __len__(self) -> int:
         """

@@ -106,19 +106,19 @@ def bigintersect(x: Seq(Sctids_or_Error)) -> Sctids_or_Error:
 def gunion(x: sctIdGroups_or_Error, y: sctIdGroups_or_Error) -> sctIdGroups_or_Error:
     if x.inran('error') or y.inran('error'):
         return first_error(Seq(Sctids_or_Error)(x, y))
-    return x.group_value.union(y.group_value)
+    return sctIdGroups_or_Error(group_value=x.group_value.union(y.group_value))
 
 
 def gintersect(x: sctIdGroups_or_Error, y: sctIdGroups_or_Error) -> sctIdGroups_or_Error:
     if x.inran('gerror') or y.inran('gerror'):
         return gfirst_error(Seq(sctIdGroups_or_Error)(x, y))
-    return x.group_value.intersect(y.group_value)
+    return sctIdGroups_or_Error(group_value=x.group_value.intersect(y.group_value))
 
 
 def gminus(x: Sctids_or_Error, y: Sctids_or_Error) -> Sctids_or_Error:
     if x.inran('gerror') or y.inran('gerror'):
         return gfirst_error(Seq(sctIdGroups_or_Error)(x, y))
-    return x.group_value.intersect(y.group_value)
+    return sctIdGroups_or_Error(group_value=x.group_value.intersect(y.group_value))
 
 
 # B Generic cardinality evaluation
