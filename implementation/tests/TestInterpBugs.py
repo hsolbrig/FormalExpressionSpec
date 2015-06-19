@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2014, Mayo Clinic
+# Copyright (c) 2015, Mayo Clinic
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification,
@@ -28,11 +28,17 @@
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import unittest
+from ECLparser.interpreter.base_types import union, intersect
+from ECLparser.z.z import Set
+from ECLparser.datatypes import sctId, Sctids_or_Error
+from ECLparser.rf2_substrate.RF2_Substrate import RF2_Substrate
 
 
-class MyTestCase(unittest.TestCase):
-    def test_something(self):
-        self.assertEqual(True, False)
+
+class InterpTestCase(unittest.TestCase):
+    def test_empty_seq(self):
+        x = Sctids_or_Error(ok=RF2_Substrate().refsets(16))
+        print(union(x, x))
 
 
 if __name__ == '__main__':

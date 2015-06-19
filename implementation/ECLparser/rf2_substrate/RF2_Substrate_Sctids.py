@@ -27,6 +27,7 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 from collections import Container, Sized
+import re
 
 from rf2db.db.RF2ConceptFile import ConceptDB
 from ECLparser.datatypes import sctid
@@ -35,14 +36,18 @@ from ECLparser.z.z import Set, _Instance
 
 concdb = ConceptDB()
 
+def fmt(txt):
+    return re.sub(r'\s+', ' ', str(txt))[:20]
+
 
 def _v(**kwargs):
     return kwargs
 
-_countSTMT = "SELECT count(t.id) FROM (%s) AS t"
-_andSTMT = "SELECT DISTINCT t1.id FROM (%s) AS t1 JOIN (%s) AS t2 ON t1.id = t2.id"
-_orSTMT = "SELECT DISTINCT t.id FROM ((%s) UNION (%s)) as t"
-_minusSTMT = "SELECT DISTINCT t1.id FROM (%s) AS t1 WHERE t1.id NOT IN (%s)"
+_countSTMT = "SELECT COUNT(cnt_sctid.id) FROM (%s) AS cnt_sctid"
+_andSTMT = "SELECT DISTINCT and_sctid1.id FROM (%s) AS and_sctid1 JOIN (%s) AS and_sctid2 " \
+           "ON and_sctid1.id = and_sctid2.id"
+_orSTMT = "SELECT DISTINCT or_sctid.id FROM ((%s) UNION (%s)) as or_sctid"
+_minusSTMT = "SELECT DISTINCT minus_sctid.id FROM (%s) AS minus_sctid WHERE minus_sctid.id NOT IN (%s)"
 
 class Set_Sctids(Set):
     def __init__(self):
@@ -66,12 +71,16 @@ class Sctids(_Instance, Set):
         self._val = self
         self._type = sctid
         self._len = None                # number of elements
+
         if query is not None:
             self._query = query
         else:
             if filtr is not None and not isinstance(filtr, str):
                 sctid_list = filtr if isinstance(filtr, Container) else [filtr]
-                filtr = 'id IN (' + ','.join(str(e) for e in sctid_list) + ')'
+                if sctid_list:
+                    filtr = 'id IN (' + ','.join(str(e) for e in sctid_list) + ')'
+                else:
+                    filtr = ' False '
             self._query = concdb.buildQuery(**self._build_parms(filtr))
 
     @staticmethod
@@ -88,7 +97,7 @@ class Sctids(_Instance, Set):
         return db.ResultsGenerator(db)
 
     def as_sql(self):
-        return '\n' + self._query + '\n'
+        return self._query
 
     def __len__(self) -> int:
         """

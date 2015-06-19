@@ -42,11 +42,12 @@ class SctidGroup:
 
 class SctidGroups(RF2_Substrate_Common):
     _db = RelationshipDB()
-    _andSTMT = "SELECT DISTINCT sg1.id, sg1.gid FROM (%s) AS sg1 JOIN" \
-               " (%s) AS sg2 ON sg1.id = sg2.id AND sg1.gid = sg2.gid"
-    _orSTMT = "SELECT DISTINCT sg.id, sg.gid FROM ((%s) UNION (%s)) as sg"
-    _minusSTMT = "SELECT DISTINCT sg1.id, sg1.gid FROM (%s) AS sg1 LEFT JOIN " \
-                 "(%s) AS sg2 ON sg1.id = sg2.id AND sg1.gid = sg2.gid WHERE sg2.id IS NULL"
+    _andSTMT = "SELECT DISTINCT sg_and1.id, sg_and1.gid FROM (%s) AS sg_and1 JOIN" \
+               " (%s) AS sg_and2 ON sg_and1.id = sg_and2.id AND sg_and1.gid = sg_and2.gid"
+    _orSTMT = "SELECT DISTINCT sg_or.id, sg_or.gid FROM ((%s) UNION (%s)) as sg_or"
+    _minusSTMT = "SELECT DISTINCT sg_minus1.id, sg_minus1.gid FROM (%s) AS sg_minus1 LEFT JOIN " \
+                 "(%s) AS sg_minus2 ON sg_minus1.id = sg_minus2.id AND " \
+                 "sg_minus1.gid = sg_minus2.gid WHERE sg_minus2.id IS NULL"
     _data_type = SctidGroup
 
     def __init__(self, query=None, rf: bool=None):
@@ -69,18 +70,18 @@ class SctidGroups(RF2_Substrate_Common):
         sord = 'destinationId' if rf else 'sourceId'
 
         if query is not None:
-            self._query = "SELECT DISTINCT r.id, gid"
-            self._query += " FROM (%s) AS r" % query
+            self._query = "SELECT DISTINCT idg.id, idg.gid"
+            self._query += " FROM (%s) AS idg" % query
         else:
-            self._query = "SELECT DISTINCT r.%s AS id, gid" % sord
-            self._query += " FROM %s AS r WHERE active=1 AND locked=0" % RelationshipDB.fname() + '_ext'
+            self._query = "SELECT DISTINCT idg.%s AS id, idg.gid" % sord
+            self._query += " FROM %s AS idg WHERE active=1 AND locked=0" % RelationshipDB.fname() + '_ext'
 
     def to_sctids(self):
-        return Sctids(filtr=("id in (select sg.id from (%s) as sg) " % self.as_sql()))
+        return Sctids(filtr=("id in (select to_sctid.id from (%s) as to_sctid) " % self.as_sql()))
 
     def __contains__(self, item: SctidGroup) -> bool:
         query = self._countSTMT % self.as_sql()
-        query += " WHERE sg.id = %s AND sg.gid = %s" % (item.sctid, item.group)
+        query += " WHERE id = %s AND gid = %s" % (item.sctid, item.group)
         return int(list(self._execute_query(self._countSTMT % query))[0]) > 0
 
     def __and__(self, other):
@@ -101,22 +102,21 @@ class SctidGroups(RF2_Substrate_Common):
         return SctidGroups(query=self._minusSTMT % (self._query, other.as_sql()), rf=self._rf)
 
     # Convert SctidGroups to Sctids
-    def i_required_group_cardinality(self, min_, max_, rf):
-        src = 'destinationId' if rf else 'sourceId'
+    def i_required_group_cardinality(self, min_, max_):
         sql = self.as_sql()
 
-        if min_ <= 1 and not max_:
-            query = "SELECT DISTINCT rc.%s AS id FROM  " % src
-            query += "(%s) " % sql
+        if min_ <= 1 and not max_ or max_.inran('many'):
+            query = "SELECT DISTINCT rg_card.id FROM  "
+            query += "(%s) AS rg_card " % sql
         else:
-            query = "SELECT DISTINCT rc.id FROM  "
+            query = "SELECT DISTINCT rg_card1.id FROM  "
             query += "(SELECT id, count(gid) as cnt FROM (%s) " % sql
-            query += "AS ig GROUP BY ig.id) as rc WHERE "
-            query += "rc.cnt >= %s" % (min_ if min_ > 1 else "1")
-            query += " AND ig.cnt <= %s" % max_ if max_ and max_.inran('num') else ''
+            query += "AS rg_card2 GROUP BY id) as rg_card1 WHERE "
+            query += ("rg_card1.cnt >= %s" % min_) if min_ > 1 else "1"
+            query += " AND rg_card1.cnt <= %s" % max_ if max_ and max_.inran('num') else ''
         return Sctids(query=query)
 
     # Convert SctidGroups to Sctids
-    def i_optional_group_cardinality(self, ss, max_, rf):
+    def i_optional_group_cardinality(self, ss, max_):
         # Return all concepts that don't fail the cardinality test
-        return Sctids() - (self.to_sctids() - self.i_required_group_cardinality(0, max_, rf))
+        return Sctids() - (self.to_sctids() - self.i_required_group_cardinality(0, max_))

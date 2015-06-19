@@ -1,0 +1,6 @@
+// Substrate: 20150131
+// Timestamp: 
+// Result: Exception
+
+< 404684003 |clinical finding|: 
+[2..*] 363698007 |finding site| = < 91723000 |anatomical structure|

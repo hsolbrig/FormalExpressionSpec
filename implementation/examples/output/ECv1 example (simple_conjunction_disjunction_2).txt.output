@@ -1,0 +1,35 @@
+// Substrate: 20150131
+// Timestamp: 
+// Result: Pass
+
+< 19829001 |disorder of lung| and < 301867009 |edema of trunk|
+// Result: {233707008, 698640000, 233712009, 162970000, 700458001, 233706004, 19242006,
+// 46847001, 233711002, 233705000, 196153002, 233710001, 698638005, 360371003,
+// 196152007, 40541001, 95437004, 233709006, 276637009, 196151000, 89687005,
+// 10519008, 405276000, 233708003, 11468004, 61233003, 67782005}
+//
+// Length=27
+
+// ============================================================
+//SELECT DISTINCT and_sctid1.id
+// FROM
+//   (SELECT DISTINCT tt1.child AS id
+//    FROM transitive_ss AS tt1
+//    JOIN
+//      (SELECT id
+//       FROM concept_ss
+//       WHERE active=1
+//         AND locked = 0
+//         AND (id IN (19829001))) AS tt2 ON tt1.parent = tt2.id
+//    WHERE tt1.locked = 0) AS and_sctid1
+// JOIN
+//   (SELECT DISTINCT tt1.child AS id
+//    FROM transitive_ss AS tt1
+//    JOIN
+//      (SELECT id
+//       FROM concept_ss
+//       WHERE active=1
+//         AND locked = 0
+//         AND (id IN (301867009))) AS tt2 ON tt1.parent = tt2.id
+//    WHERE tt1.locked = 0) AS and_sctid2 ON and_sctid1.id = and_sctid2.id
+// ============================================================

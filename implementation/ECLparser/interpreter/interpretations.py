@@ -53,7 +53,7 @@ def i_expressionConstraint(ss: Substrate, ec: expressionConstraint) -> Sctids_or
 
 # 3.2.1 unrefinedExpressionConstraint
 def i_unrefinedExpressionConstraint(ss: Substrate, uec: unrefinedExpressionConstraint) -> Sctids_or_Error:
-    return i_compoundExpressionConstraint(ss, uec.unrefined_compund) if uec.inran('unrefined_compound') else \
+    return i_compoundExpressionConstraint(ss, uec.unrefined_compound) if uec.inran('unrefined_compound') else \
         i_simpleExpressionConstraint(ss, uec.unrefined_simple)
 
 
@@ -238,13 +238,13 @@ def i_group_cardinality(ss: Substrate, ocard: Optional(cardinality), idg: sctIdG
         return Sctids_or_Error(error=idg.gerror)
     gv = idg.group_value
     if ocard.is_empty:
-        rval = gv.i_required_group_cardinality(N(1), many, idg.group_value)
+        rval = gv.i_required_group_cardinality(N(1), many)
     else:
         card = ocard.head
         if card.min_ > 0:
-            rval = gv.i_required_group_cardinality(card.min_, card.max_, idg.group_value)
+            rval = gv.i_required_group_cardinality(card.min_, card.max_)
         else:
-            rval = gv.i_optional_group_cardinality(ss, card.max_, idg.group_value)
+            rval = gv.i_optional_group_cardinality(ss, card.max_)
     return Sctids_or_Error(ok=rval)
 
 # not called in RF2 substrate
@@ -308,14 +308,15 @@ def i_att_group_cardinality(ss: Substrate, ocard: Optional(cardinality), qore: Q
     if qore.inran('qerror'):
         return sctIdGroups_or_Error(error=qore.qerror)
     qv = quads_for(qore)
+    rf = quad_direction(qore) == source_direction
     if ocard.is_empty:
-        rval = qv.i_required_att_group_cardinality(N(1), many, qore)
+        rval = qv.i_required_att_group_cardinality(N(1), many, rf)
     else:
         card = ocard.head
         if card.min_ > 0:
-            rval = qv.i_required_att_group_cardinality(card.min_, card.max_, qore)
+            rval = qv.i_required_att_group_cardinality(card.min_, card.max_, rf)
         else:
-            rval = qv.i_optional_att_group_cardinality(ss, card.max_, qore)
+            rval = qv.i_optional_att_group_cardinality(ss, card.max_, rf)
     return sctIdGroups_or_Error(group_value=rval)
 
 

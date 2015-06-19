@@ -1,0 +1,46 @@
+// Substrate: 20150131
+// Timestamp: 
+// Result: Pass
+
+descendantOf 105590001 |substance|: 
+reverseOf 127489000 |has active ingredient| = 111115 |TRIPHASIL tablet|
+// Result: set()
+//
+// Length=0
+
+// ============================================================
+//SELECT DISTINCT and_sctid1.id
+// FROM
+//   (SELECT DISTINCT tt1.child AS id
+//    FROM transitive_ss AS tt1
+//    JOIN
+//      (SELECT id
+//       FROM concept_ss
+//       WHERE active=1
+//         AND locked = 0
+//         AND (id IN (105590001))) AS tt2 ON tt1.parent = tt2.id
+//    WHERE tt1.locked = 0) AS and_sctid1
+// JOIN
+//   (SELECT DISTINCT rc_1.destinationId AS id
+//    FROM
+//      (SELECT id,
+//              sourceId,
+//              typeId,
+//              destinationId,
+//              gid
+//       FROM relationship_ss_ext
+//       WHERE typeId IN
+//           (SELECT id
+//            FROM concept_ss
+//            WHERE active=1
+//              AND locked = 0
+//              AND (id IN (127489000)))
+//         AND sourceId IN
+//           (SELECT id
+//            FROM concept_ss
+//            WHERE active=1
+//              AND locked = 0
+//              AND (id IN (111115)))
+//         AND active=1
+//         AND locked=0) AS rc_1) AS and_sctid2 ON and_sctid1.id = and_sctid2.id
+// ============================================================

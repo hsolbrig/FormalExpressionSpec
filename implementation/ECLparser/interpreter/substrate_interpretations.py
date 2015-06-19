@@ -28,7 +28,7 @@
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 from ECLparser.rf2_substrate.RF2_Substrate_ConstraintOperators import descendants_of, ancestors_of
 from ECLparser.rf2_substrate.RF2_Substrate_Quads import Quads
-from ECLparser.z.z import Set, CrossProduct
+from ECLparser.z.z import Set, CrossProduct, Seq
 
 from ECLparser.datatypes import Optional, concreteValue, stringValue, refset_concept, \
     reverseFlag, source_direction, targets_direction, Quads_or_Error, constraintOperator, descendantOf, \
@@ -134,7 +134,19 @@ def i_focusConcept(ss: Substrate, fc: focusConcept) -> Sctids_or_Error:
 
 
 def i_memberOf(ss: Substrate, crorwc: crOrWildCard) -> Sctids_or_Error:
+    # TODO -- this function executes queries - need to redo ?
     refsetids = ss.i_conceptReference(crorwc.cr) if crorwc.inran('cr') else \
         Sctids_or_Error(ok=ss.descendants(refset_concept))
-    return refsetids if refsetids.inran('error') else \
-        bigunion(([ss.i_refsetId(sctid) for sctid in result_sctids(refsetids)]))
+    if refsetids.inran('error'):
+        return refsetids
+    refsets = result_sctids(refsetids)
+    refset_members = [ss.i_refsetId(sctid) for sctid in refsets]
+    rval = refset_members[0] if refset_members else ss.equivalent_concepts(None)
+    for m in refset_members[1:]:
+        rval = rval.union(m)
+    return Sctids_or_Error(ok=rval)
+    # refsetids = ss.i_conceptReference(crorwc.cr) if crorwc.inran('cr') else \
+    #     Sctids_or_Error(ok=ss.descendants(refset_concept))
+    # return refsetids if refsetids.inran('error') else \
+    #   bigunion(([ss.i_refsetId(sctid) for sctid in result_sctids(refsetids)]))
+

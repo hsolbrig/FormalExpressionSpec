@@ -1,0 +1,31 @@
+// Substrate: 20150131
+// Timestamp: 
+// Result: Pass
+
+ancestorOrSelfOf 40541001 |acute pulmonary oedema|
+// Result: {301867009, 2704003, 19829001, 106048009, 128272009, 362965005, 118234003,
+// 19242006, 123946008, 301226008, 302292003, 111273006, 128121009, 301230006,
+// 267038008, 118654009, 40541001, 118946009, 609623002, 64572001, 404684003,
+// 298705000, 301857004, 609622007, 50043002, 138875005, 406123005}
+//
+// Length=27
+
+// ============================================================
+//SELECT DISTINCT or_sctid.id
+// FROM (
+//         (SELECT id
+//          FROM concept_ss
+//          WHERE active=1
+//            AND locked = 0
+//            AND (id IN (40541001)))
+//       UNION
+//         (SELECT DISTINCT tt1.parent AS id
+//          FROM transitive_ss AS tt1
+//          JOIN
+//            (SELECT id
+//             FROM concept_ss
+//             WHERE active=1
+//               AND locked = 0
+//               AND (id IN (40541001))) AS tt2 ON tt1.child = tt2.id
+//          WHERE tt1.locked = 0)) as or_sctid
+// ============================================================

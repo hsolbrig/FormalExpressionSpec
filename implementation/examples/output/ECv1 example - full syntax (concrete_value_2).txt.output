@@ -1,0 +1,10 @@
+// Substrate: 20150131
+// Timestamp: 
+// Result: Exception
+
+descendantOf 111115 |amoxicillin tablet|: 
+{ 127489000 |has active ingredient| = 372687004 |amoxicillin| and
+   111115 |has reference basis of strength| = 372687004 |amoxicillin| and
+   111115 |strength magnitude equal to| >= #500 and
+   111115 |strength magnitude equal to| <= #800 and
+   111115 |strength unit| = 258684004 |mg|}

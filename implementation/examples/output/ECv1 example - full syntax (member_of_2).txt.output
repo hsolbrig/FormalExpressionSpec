@@ -1,0 +1,16 @@
+// Substrate: 20150131
+// Timestamp: 
+// Result: Pass
+
+memberOf  1111000000132 |medication reference sets reference set|
+// Result: set()
+//
+// Length=0
+
+// ============================================================
+//SELECT id
+// FROM concept_ss
+// WHERE active=1
+//   AND locked = 0
+//   AND (False)
+// ============================================================

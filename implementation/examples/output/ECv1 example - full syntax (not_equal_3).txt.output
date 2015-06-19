@@ -1,0 +1,146 @@
+// Substrate: 20150131
+// Timestamp: 
+// Result: Pass
+
+descendantOrSelfOf 404684003 |clinical finding|: 
+[0 to 0] 116676008 |associated morphology| NOT =  descendantOrSelfOf 26036001 |obstruction| and
+[1 to many] 116676008 |associated morphology| =   descendantOrSelfOf 26036001 |obstruction|
+// Result: 
+//
+// Length=1120
+
+// ============================================================
+//SELECT DISTINCT and_sctid1.id
+// FROM
+//   (SELECT DISTINCT or_sctid.id
+//    FROM (
+//            (SELECT id
+//             FROM concept_ss
+//             WHERE active=1
+//               AND locked = 0
+//               AND (id IN (404684003)))
+//          UNION
+//            (SELECT DISTINCT tt1.child AS id
+//             FROM transitive_ss AS tt1
+//             JOIN
+//               (SELECT id
+//                FROM concept_ss
+//                WHERE active=1
+//                  AND locked = 0
+//                  AND (id IN (404684003))) AS tt2 ON tt1.parent = tt2.id
+//             WHERE tt1.locked = 0)) as or_sctid) AS and_sctid1
+// JOIN
+//   (SELECT DISTINCT and_sctid1.id
+//    FROM
+//      (SELECT DISTINCT minus_sctid.id
+//       FROM
+//         (SELECT id
+//          FROM concept_ss
+//          WHERE active=1
+//            AND locked = 0) AS minus_sctid
+//       WHERE minus_sctid.id NOT IN
+//           (SELECT DISTINCT minus_sctid.id
+//            FROM
+//              (SELECT id,
+//                      sourceId,
+//                      typeId,
+//                      destinationId,
+//                      gid
+//               FROM relationship_ss_ext
+//               WHERE typeId NOT IN
+//                   (SELECT id
+//                    FROM concept_ss
+//                    WHERE active=1
+//                      AND locked = 0
+//                      AND (id IN (116676008)))
+//                 AND destinationId IN
+//                   (SELECT DISTINCT or_sctid.id
+//                    FROM (
+//                            (SELECT id
+//                             FROM concept_ss
+//                             WHERE active=1
+//                               AND locked = 0
+//                               AND (id IN (26036001)))
+//                          UNION
+//                            (SELECT DISTINCT tt1.child AS id
+//                             FROM transitive_ss AS tt1
+//                             JOIN
+//                               (SELECT id
+//                                FROM concept_ss
+//                                WHERE active=1
+//                                  AND locked = 0
+//                                  AND (id IN (26036001))) AS tt2 ON tt1.parent = tt2.id
+//                             WHERE tt1.locked = 0)) as or_sctid)
+//                 AND active=1
+//                 AND locked=0) AS minus_sctid
+//            WHERE minus_sctid.id NOT IN
+//                (SELECT DISTINCT rc_1.sourceId AS id
+//                 FROM
+//                   (SELECT id,
+//                           sourceId,
+//                           typeId,
+//                           destinationId,
+//                           gid
+//                    FROM relationship_ss_ext
+//                    WHERE typeId NOT IN
+//                        (SELECT id
+//                         FROM concept_ss
+//                         WHERE active=1
+//                           AND locked = 0
+//                           AND (id IN (116676008)))
+//                      AND destinationId IN
+//                        (SELECT DISTINCT or_sctid.id
+//                         FROM (
+//                                 (SELECT id
+//                                  FROM concept_ss
+//                                  WHERE active=1
+//                                    AND locked = 0
+//                                    AND (id IN (26036001)))
+//                               UNION
+//                                 (SELECT DISTINCT tt1.child AS id
+//                                  FROM transitive_ss AS tt1
+//                                  JOIN
+//                                    (SELECT id
+//                                     FROM concept_ss
+//                                     WHERE active=1
+//                                       AND locked = 0
+//                                       AND (id IN (26036001))) AS tt2 ON tt1.parent = tt2.id
+//                                  WHERE tt1.locked = 0)) as or_sctid)
+//                      AND active=1
+//                      AND locked=0) AS rc_1))) AS and_sctid1
+//    JOIN
+//      (SELECT DISTINCT rc_1.sourceId AS id
+//       FROM
+//         (SELECT id,
+//                 sourceId,
+//                 typeId,
+//                 destinationId,
+//                 gid
+//          FROM relationship_ss_ext
+//          WHERE typeId IN
+//              (SELECT id
+//               FROM concept_ss
+//               WHERE active=1
+//                 AND locked = 0
+//                 AND (id IN (116676008)))
+//            AND destinationId IN
+//              (SELECT DISTINCT or_sctid.id
+//               FROM (
+//                       (SELECT id
+//                        FROM concept_ss
+//                        WHERE active=1
+//                          AND locked = 0
+//                          AND (id IN (26036001)))
+//                     UNION
+//                       (SELECT DISTINCT tt1.child AS id
+//                        FROM transitive_ss AS tt1
+//                        JOIN
+//                          (SELECT id
+//                           FROM concept_ss
+//                           WHERE active=1
+//                             AND locked = 0
+//                             AND (id IN (26036001))) AS tt2 ON tt1.parent = tt2.id
+//                        WHERE tt1.locked = 0)) as or_sctid)
+//            AND active=1
+//            AND locked=0) AS rc_1) AS and_sctid2 ON and_sctid1.id = and_sctid2.id) AS and_sctid2 ON and_sctid1.id = and_sctid2.id
+// ============================================================

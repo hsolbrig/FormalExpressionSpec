@@ -254,6 +254,9 @@ class Set(_MetaType):
         def v(self):
             return self._val
 
+        def __iter__(self):
+            return self.v.__iter__()
+
         def subseteq(self, other) -> bool:
             assert self.cls.same_type_as(other.cls), "Types must match"
             return self.v <= other.v

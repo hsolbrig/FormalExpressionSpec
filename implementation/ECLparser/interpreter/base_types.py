@@ -75,8 +75,7 @@ def gfirst_error(x: Seq(sctIdGroups_or_Error)) -> sctIdGroups_or_Error:
 def union(x: Sctids_or_Error, y: Sctids_or_Error) -> Sctids_or_Error:
     if x.inran('error') or y.inran('error'):
         return first_error(Seq(Sctids_or_Error)(x, y))
-    # return Sctids_or_Error(ok=x.ok.union(y.ok))
-    return Sctids_or_Error(ok=x.ok | y.ok)
+    return Sctids_or_Error(ok=x.ok.union(y.ok))
 
 
 def intersect(x: Sctids_or_Error, y: Sctids_or_Error) -> Sctids_or_Error:
@@ -87,20 +86,19 @@ def intersect(x: Sctids_or_Error, y: Sctids_or_Error) -> Sctids_or_Error:
 def minus(x: Sctids_or_Error, y: Sctids_or_Error) -> Sctids_or_Error:
     if x.inran('error') or y.inran('error'):
         return first_error(Seq(Sctids_or_Error)(x, y))
-    # return Sctids_or_Error(ok=x.ok.difference(y.ok))
-    return Sctids_or_Error(ok=x.ok - y.ok)
+    return Sctids_or_Error(ok=x.ok.minis(y.ok))
 
 
 def bigunion(x: Seq(Sctids_or_Error)) -> Sctids_or_Error:
     if any([e.inran('error') for e in x]):
         return first_error(x)
-    return Set.SetInstance.bigcup(Set(sctId), [e.ok for e in x])
+    return Sctids_or_Error(ok=Set.SetInstance.bigcup(Set(sctId), [e.ok for e in x]))
 
 
 def bigintersect(x: Seq(Sctids_or_Error)) -> Sctids_or_Error:
     if any([e.inran('error') for e in x]):
         return first_error(x)
-    return Set.SetInstance.bigcap(Set(sctId), [e.ok for e in x])
+    return Sctids_or_Error(Set.SetInstance.bigcap(Set(sctId), [e.ok for e in x]))
 
 
 def gunion(x: sctIdGroups_or_Error, y: sctIdGroups_or_Error) -> sctIdGroups_or_Error:
@@ -129,5 +127,5 @@ def evalCardinality(min_: N, max_: unlimitedNat, t: Sized) -> bool:
 
 # C Generic sequence function
 def applyToSequence(ss: Substrate, f, op, seq_e) -> Sctids_or_Error:
-    return op(f(ss, seq_e.first), f(ss, seq_e.head.second)) if seq_e.second.tail.is_empty else \
+    return op(f(ss, seq_e.first), f(ss, seq_e.second.head)) if seq_e.second.tail.is_empty else \
            op(f(ss, seq_e.first), applyToSequence(ss, f, op, CrossProduct()(seq_e.second.head, seq_e.second.tail)))

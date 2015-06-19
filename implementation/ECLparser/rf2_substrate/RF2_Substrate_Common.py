@@ -39,7 +39,7 @@ class RF2_Substrate_Common:
     _minusSTMT = None
     _data_type = int
 
-    _countSTMT = "SELECT COUNT(t.id) FROM (%s) AS t"
+    _countSTMT = "SELECT COUNT(t_cnt.id) FROM (%s) AS t_cnt"
 
     def __init__(self):
         self._len = None
@@ -52,7 +52,7 @@ class RF2_Substrate_Common:
         return db
 
     def as_sql(self):
-        return '\n' + self._query + '\n'
+        return self._query
 
     def __len__(self) -> int:
         """

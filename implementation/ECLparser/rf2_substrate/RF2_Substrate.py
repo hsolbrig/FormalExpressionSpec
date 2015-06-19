@@ -56,14 +56,16 @@ class RF2_Substrate(Substrate):
         return self._relationships
 
     def equivalent_concepts(self, s: sctId) -> RF2_Substrate_Sctids.Sctids:
-        """
-        :param s:
+        """ Return the set of concepts that are equivalent to the supplied concept. This function can also
+        be used to construct an empty set of sctids
+        :param s: concept to test or None
         :return:
         """
-        return RF2_Substrate_Sctids.Sctids(s if permissive else RF2_Substrate_Sctids.Sctids(s))
+        return RF2_Substrate_Sctids.Sctids({} if s is None else s if permissive else RF2_Substrate_Sctids.Sctids(s))
 
-    def refsets(self, _: sctId) -> RF2_Substrate_Sctids.Sctids:
-        return []
+    def refsets(self, s: sctId) -> RF2_Substrate_Sctids.Sctids:
+        # TODO: Implement this
+        return RF2_Substrate_Sctids.Sctids({})
 
     def descendants(self, s: sctId) -> RF2_Substrate_Sctids.Sctids:
         return RF2_Substrate_ConstraintOperators.descendants(RF2_Substrate_Sctids.Sctids(s))
@@ -77,8 +79,11 @@ class RF2_Substrate(Substrate):
 
     def i_attributeName(self, an: attributeName) -> Sctids_or_Error:
         return Sctids_or_Error(ok=self.equivalent_concepts(an.ancr.first)) \
-            if permissive or an.ancr.first in self.descendants(attribute_concept) else Sctids_or_Error(error=unknownAttributeId)
+            if permissive or an.ancr.first in self.descendants(attribute_concept) else \
+            Sctids_or_Error(error=unknownAttributeId)
 
     def i_refsetId(self, rsid: conceptReference) -> Sctids_or_Error:
-        return Sctids_or_Error(ok=self.equivalent_concepts(rsid.first)) \
-            if permissive or rsid.first in self.descendants(refset_concept) else Sctids_or_Error(error=unknownRefsetId)
+        if permissive or rsid.first in self.descendants(refset_concept):
+            return Sctids_or_Error(ok=self.equivalent_concepts(rsid.first))
+        else:
+            return Sctids_or_Error(error=unknownRefsetId)

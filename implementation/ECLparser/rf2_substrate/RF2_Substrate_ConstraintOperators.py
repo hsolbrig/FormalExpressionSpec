@@ -26,12 +26,15 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
-
+import re
 from ECLparser.rf2_substrate.RF2_Substrate_Sctids import Sctids
 
-_transitive_query = "SELECT DISTINCT t1.%s AS id FROM transitive_ss AS t1 JOIN (%s) AS t2" \
-                    " ON t1.%s = t2.id WHERE t1.locked = 0"
-_self_query = "SELECT u.id FROM ((%s) UNION (%s)) AS u"
+_transitive_query = "SELECT DISTINCT tt1.%s AS id FROM transitive_ss AS tt1 JOIN (%s) AS tt2" \
+                    " ON tt1.%s = tt2.id WHERE tt1.locked = 0"
+_self_query = "SELECT t_u.id FROM ((%s) UNION (%s)) AS t_u"
+
+def fmt(txt):
+    return re.sub(r'\s+', ' ', str(txt))[:20]
 
 
 def descendants_of(query: Sctids) -> Sctids:

@@ -113,6 +113,12 @@ class RF2_SubstrateTestCase(unittest.TestCase):
         # print(c.as_sql())
         self.assertEqual(set(a) ^ set(b), set(a ^ b))
 
+    def test_empty(self):
+        a = Sctids({})
+        b = Sctids({})
+        self.assertEqual(a.union(b), a)
+        self.assertEqual(a.intersect(b), a)
+
 
 if __name__ == '__main__':
     unittest.main()

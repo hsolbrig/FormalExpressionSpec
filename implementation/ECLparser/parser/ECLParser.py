@@ -7,150 +7,151 @@ ischild = len(package)>0 if package is not None else False
 if ischild:
     from .ECLVisitor import ECLVisitor
 else:
-    from ECLparser.parser.ECLVisitor import ECLVisitor
+    from ECLVisitor import ECLVisitor
 
 def serializedATN():
     with StringIO() as buf:
         buf.write("\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3(")
-        buf.write("\u0144\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
+        buf.write("\u0146\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
         buf.write("\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r\4\16")
         buf.write("\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22\4\23\t\23")
         buf.write("\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31")
         buf.write("\t\31\4\32\t\32\4\33\t\33\4\34\t\34\4\35\t\35\4\36\t\36")
         buf.write("\4\37\t\37\4 \t \4!\t!\4\"\t\"\4#\t#\4$\t$\4%\t%\4&\t")
         buf.write("&\4\'\t\'\4(\t(\4)\t)\4*\t*\4+\t+\4,\t,\4-\t-\3\2\3\2")
-        buf.write("\5\2]\n\2\3\3\3\3\5\3a\n\3\3\4\5\4d\n\4\3\4\3\4\3\5\3")
-        buf.write("\5\3\5\3\5\3\5\3\5\3\5\5\5o\n\5\3\6\3\6\3\6\3\6\6\6u\n")
-        buf.write("\6\r\6\16\6v\3\7\3\7\3\7\3\7\6\7}\n\7\r\7\16\7~\3\b\3")
-        buf.write("\b\3\b\3\b\3\t\3\t\3\t\3\t\5\t\u0089\n\t\3\t\3\t\5\t\u008d")
-        buf.write("\n\t\3\n\3\n\3\n\3\n\3\n\3\n\3\n\3\n\5\n\u0097\n\n\3\13")
-        buf.write("\5\13\u009a\n\13\3\13\3\13\5\13\u009e\n\13\3\f\3\f\3\r")
-        buf.write("\3\r\5\r\u00a4\n\r\3\16\3\16\3\17\3\17\3\20\3\20\3\21")
-        buf.write("\3\21\3\21\3\21\5\21\u00b0\n\21\3\22\3\22\3\23\3\23\3")
-        buf.write("\24\3\24\3\25\3\25\3\26\3\26\3\27\3\27\3\30\3\30\3\31")
-        buf.write("\3\31\3\31\5\31\u00c3\n\31\3\32\3\32\3\32\6\32\u00c8\n")
-        buf.write("\32\r\32\16\32\u00c9\3\33\3\33\3\33\6\33\u00cf\n\33\r")
-        buf.write("\33\16\33\u00d0\3\34\3\34\3\34\3\34\3\34\3\34\5\34\u00d9")
-        buf.write("\n\34\3\35\3\35\3\35\5\35\u00de\n\35\3\36\3\36\3\36\6")
-        buf.write("\36\u00e3\n\36\r\36\16\36\u00e4\3\37\3\37\3\37\6\37\u00ea")
-        buf.write("\n\37\r\37\16\37\u00eb\3 \3 \3 \3 \3 \5 \u00f3\n \3!\5")
-        buf.write("!\u00f6\n!\3!\3!\3!\3!\3\"\5\"\u00fd\n\"\3\"\5\"\u0100")
-        buf.write("\n\"\3\"\5\"\u0103\n\"\3\"\3\"\3\"\3\"\3\"\3\"\3\"\3\"")
-        buf.write("\3\"\3\"\5\"\u010f\n\"\3#\3#\3#\3#\3#\5#\u0116\n#\3#\3")
-        buf.write("#\3$\3$\3%\3%\3&\3&\5&\u0120\n&\3\'\3\'\5\'\u0124\n\'")
-        buf.write("\3(\3(\3(\3(\5(\u012a\n(\3(\3(\5(\u012e\n(\3)\3)\3*\3")
-        buf.write("*\3*\3*\5*\u0136\n*\3*\3*\5*\u013a\n*\5*\u013c\n*\3+\3")
-        buf.write("+\3,\3,\3-\3-\3-\2\2.\2\4\6\b\n\f\16\20\22\24\26\30\32")
-        buf.write("\34\36 \"$&(*,.\60\62\64\668:<>@BDFHJLNPRTVX\2\13\4\2")
-        buf.write("\6\6\22\22\3\2\24\25\4\2\7\7\30\30\4\2\b\b\31\31\4\2\t")
-        buf.write("\t\32\32\4\2\n\n\33\33\4\2\13\13\34\34\4\2\24\24!!\4\2")
-        buf.write("\20\20##\u0143\2\\\3\2\2\2\4`\3\2\2\2\6c\3\2\2\2\bn\3")
-        buf.write("\2\2\2\np\3\2\2\2\fx\3\2\2\2\16\u0080\3\2\2\2\20\u008c")
-        buf.write("\3\2\2\2\22\u0096\3\2\2\2\24\u0099\3\2\2\2\26\u009f\3")
-        buf.write("\2\2\2\30\u00a1\3\2\2\2\32\u00a5\3\2\2\2\34\u00a7\3\2")
-        buf.write("\2\2\36\u00a9\3\2\2\2 \u00af\3\2\2\2\"\u00b1\3\2\2\2$")
-        buf.write("\u00b3\3\2\2\2&\u00b5\3\2\2\2(\u00b7\3\2\2\2*\u00b9\3")
-        buf.write("\2\2\2,\u00bb\3\2\2\2.\u00bd\3\2\2\2\60\u00bf\3\2\2\2")
-        buf.write("\62\u00c7\3\2\2\2\64\u00ce\3\2\2\2\66\u00d8\3\2\2\28\u00da")
-        buf.write("\3\2\2\2:\u00e2\3\2\2\2<\u00e9\3\2\2\2>\u00f2\3\2\2\2")
-        buf.write("@\u00f5\3\2\2\2B\u00fc\3\2\2\2D\u0110\3\2\2\2F\u0119\3")
-        buf.write("\2\2\2H\u011b\3\2\2\2J\u011f\3\2\2\2L\u0123\3\2\2\2N\u012d")
-        buf.write("\3\2\2\2P\u012f\3\2\2\2R\u013b\3\2\2\2T\u013d\3\2\2\2")
-        buf.write("V\u013f\3\2\2\2X\u0141\3\2\2\2Z]\5\22\n\2[]\5\4\3\2\\")
-        buf.write("Z\3\2\2\2\\[\3\2\2\2]\3\3\2\2\2^a\5\b\5\2_a\5\6\4\2`^")
-        buf.write("\3\2\2\2`_\3\2\2\2a\5\3\2\2\2bd\5 \21\2cb\3\2\2\2cd\3")
-        buf.write("\2\2\2de\3\2\2\2ef\5\24\13\2f\7\3\2\2\2go\5\n\6\2ho\5")
-        buf.write("\f\7\2io\5\16\b\2jk\7\3\2\2kl\5\b\5\2lm\7\4\2\2mo\3\2")
-        buf.write("\2\2ng\3\2\2\2nh\3\2\2\2ni\3\2\2\2nj\3\2\2\2o\t\3\2\2")
-        buf.write("\2pt\5\20\t\2qr\5*\26\2rs\5\20\t\2su\3\2\2\2tq\3\2\2\2")
-        buf.write("uv\3\2\2\2vt\3\2\2\2vw\3\2\2\2w\13\3\2\2\2x|\5\20\t\2")
-        buf.write("yz\5,\27\2z{\5\20\t\2{}\3\2\2\2|y\3\2\2\2}~\3\2\2\2~|")
-        buf.write("\3\2\2\2~\177\3\2\2\2\177\r\3\2\2\2\u0080\u0081\5\20\t")
-        buf.write("\2\u0081\u0082\5.\30\2\u0082\u0083\5\20\t\2\u0083\17\3")
-        buf.write("\2\2\2\u0084\u008d\5\6\4\2\u0085\u0088\7\3\2\2\u0086\u0089")
-        buf.write("\5\b\5\2\u0087\u0089\5\22\n\2\u0088\u0086\3\2\2\2\u0088")
-        buf.write("\u0087\3\2\2\2\u0089\u008a\3\2\2\2\u008a\u008b\7\4\2\2")
-        buf.write("\u008b\u008d\3\2\2\2\u008c\u0084\3\2\2\2\u008c\u0085\3")
-        buf.write("\2\2\2\u008d\21\3\2\2\2\u008e\u008f\5\4\3\2\u008f\u0090")
-        buf.write("\7\5\2\2\u0090\u0091\5\60\31\2\u0091\u0097\3\2\2\2\u0092")
-        buf.write("\u0093\7\3\2\2\u0093\u0094\5\22\n\2\u0094\u0095\7\4\2")
-        buf.write("\2\u0095\u0097\3\2\2\2\u0096\u008e\3\2\2\2\u0096\u0092")
-        buf.write("\3\2\2\2\u0097\23\3\2\2\2\u0098\u009a\5\26\f\2\u0099\u0098")
-        buf.write("\3\2\2\2\u0099\u009a\3\2\2\2\u009a\u009d\3\2\2\2\u009b")
-        buf.write("\u009e\5\30\r\2\u009c\u009e\5\34\17\2\u009d\u009b\3\2")
-        buf.write("\2\2\u009d\u009c\3\2\2\2\u009e\25\3\2\2\2\u009f\u00a0")
-        buf.write("\t\2\2\2\u00a0\27\3\2\2\2\u00a1\u00a3\5\32\16\2\u00a2")
-        buf.write("\u00a4\5\36\20\2\u00a3\u00a2\3\2\2\2\u00a3\u00a4\3\2\2")
-        buf.write("\2\u00a4\31\3\2\2\2\u00a5\u00a6\7\23\2\2\u00a6\33\3\2")
-        buf.write("\2\2\u00a7\u00a8\t\3\2\2\u00a8\35\3\2\2\2\u00a9\u00aa")
-        buf.write("\7\26\2\2\u00aa\37\3\2\2\2\u00ab\u00b0\5$\23\2\u00ac\u00b0")
-        buf.write("\5\"\22\2\u00ad\u00b0\5(\25\2\u00ae\u00b0\5&\24\2\u00af")
-        buf.write("\u00ab\3\2\2\2\u00af\u00ac\3\2\2\2\u00af\u00ad\3\2\2\2")
-        buf.write("\u00af\u00ae\3\2\2\2\u00b0!\3\2\2\2\u00b1\u00b2\t\4\2")
-        buf.write("\2\u00b2#\3\2\2\2\u00b3\u00b4\t\5\2\2\u00b4%\3\2\2\2\u00b5")
-        buf.write("\u00b6\t\6\2\2\u00b6\'\3\2\2\2\u00b7\u00b8\t\7\2\2\u00b8")
-        buf.write(")\3\2\2\2\u00b9\u00ba\t\b\2\2\u00ba+\3\2\2\2\u00bb\u00bc")
-        buf.write("\7\35\2\2\u00bc-\3\2\2\2\u00bd\u00be\7\36\2\2\u00be/\3")
-        buf.write("\2\2\2\u00bf\u00c2\5\66\34\2\u00c0\u00c3\5\62\32\2\u00c1")
-        buf.write("\u00c3\5\64\33\2\u00c2\u00c0\3\2\2\2\u00c2\u00c1\3\2\2")
-        buf.write("\2\u00c2\u00c3\3\2\2\2\u00c3\61\3\2\2\2\u00c4\u00c5\5")
-        buf.write("*\26\2\u00c5\u00c6\5\66\34\2\u00c6\u00c8\3\2\2\2\u00c7")
-        buf.write("\u00c4\3\2\2\2\u00c8\u00c9\3\2\2\2\u00c9\u00c7\3\2\2\2")
-        buf.write("\u00c9\u00ca\3\2\2\2\u00ca\63\3\2\2\2\u00cb\u00cc\5,\27")
-        buf.write("\2\u00cc\u00cd\5\66\34\2\u00cd\u00cf\3\2\2\2\u00ce\u00cb")
-        buf.write("\3\2\2\2\u00cf\u00d0\3\2\2\2\u00d0\u00ce\3\2\2\2\u00d0")
-        buf.write("\u00d1\3\2\2\2\u00d1\65\3\2\2\2\u00d2\u00d9\58\35\2\u00d3")
-        buf.write("\u00d9\5@!\2\u00d4\u00d5\7\3\2\2\u00d5\u00d6\5\60\31\2")
-        buf.write("\u00d6\u00d7\7\4\2\2\u00d7\u00d9\3\2\2\2\u00d8\u00d2\3")
-        buf.write("\2\2\2\u00d8\u00d3\3\2\2\2\u00d8\u00d4\3\2\2\2\u00d9\67")
-        buf.write("\3\2\2\2\u00da\u00dd\5> \2\u00db\u00de\5:\36\2\u00dc\u00de")
-        buf.write("\5<\37\2\u00dd\u00db\3\2\2\2\u00dd\u00dc\3\2\2\2\u00dd")
-        buf.write("\u00de\3\2\2\2\u00de9\3\2\2\2\u00df\u00e0\5*\26\2\u00e0")
-        buf.write("\u00e1\5> \2\u00e1\u00e3\3\2\2\2\u00e2\u00df\3\2\2\2\u00e3")
-        buf.write("\u00e4\3\2\2\2\u00e4\u00e2\3\2\2\2\u00e4\u00e5\3\2\2\2")
-        buf.write("\u00e5;\3\2\2\2\u00e6\u00e7\5,\27\2\u00e7\u00e8\5> \2")
-        buf.write("\u00e8\u00ea\3\2\2\2\u00e9\u00e6\3\2\2\2\u00ea\u00eb\3")
-        buf.write("\2\2\2\u00eb\u00e9\3\2\2\2\u00eb\u00ec\3\2\2\2\u00ec=")
-        buf.write("\3\2\2\2\u00ed\u00f3\5B\"\2\u00ee\u00ef\7\3\2\2\u00ef")
-        buf.write("\u00f0\58\35\2\u00f0\u00f1\7\4\2\2\u00f1\u00f3\3\2\2\2")
-        buf.write("\u00f2\u00ed\3\2\2\2\u00f2\u00ee\3\2\2\2\u00f3?\3\2\2")
-        buf.write("\2\u00f4\u00f6\5D#\2\u00f5\u00f4\3\2\2\2\u00f5\u00f6\3")
-        buf.write("\2\2\2\u00f6\u00f7\3\2\2\2\u00f7\u00f8\7\f\2\2\u00f8\u00f9")
-        buf.write("\58\35\2\u00f9\u00fa\7\r\2\2\u00faA\3\2\2\2\u00fb\u00fd")
-        buf.write("\5D#\2\u00fc\u00fb\3\2\2\2\u00fc\u00fd\3\2\2\2\u00fd\u00ff")
-        buf.write("\3\2\2\2\u00fe\u0100\5H%\2\u00ff\u00fe\3\2\2\2\u00ff\u0100")
-        buf.write("\3\2\2\2\u0100\u0102\3\2\2\2\u0101\u0103\5J&\2\u0102\u0101")
-        buf.write("\3\2\2\2\u0102\u0103\3\2\2\2\u0103\u0104\3\2\2\2\u0104")
-        buf.write("\u010e\5L\'\2\u0105\u0106\5P)\2\u0106\u0107\5N(\2\u0107")
-        buf.write("\u010f\3\2\2\2\u0108\u0109\5R*\2\u0109\u010a\5V,\2\u010a")
-        buf.write("\u010f\3\2\2\2\u010b\u010c\5T+\2\u010c\u010d\5X-\2\u010d")
-        buf.write("\u010f\3\2\2\2\u010e\u0105\3\2\2\2\u010e\u0108\3\2\2\2")
-        buf.write("\u010e\u010b\3\2\2\2\u010fC\3\2\2\2\u0110\u0111\7\16\2")
-        buf.write("\2\u0111\u0112\7\37\2\2\u0112\u0115\7 \2\2\u0113\u0116")
-        buf.write("\7\37\2\2\u0114\u0116\5F$\2\u0115\u0113\3\2\2\2\u0115")
-        buf.write("\u0114\3\2\2\2\u0116\u0117\3\2\2\2\u0117\u0118\7\17\2")
-        buf.write("\2\u0118E\3\2\2\2\u0119\u011a\t\t\2\2\u011aG\3\2\2\2\u011b")
-        buf.write("\u011c\7\"\2\2\u011cI\3\2\2\2\u011d\u0120\5$\23\2\u011e")
-        buf.write("\u0120\5\"\22\2\u011f\u011d\3\2\2\2\u011f\u011e\3\2\2")
-        buf.write("\2\u0120K\3\2\2\2\u0121\u0124\5\30\r\2\u0122\u0124\5\34")
-        buf.write("\17\2\u0123\u0121\3\2\2\2\u0123\u0122\3\2\2\2\u0124M\3")
-        buf.write("\2\2\2\u0125\u012e\5\6\4\2\u0126\u0129\7\3\2\2\u0127\u012a")
-        buf.write("\5\22\n\2\u0128\u012a\5\b\5\2\u0129\u0127\3\2\2\2\u0129")
-        buf.write("\u0128\3\2\2\2\u012a\u012b\3\2\2\2\u012b\u012c\7\4\2\2")
-        buf.write("\u012c\u012e\3\2\2\2\u012d\u0125\3\2\2\2\u012d\u0126\3")
-        buf.write("\2\2\2\u012eO\3\2\2\2\u012f\u0130\t\n\2\2\u0130Q\3\2\2")
-        buf.write("\2\u0131\u013c\7\20\2\2\u0132\u013c\7#\2\2\u0133\u0135")
-        buf.write("\7\7\2\2\u0134\u0136\7\20\2\2\u0135\u0134\3\2\2\2\u0135")
-        buf.write("\u0136\3\2\2\2\u0136\u013c\3\2\2\2\u0137\u0139\7\t\2\2")
-        buf.write("\u0138\u013a\7\20\2\2\u0139\u0138\3\2\2\2\u0139\u013a")
-        buf.write("\3\2\2\2\u013a\u013c\3\2\2\2\u013b\u0131\3\2\2\2\u013b")
-        buf.write("\u0132\3\2\2\2\u013b\u0133\3\2\2\2\u013b\u0137\3\2\2\2")
-        buf.write("\u013cS\3\2\2\2\u013d\u013e\t\n\2\2\u013eU\3\2\2\2\u013f")
-        buf.write("\u0140\7$\2\2\u0140W\3\2\2\2\u0141\u0142\7%\2\2\u0142")
-        buf.write("Y\3\2\2\2$\\`cnv~\u0088\u008c\u0096\u0099\u009d\u00a3")
-        buf.write("\u00af\u00c2\u00c9\u00d0\u00d8\u00dd\u00e4\u00eb\u00f2")
-        buf.write("\u00f5\u00fc\u00ff\u0102\u010e\u0115\u011f\u0123\u0129")
-        buf.write("\u012d\u0135\u0139\u013b")
+        buf.write("\5\2]\n\2\3\2\3\2\3\3\3\3\5\3c\n\3\3\4\5\4f\n\4\3\4\3")
+        buf.write("\4\3\5\3\5\3\5\3\5\3\5\3\5\3\5\5\5q\n\5\3\6\3\6\3\6\3")
+        buf.write("\6\6\6w\n\6\r\6\16\6x\3\7\3\7\3\7\3\7\6\7\177\n\7\r\7")
+        buf.write("\16\7\u0080\3\b\3\b\3\b\3\b\3\t\3\t\3\t\3\t\5\t\u008b")
+        buf.write("\n\t\3\t\3\t\5\t\u008f\n\t\3\n\3\n\3\n\3\n\3\n\3\n\3\n")
+        buf.write("\3\n\5\n\u0099\n\n\3\13\5\13\u009c\n\13\3\13\3\13\5\13")
+        buf.write("\u00a0\n\13\3\f\3\f\3\r\3\r\5\r\u00a6\n\r\3\16\3\16\3")
+        buf.write("\17\3\17\3\20\3\20\3\21\3\21\3\21\3\21\5\21\u00b2\n\21")
+        buf.write("\3\22\3\22\3\23\3\23\3\24\3\24\3\25\3\25\3\26\3\26\3\27")
+        buf.write("\3\27\3\30\3\30\3\31\3\31\3\31\5\31\u00c5\n\31\3\32\3")
+        buf.write("\32\3\32\6\32\u00ca\n\32\r\32\16\32\u00cb\3\33\3\33\3")
+        buf.write("\33\6\33\u00d1\n\33\r\33\16\33\u00d2\3\34\3\34\3\34\3")
+        buf.write("\34\3\34\3\34\5\34\u00db\n\34\3\35\3\35\3\35\5\35\u00e0")
+        buf.write("\n\35\3\36\3\36\3\36\6\36\u00e5\n\36\r\36\16\36\u00e6")
+        buf.write("\3\37\3\37\3\37\6\37\u00ec\n\37\r\37\16\37\u00ed\3 \3")
+        buf.write(" \3 \3 \3 \5 \u00f5\n \3!\5!\u00f8\n!\3!\3!\3!\3!\3\"")
+        buf.write("\5\"\u00ff\n\"\3\"\5\"\u0102\n\"\3\"\5\"\u0105\n\"\3\"")
+        buf.write("\3\"\3\"\3\"\3\"\3\"\3\"\3\"\3\"\3\"\5\"\u0111\n\"\3#")
+        buf.write("\3#\3#\3#\3#\5#\u0118\n#\3#\3#\3$\3$\3%\3%\3&\3&\5&\u0122")
+        buf.write("\n&\3\'\3\'\5\'\u0126\n\'\3(\3(\3(\3(\5(\u012c\n(\3(\3")
+        buf.write("(\5(\u0130\n(\3)\3)\3*\3*\3*\3*\5*\u0138\n*\3*\3*\5*\u013c")
+        buf.write("\n*\5*\u013e\n*\3+\3+\3,\3,\3-\3-\3-\2\2.\2\4\6\b\n\f")
+        buf.write("\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\62\64\668:<>@")
+        buf.write("BDFHJLNPRTVX\2\13\4\2\6\6\22\22\3\2\24\25\4\2\7\7\30\30")
+        buf.write("\4\2\b\b\31\31\4\2\t\t\32\32\4\2\n\n\33\33\4\2\13\13\34")
+        buf.write("\34\4\2\24\24!!\4\2\20\20##\u0145\2\\\3\2\2\2\4b\3\2\2")
+        buf.write("\2\6e\3\2\2\2\bp\3\2\2\2\nr\3\2\2\2\fz\3\2\2\2\16\u0082")
+        buf.write("\3\2\2\2\20\u008e\3\2\2\2\22\u0098\3\2\2\2\24\u009b\3")
+        buf.write("\2\2\2\26\u00a1\3\2\2\2\30\u00a3\3\2\2\2\32\u00a7\3\2")
+        buf.write("\2\2\34\u00a9\3\2\2\2\36\u00ab\3\2\2\2 \u00b1\3\2\2\2")
+        buf.write("\"\u00b3\3\2\2\2$\u00b5\3\2\2\2&\u00b7\3\2\2\2(\u00b9")
+        buf.write("\3\2\2\2*\u00bb\3\2\2\2,\u00bd\3\2\2\2.\u00bf\3\2\2\2")
+        buf.write("\60\u00c1\3\2\2\2\62\u00c9\3\2\2\2\64\u00d0\3\2\2\2\66")
+        buf.write("\u00da\3\2\2\28\u00dc\3\2\2\2:\u00e4\3\2\2\2<\u00eb\3")
+        buf.write("\2\2\2>\u00f4\3\2\2\2@\u00f7\3\2\2\2B\u00fe\3\2\2\2D\u0112")
+        buf.write("\3\2\2\2F\u011b\3\2\2\2H\u011d\3\2\2\2J\u0121\3\2\2\2")
+        buf.write("L\u0125\3\2\2\2N\u012f\3\2\2\2P\u0131\3\2\2\2R\u013d\3")
+        buf.write("\2\2\2T\u013f\3\2\2\2V\u0141\3\2\2\2X\u0143\3\2\2\2Z]")
+        buf.write("\5\22\n\2[]\5\4\3\2\\Z\3\2\2\2\\[\3\2\2\2]^\3\2\2\2^_")
+        buf.write("\7\2\2\3_\3\3\2\2\2`c\5\b\5\2ac\5\6\4\2b`\3\2\2\2ba\3")
+        buf.write("\2\2\2c\5\3\2\2\2df\5 \21\2ed\3\2\2\2ef\3\2\2\2fg\3\2")
+        buf.write("\2\2gh\5\24\13\2h\7\3\2\2\2iq\5\n\6\2jq\5\f\7\2kq\5\16")
+        buf.write("\b\2lm\7\3\2\2mn\5\b\5\2no\7\4\2\2oq\3\2\2\2pi\3\2\2\2")
+        buf.write("pj\3\2\2\2pk\3\2\2\2pl\3\2\2\2q\t\3\2\2\2rv\5\20\t\2s")
+        buf.write("t\5*\26\2tu\5\20\t\2uw\3\2\2\2vs\3\2\2\2wx\3\2\2\2xv\3")
+        buf.write("\2\2\2xy\3\2\2\2y\13\3\2\2\2z~\5\20\t\2{|\5,\27\2|}\5")
+        buf.write("\20\t\2}\177\3\2\2\2~{\3\2\2\2\177\u0080\3\2\2\2\u0080")
+        buf.write("~\3\2\2\2\u0080\u0081\3\2\2\2\u0081\r\3\2\2\2\u0082\u0083")
+        buf.write("\5\20\t\2\u0083\u0084\5.\30\2\u0084\u0085\5\20\t\2\u0085")
+        buf.write("\17\3\2\2\2\u0086\u008f\5\6\4\2\u0087\u008a\7\3\2\2\u0088")
+        buf.write("\u008b\5\b\5\2\u0089\u008b\5\22\n\2\u008a\u0088\3\2\2")
+        buf.write("\2\u008a\u0089\3\2\2\2\u008b\u008c\3\2\2\2\u008c\u008d")
+        buf.write("\7\4\2\2\u008d\u008f\3\2\2\2\u008e\u0086\3\2\2\2\u008e")
+        buf.write("\u0087\3\2\2\2\u008f\21\3\2\2\2\u0090\u0091\5\4\3\2\u0091")
+        buf.write("\u0092\7\5\2\2\u0092\u0093\5\60\31\2\u0093\u0099\3\2\2")
+        buf.write("\2\u0094\u0095\7\3\2\2\u0095\u0096\5\22\n\2\u0096\u0097")
+        buf.write("\7\4\2\2\u0097\u0099\3\2\2\2\u0098\u0090\3\2\2\2\u0098")
+        buf.write("\u0094\3\2\2\2\u0099\23\3\2\2\2\u009a\u009c\5\26\f\2\u009b")
+        buf.write("\u009a\3\2\2\2\u009b\u009c\3\2\2\2\u009c\u009f\3\2\2\2")
+        buf.write("\u009d\u00a0\5\30\r\2\u009e\u00a0\5\34\17\2\u009f\u009d")
+        buf.write("\3\2\2\2\u009f\u009e\3\2\2\2\u00a0\25\3\2\2\2\u00a1\u00a2")
+        buf.write("\t\2\2\2\u00a2\27\3\2\2\2\u00a3\u00a5\5\32\16\2\u00a4")
+        buf.write("\u00a6\5\36\20\2\u00a5\u00a4\3\2\2\2\u00a5\u00a6\3\2\2")
+        buf.write("\2\u00a6\31\3\2\2\2\u00a7\u00a8\7\23\2\2\u00a8\33\3\2")
+        buf.write("\2\2\u00a9\u00aa\t\3\2\2\u00aa\35\3\2\2\2\u00ab\u00ac")
+        buf.write("\7\26\2\2\u00ac\37\3\2\2\2\u00ad\u00b2\5$\23\2\u00ae\u00b2")
+        buf.write("\5\"\22\2\u00af\u00b2\5(\25\2\u00b0\u00b2\5&\24\2\u00b1")
+        buf.write("\u00ad\3\2\2\2\u00b1\u00ae\3\2\2\2\u00b1\u00af\3\2\2\2")
+        buf.write("\u00b1\u00b0\3\2\2\2\u00b2!\3\2\2\2\u00b3\u00b4\t\4\2")
+        buf.write("\2\u00b4#\3\2\2\2\u00b5\u00b6\t\5\2\2\u00b6%\3\2\2\2\u00b7")
+        buf.write("\u00b8\t\6\2\2\u00b8\'\3\2\2\2\u00b9\u00ba\t\7\2\2\u00ba")
+        buf.write(")\3\2\2\2\u00bb\u00bc\t\b\2\2\u00bc+\3\2\2\2\u00bd\u00be")
+        buf.write("\7\35\2\2\u00be-\3\2\2\2\u00bf\u00c0\7\36\2\2\u00c0/\3")
+        buf.write("\2\2\2\u00c1\u00c4\5\66\34\2\u00c2\u00c5\5\62\32\2\u00c3")
+        buf.write("\u00c5\5\64\33\2\u00c4\u00c2\3\2\2\2\u00c4\u00c3\3\2\2")
+        buf.write("\2\u00c4\u00c5\3\2\2\2\u00c5\61\3\2\2\2\u00c6\u00c7\5")
+        buf.write("*\26\2\u00c7\u00c8\5\66\34\2\u00c8\u00ca\3\2\2\2\u00c9")
+        buf.write("\u00c6\3\2\2\2\u00ca\u00cb\3\2\2\2\u00cb\u00c9\3\2\2\2")
+        buf.write("\u00cb\u00cc\3\2\2\2\u00cc\63\3\2\2\2\u00cd\u00ce\5,\27")
+        buf.write("\2\u00ce\u00cf\5\66\34\2\u00cf\u00d1\3\2\2\2\u00d0\u00cd")
+        buf.write("\3\2\2\2\u00d1\u00d2\3\2\2\2\u00d2\u00d0\3\2\2\2\u00d2")
+        buf.write("\u00d3\3\2\2\2\u00d3\65\3\2\2\2\u00d4\u00db\58\35\2\u00d5")
+        buf.write("\u00db\5@!\2\u00d6\u00d7\7\3\2\2\u00d7\u00d8\5\60\31\2")
+        buf.write("\u00d8\u00d9\7\4\2\2\u00d9\u00db\3\2\2\2\u00da\u00d4\3")
+        buf.write("\2\2\2\u00da\u00d5\3\2\2\2\u00da\u00d6\3\2\2\2\u00db\67")
+        buf.write("\3\2\2\2\u00dc\u00df\5> \2\u00dd\u00e0\5:\36\2\u00de\u00e0")
+        buf.write("\5<\37\2\u00df\u00dd\3\2\2\2\u00df\u00de\3\2\2\2\u00df")
+        buf.write("\u00e0\3\2\2\2\u00e09\3\2\2\2\u00e1\u00e2\5*\26\2\u00e2")
+        buf.write("\u00e3\5> \2\u00e3\u00e5\3\2\2\2\u00e4\u00e1\3\2\2\2\u00e5")
+        buf.write("\u00e6\3\2\2\2\u00e6\u00e4\3\2\2\2\u00e6\u00e7\3\2\2\2")
+        buf.write("\u00e7;\3\2\2\2\u00e8\u00e9\5,\27\2\u00e9\u00ea\5> \2")
+        buf.write("\u00ea\u00ec\3\2\2\2\u00eb\u00e8\3\2\2\2\u00ec\u00ed\3")
+        buf.write("\2\2\2\u00ed\u00eb\3\2\2\2\u00ed\u00ee\3\2\2\2\u00ee=")
+        buf.write("\3\2\2\2\u00ef\u00f5\5B\"\2\u00f0\u00f1\7\3\2\2\u00f1")
+        buf.write("\u00f2\58\35\2\u00f2\u00f3\7\4\2\2\u00f3\u00f5\3\2\2\2")
+        buf.write("\u00f4\u00ef\3\2\2\2\u00f4\u00f0\3\2\2\2\u00f5?\3\2\2")
+        buf.write("\2\u00f6\u00f8\5D#\2\u00f7\u00f6\3\2\2\2\u00f7\u00f8\3")
+        buf.write("\2\2\2\u00f8\u00f9\3\2\2\2\u00f9\u00fa\7\f\2\2\u00fa\u00fb")
+        buf.write("\58\35\2\u00fb\u00fc\7\r\2\2\u00fcA\3\2\2\2\u00fd\u00ff")
+        buf.write("\5D#\2\u00fe\u00fd\3\2\2\2\u00fe\u00ff\3\2\2\2\u00ff\u0101")
+        buf.write("\3\2\2\2\u0100\u0102\5H%\2\u0101\u0100\3\2\2\2\u0101\u0102")
+        buf.write("\3\2\2\2\u0102\u0104\3\2\2\2\u0103\u0105\5J&\2\u0104\u0103")
+        buf.write("\3\2\2\2\u0104\u0105\3\2\2\2\u0105\u0106\3\2\2\2\u0106")
+        buf.write("\u0110\5L\'\2\u0107\u0108\5P)\2\u0108\u0109\5N(\2\u0109")
+        buf.write("\u0111\3\2\2\2\u010a\u010b\5R*\2\u010b\u010c\5V,\2\u010c")
+        buf.write("\u0111\3\2\2\2\u010d\u010e\5T+\2\u010e\u010f\5X-\2\u010f")
+        buf.write("\u0111\3\2\2\2\u0110\u0107\3\2\2\2\u0110\u010a\3\2\2\2")
+        buf.write("\u0110\u010d\3\2\2\2\u0111C\3\2\2\2\u0112\u0113\7\16\2")
+        buf.write("\2\u0113\u0114\7\37\2\2\u0114\u0117\7 \2\2\u0115\u0118")
+        buf.write("\7\37\2\2\u0116\u0118\5F$\2\u0117\u0115\3\2\2\2\u0117")
+        buf.write("\u0116\3\2\2\2\u0118\u0119\3\2\2\2\u0119\u011a\7\17\2")
+        buf.write("\2\u011aE\3\2\2\2\u011b\u011c\t\t\2\2\u011cG\3\2\2\2\u011d")
+        buf.write("\u011e\7\"\2\2\u011eI\3\2\2\2\u011f\u0122\5$\23\2\u0120")
+        buf.write("\u0122\5\"\22\2\u0121\u011f\3\2\2\2\u0121\u0120\3\2\2")
+        buf.write("\2\u0122K\3\2\2\2\u0123\u0126\5\30\r\2\u0124\u0126\5\34")
+        buf.write("\17\2\u0125\u0123\3\2\2\2\u0125\u0124\3\2\2\2\u0126M\3")
+        buf.write("\2\2\2\u0127\u0130\5\6\4\2\u0128\u012b\7\3\2\2\u0129\u012c")
+        buf.write("\5\22\n\2\u012a\u012c\5\b\5\2\u012b\u0129\3\2\2\2\u012b")
+        buf.write("\u012a\3\2\2\2\u012c\u012d\3\2\2\2\u012d\u012e\7\4\2\2")
+        buf.write("\u012e\u0130\3\2\2\2\u012f\u0127\3\2\2\2\u012f\u0128\3")
+        buf.write("\2\2\2\u0130O\3\2\2\2\u0131\u0132\t\n\2\2\u0132Q\3\2\2")
+        buf.write("\2\u0133\u013e\7\20\2\2\u0134\u013e\7#\2\2\u0135\u0137")
+        buf.write("\7\7\2\2\u0136\u0138\7\20\2\2\u0137\u0136\3\2\2\2\u0137")
+        buf.write("\u0138\3\2\2\2\u0138\u013e\3\2\2\2\u0139\u013b\7\t\2\2")
+        buf.write("\u013a\u013c\7\20\2\2\u013b\u013a\3\2\2\2\u013b\u013c")
+        buf.write("\3\2\2\2\u013c\u013e\3\2\2\2\u013d\u0133\3\2\2\2\u013d")
+        buf.write("\u0134\3\2\2\2\u013d\u0135\3\2\2\2\u013d\u0139\3\2\2\2")
+        buf.write("\u013eS\3\2\2\2\u013f\u0140\t\n\2\2\u0140U\3\2\2\2\u0141")
+        buf.write("\u0142\7$\2\2\u0142W\3\2\2\2\u0143\u0144\7%\2\2\u0144")
+        buf.write("Y\3\2\2\2$\\bepx\u0080\u008a\u008e\u0098\u009b\u009f\u00a5")
+        buf.write("\u00b1\u00c4\u00cb\u00d2\u00da\u00df\u00e6\u00ed\u00f4")
+        buf.write("\u00f7\u00fe\u0101\u0104\u0110\u0117\u0121\u0125\u012b")
+        buf.write("\u012f\u0137\u013b\u013d")
         return buf.getvalue()
 
 
@@ -295,6 +296,9 @@ class ECLParser ( Parser ):
             super().__init__(parent, invokingState)
             self.parser = parser
 
+        def EOF(self):
+            return self.getToken(ECLParser.EOF, 0)
+
         def refinedExpressionConstraint(self):
             return self.getTypedRuleContext(ECLParser.RefinedExpressionConstraintContext,0)
 
@@ -320,21 +324,22 @@ class ECLParser ( Parser ):
         localctx = ECLParser.ExpressionConstraintContext(self, self._ctx, self.state)
         self.enterRule(localctx, 0, self.RULE_expressionConstraint)
         try:
+            self.enterOuterAlt(localctx, 1)
             self.state = 90
             la_ = self._interp.adaptivePredict(self._input,0,self._ctx)
             if la_ == 1:
-                self.enterOuterAlt(localctx, 1)
                 self.state = 88
                 self.refinedExpressionConstraint()
                 pass
 
             elif la_ == 2:
-                self.enterOuterAlt(localctx, 2)
                 self.state = 89
                 self.unrefinedExpressionConstraint()
                 pass
 
 
+            self.state = 92
+            self.match(ECLParser.EOF)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -374,17 +379,17 @@ class ECLParser ( Parser ):
         localctx = ECLParser.UnrefinedExpressionConstraintContext(self, self._ctx, self.state)
         self.enterRule(localctx, 2, self.RULE_unrefinedExpressionConstraint)
         try:
-            self.state = 94
+            self.state = 96
             la_ = self._interp.adaptivePredict(self._input,1,self._ctx)
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 92
+                self.state = 94
                 self.compoundExpressionConstraint()
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 93
+                self.state = 95
                 self.simpleExpressionConstraint()
                 pass
 
@@ -430,14 +435,14 @@ class ECLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 97
+            self.state = 99
             _la = self._input.LA(1)
             if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << ECLParser.T__4) | (1 << ECLParser.T__5) | (1 << ECLParser.T__6) | (1 << ECLParser.T__7) | (1 << ECLParser.DESCENDANTOF) | (1 << ECLParser.DESCENDANTORSELFOF) | (1 << ECLParser.ANCESTOROF) | (1 << ECLParser.ANCESTORORSELFOF))) != 0):
-                self.state = 96
+                self.state = 98
                 self.constraintOperator()
 
 
-            self.state = 99
+            self.state = 101
             self.focusConcept()
         except RecognitionException as re:
             localctx.exception = re
@@ -486,33 +491,33 @@ class ECLParser ( Parser ):
         localctx = ECLParser.CompoundExpressionConstraintContext(self, self._ctx, self.state)
         self.enterRule(localctx, 6, self.RULE_compoundExpressionConstraint)
         try:
-            self.state = 108
+            self.state = 110
             la_ = self._interp.adaptivePredict(self._input,3,self._ctx)
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 101
+                self.state = 103
                 self.conjunctionExpressionConstraint()
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 102
+                self.state = 104
                 self.disjunctionExpressionConstraint()
                 pass
 
             elif la_ == 3:
                 self.enterOuterAlt(localctx, 3)
-                self.state = 103
+                self.state = 105
                 self.exclusionExpressionConstraint()
                 pass
 
             elif la_ == 4:
                 self.enterOuterAlt(localctx, 4)
-                self.state = 104
-                self.match(ECLParser.T__0)
-                self.state = 105
-                self.compoundExpressionConstraint()
                 self.state = 106
+                self.match(ECLParser.T__0)
+                self.state = 107
+                self.compoundExpressionConstraint()
+                self.state = 108
                 self.match(ECLParser.T__1)
                 pass
 
@@ -564,17 +569,17 @@ class ECLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 110
+            self.state = 112
             self.subExpressionConstraint()
-            self.state = 114 
+            self.state = 116 
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while True:
-                self.state = 111
+                self.state = 113
                 self.conjunction()
-                self.state = 112
+                self.state = 114
                 self.subExpressionConstraint()
-                self.state = 116 
+                self.state = 118 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 if not (_la==ECLParser.T__8 or _la==ECLParser.AND):
@@ -627,17 +632,17 @@ class ECLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 118
+            self.state = 120
             self.subExpressionConstraint()
-            self.state = 122 
+            self.state = 124 
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while True:
-                self.state = 119
+                self.state = 121
                 self.disjunction()
-                self.state = 120
+                self.state = 122
                 self.subExpressionConstraint()
-                self.state = 124 
+                self.state = 126 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 if not (_la==ECLParser.DISJUNCTION):
@@ -686,11 +691,11 @@ class ECLParser ( Parser ):
         self.enterRule(localctx, 12, self.RULE_exclusionExpressionConstraint)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 126
-            self.subExpressionConstraint()
-            self.state = 127
-            self.exclusion()
             self.state = 128
+            self.subExpressionConstraint()
+            self.state = 129
+            self.exclusion()
+            self.state = 130
             self.subExpressionConstraint()
         except RecognitionException as re:
             localctx.exception = re
@@ -735,31 +740,31 @@ class ECLParser ( Parser ):
         localctx = ECLParser.SubExpressionConstraintContext(self, self._ctx, self.state)
         self.enterRule(localctx, 14, self.RULE_subExpressionConstraint)
         try:
-            self.state = 138
+            self.state = 140
             token = self._input.LA(1)
             if token in [ECLParser.T__3, ECLParser.T__4, ECLParser.T__5, ECLParser.T__6, ECLParser.T__7, ECLParser.MEMBEROF, ECLParser.SCTID, ECLParser.STAR, ECLParser.ANY, ECLParser.DESCENDANTOF, ECLParser.DESCENDANTORSELFOF, ECLParser.ANCESTOROF, ECLParser.ANCESTORORSELFOF]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 130
+                self.state = 132
                 self.simpleExpressionConstraint()
 
             elif token in [ECLParser.T__0]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 131
+                self.state = 133
                 self.match(ECLParser.T__0)
-                self.state = 134
+                self.state = 136
                 la_ = self._interp.adaptivePredict(self._input,6,self._ctx)
                 if la_ == 1:
-                    self.state = 132
+                    self.state = 134
                     self.compoundExpressionConstraint()
                     pass
 
                 elif la_ == 2:
-                    self.state = 133
+                    self.state = 135
                     self.refinedExpressionConstraint()
                     pass
 
 
-                self.state = 136
+                self.state = 138
                 self.match(ECLParser.T__1)
 
             else:
@@ -808,25 +813,25 @@ class ECLParser ( Parser ):
         localctx = ECLParser.RefinedExpressionConstraintContext(self, self._ctx, self.state)
         self.enterRule(localctx, 16, self.RULE_refinedExpressionConstraint)
         try:
-            self.state = 148
+            self.state = 150
             la_ = self._interp.adaptivePredict(self._input,8,self._ctx)
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 140
-                self.unrefinedExpressionConstraint()
-                self.state = 141
-                self.match(ECLParser.T__2)
                 self.state = 142
+                self.unrefinedExpressionConstraint()
+                self.state = 143
+                self.match(ECLParser.T__2)
+                self.state = 144
                 self.refinement()
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 144
-                self.match(ECLParser.T__0)
-                self.state = 145
-                self.refinedExpressionConstraint()
                 self.state = 146
+                self.match(ECLParser.T__0)
+                self.state = 147
+                self.refinedExpressionConstraint()
+                self.state = 148
                 self.match(ECLParser.T__1)
                 pass
 
@@ -876,21 +881,21 @@ class ECLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 151
+            self.state = 153
             _la = self._input.LA(1)
             if _la==ECLParser.T__3 or _la==ECLParser.MEMBEROF:
-                self.state = 150
+                self.state = 152
                 self.memberOf()
 
 
-            self.state = 155
+            self.state = 157
             token = self._input.LA(1)
             if token in [ECLParser.SCTID]:
-                self.state = 153
+                self.state = 155
                 self.conceptReference()
 
             elif token in [ECLParser.STAR, ECLParser.ANY]:
-                self.state = 154
+                self.state = 156
                 self.wildCard()
 
             else:
@@ -932,7 +937,7 @@ class ECLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 157
+            self.state = 159
             _la = self._input.LA(1)
             if not(_la==ECLParser.T__3 or _la==ECLParser.MEMBEROF):
                 self._errHandler.recoverInline(self)
@@ -979,12 +984,12 @@ class ECLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 159
-            self.conceptId()
             self.state = 161
+            self.conceptId()
+            self.state = 163
             _la = self._input.LA(1)
             if _la==ECLParser.TERM:
-                self.state = 160
+                self.state = 162
                 self.term()
 
 
@@ -1023,7 +1028,7 @@ class ECLParser ( Parser ):
         self.enterRule(localctx, 24, self.RULE_conceptId)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 163
+            self.state = 165
             self.match(ECLParser.SCTID)
         except RecognitionException as re:
             localctx.exception = re
@@ -1064,7 +1069,7 @@ class ECLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 165
+            self.state = 167
             _la = self._input.LA(1)
             if not(_la==ECLParser.STAR or _la==ECLParser.ANY):
                 self._errHandler.recoverInline(self)
@@ -1105,7 +1110,7 @@ class ECLParser ( Parser ):
         self.enterRule(localctx, 28, self.RULE_term)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 167
+            self.state = 169
             self.match(ECLParser.TERM)
         except RecognitionException as re:
             localctx.exception = re
@@ -1154,26 +1159,26 @@ class ECLParser ( Parser ):
         localctx = ECLParser.ConstraintOperatorContext(self, self._ctx, self.state)
         self.enterRule(localctx, 30, self.RULE_constraintOperator)
         try:
-            self.state = 173
+            self.state = 175
             token = self._input.LA(1)
             if token in [ECLParser.T__5, ECLParser.DESCENDANTORSELFOF]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 169
+                self.state = 171
                 self.descendantOrSelfOf()
 
             elif token in [ECLParser.T__4, ECLParser.DESCENDANTOF]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 170
+                self.state = 172
                 self.descendantOf()
 
             elif token in [ECLParser.T__7, ECLParser.ANCESTORORSELFOF]:
                 self.enterOuterAlt(localctx, 3)
-                self.state = 171
+                self.state = 173
                 self.ancestorOrSelfOf()
 
             elif token in [ECLParser.T__6, ECLParser.ANCESTOROF]:
                 self.enterOuterAlt(localctx, 4)
-                self.state = 172
+                self.state = 174
                 self.ancestorOf()
 
             else:
@@ -1215,7 +1220,7 @@ class ECLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 175
+            self.state = 177
             _la = self._input.LA(1)
             if not(_la==ECLParser.T__4 or _la==ECLParser.DESCENDANTOF):
                 self._errHandler.recoverInline(self)
@@ -1257,7 +1262,7 @@ class ECLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 177
+            self.state = 179
             _la = self._input.LA(1)
             if not(_la==ECLParser.T__5 or _la==ECLParser.DESCENDANTORSELFOF):
                 self._errHandler.recoverInline(self)
@@ -1299,7 +1304,7 @@ class ECLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 179
+            self.state = 181
             _la = self._input.LA(1)
             if not(_la==ECLParser.T__6 or _la==ECLParser.ANCESTOROF):
                 self._errHandler.recoverInline(self)
@@ -1341,7 +1346,7 @@ class ECLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 181
+            self.state = 183
             _la = self._input.LA(1)
             if not(_la==ECLParser.T__7 or _la==ECLParser.ANCESTORORSELFOF):
                 self._errHandler.recoverInline(self)
@@ -1383,7 +1388,7 @@ class ECLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 183
+            self.state = 185
             _la = self._input.LA(1)
             if not(_la==ECLParser.T__8 or _la==ECLParser.AND):
                 self._errHandler.recoverInline(self)
@@ -1424,7 +1429,7 @@ class ECLParser ( Parser ):
         self.enterRule(localctx, 42, self.RULE_disjunction)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 185
+            self.state = 187
             self.match(ECLParser.DISJUNCTION)
         except RecognitionException as re:
             localctx.exception = re
@@ -1461,7 +1466,7 @@ class ECLParser ( Parser ):
         self.enterRule(localctx, 44, self.RULE_exclusion)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 187
+            self.state = 189
             self.match(ECLParser.MINUS)
         except RecognitionException as re:
             localctx.exception = re
@@ -1507,16 +1512,16 @@ class ECLParser ( Parser ):
         self.enterRule(localctx, 46, self.RULE_refinement)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 189
+            self.state = 191
             self.subRefinement()
-            self.state = 192
+            self.state = 194
             token = self._input.LA(1)
             if token in [ECLParser.T__8, ECLParser.AND]:
-                self.state = 190
+                self.state = 192
                 self.conjunctionRefinementSet()
                 pass
             elif token in [ECLParser.DISJUNCTION]:
-                self.state = 191
+                self.state = 193
                 self.disjunctionRefinementSet()
                 pass
             elif token in [ECLParser.EOF, ECLParser.T__1]:
@@ -1570,15 +1575,15 @@ class ECLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 197 
+            self.state = 199 
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while True:
-                self.state = 194
+                self.state = 196
                 self.conjunction()
-                self.state = 195
+                self.state = 197
                 self.subRefinement()
-                self.state = 199 
+                self.state = 201 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 if not (_la==ECLParser.T__8 or _la==ECLParser.AND):
@@ -1631,15 +1636,15 @@ class ECLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 204 
+            self.state = 206 
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while True:
-                self.state = 201
+                self.state = 203
                 self.disjunction()
-                self.state = 202
+                self.state = 204
                 self.subRefinement()
-                self.state = 206 
+                self.state = 208 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 if not (_la==ECLParser.DISJUNCTION):
@@ -1688,27 +1693,27 @@ class ECLParser ( Parser ):
         localctx = ECLParser.SubRefinementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 52, self.RULE_subRefinement)
         try:
-            self.state = 214
+            self.state = 216
             la_ = self._interp.adaptivePredict(self._input,16,self._ctx)
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 208
+                self.state = 210
                 self.attributeSet()
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 209
+                self.state = 211
                 self.attributeGroup()
                 pass
 
             elif la_ == 3:
                 self.enterOuterAlt(localctx, 3)
-                self.state = 210
-                self.match(ECLParser.T__0)
-                self.state = 211
-                self.refinement()
                 self.state = 212
+                self.match(ECLParser.T__0)
+                self.state = 213
+                self.refinement()
+                self.state = 214
                 self.match(ECLParser.T__1)
                 pass
 
@@ -1757,16 +1762,16 @@ class ECLParser ( Parser ):
         self.enterRule(localctx, 54, self.RULE_attributeSet)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 216
+            self.state = 218
             self.subAttributeSet()
-            self.state = 219
+            self.state = 221
             la_ = self._interp.adaptivePredict(self._input,17,self._ctx)
             if la_ == 1:
-                self.state = 217
+                self.state = 219
                 self.conjunctionAttributeSet()
 
             elif la_ == 2:
-                self.state = 218
+                self.state = 220
                 self.disjunctionAttributeSet()
 
 
@@ -1816,19 +1821,19 @@ class ECLParser ( Parser ):
         self.enterRule(localctx, 56, self.RULE_conjunctionAttributeSet)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 224 
+            self.state = 226 
             self._errHandler.sync(self)
             _alt = 1
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt == 1:
-                    self.state = 221
+                    self.state = 223
                     self.conjunction()
-                    self.state = 222
+                    self.state = 224
                     self.subAttributeSet()
 
                 else:
                     raise NoViableAltException(self)
-                self.state = 226 
+                self.state = 228 
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,18,self._ctx)
 
@@ -1878,19 +1883,19 @@ class ECLParser ( Parser ):
         self.enterRule(localctx, 58, self.RULE_disjunctionAttributeSet)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 231 
+            self.state = 233 
             self._errHandler.sync(self)
             _alt = 1
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt == 1:
-                    self.state = 228
+                    self.state = 230
                     self.disjunction()
-                    self.state = 229
+                    self.state = 231
                     self.subAttributeSet()
 
                 else:
                     raise NoViableAltException(self)
-                self.state = 233 
+                self.state = 235 
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,19,self._ctx)
 
@@ -1933,20 +1938,20 @@ class ECLParser ( Parser ):
         localctx = ECLParser.SubAttributeSetContext(self, self._ctx, self.state)
         self.enterRule(localctx, 60, self.RULE_subAttributeSet)
         try:
-            self.state = 240
+            self.state = 242
             token = self._input.LA(1)
             if token in [ECLParser.T__4, ECLParser.T__5, ECLParser.T__11, ECLParser.SCTID, ECLParser.STAR, ECLParser.ANY, ECLParser.DESCENDANTOF, ECLParser.DESCENDANTORSELFOF, ECLParser.REVERSEFLAG]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 235
+                self.state = 237
                 self.attribute()
 
             elif token in [ECLParser.T__0]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 236
-                self.match(ECLParser.T__0)
-                self.state = 237
-                self.attributeSet()
                 self.state = 238
+                self.match(ECLParser.T__0)
+                self.state = 239
+                self.attributeSet()
+                self.state = 240
                 self.match(ECLParser.T__1)
 
             else:
@@ -1993,18 +1998,18 @@ class ECLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 243
+            self.state = 245
             _la = self._input.LA(1)
             if _la==ECLParser.T__11:
-                self.state = 242
+                self.state = 244
                 self.cardinality()
 
 
-            self.state = 245
-            self.match(ECLParser.T__9)
-            self.state = 246
-            self.attributeSet()
             self.state = 247
+            self.match(ECLParser.T__9)
+            self.state = 248
+            self.attributeSet()
+            self.state = 249
             self.match(ECLParser.T__10)
         except RecognitionException as re:
             localctx.exception = re
@@ -2079,49 +2084,49 @@ class ECLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 250
+            self.state = 252
             _la = self._input.LA(1)
             if _la==ECLParser.T__11:
-                self.state = 249
+                self.state = 251
                 self.cardinality()
 
 
-            self.state = 253
+            self.state = 255
             _la = self._input.LA(1)
             if _la==ECLParser.REVERSEFLAG:
-                self.state = 252
+                self.state = 254
                 self.reverseFlag()
 
 
-            self.state = 256
+            self.state = 258
             _la = self._input.LA(1)
             if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << ECLParser.T__4) | (1 << ECLParser.T__5) | (1 << ECLParser.DESCENDANTOF) | (1 << ECLParser.DESCENDANTORSELFOF))) != 0):
-                self.state = 255
+                self.state = 257
                 self.attributeOperator()
 
 
-            self.state = 258
+            self.state = 260
             self.attributeName()
-            self.state = 268
+            self.state = 270
             la_ = self._interp.adaptivePredict(self._input,25,self._ctx)
             if la_ == 1:
-                self.state = 259
+                self.state = 261
                 self.expressionComparisonOperator()
-                self.state = 260
+                self.state = 262
                 self.expressionConstraintValue()
                 pass
 
             elif la_ == 2:
-                self.state = 262
+                self.state = 264
                 self.numericComparisonOperator()
-                self.state = 263
+                self.state = 265
                 self.numericValue()
                 pass
 
             elif la_ == 3:
-                self.state = 265
+                self.state = 267
                 self.stringComparisonOperator()
-                self.state = 266
+                self.state = 268
                 self.stringValue()
                 pass
 
@@ -2171,26 +2176,26 @@ class ECLParser ( Parser ):
         self.enterRule(localctx, 66, self.RULE_cardinality)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 270
-            self.match(ECLParser.T__11)
-            self.state = 271
-            self.match(ECLParser.NONNEGATIVEINTEGERVALUE)
             self.state = 272
+            self.match(ECLParser.T__11)
+            self.state = 273
+            self.match(ECLParser.NONNEGATIVEINTEGERVALUE)
+            self.state = 274
             self.match(ECLParser.TO)
-            self.state = 275
+            self.state = 277
             token = self._input.LA(1)
             if token in [ECLParser.NONNEGATIVEINTEGERVALUE]:
-                self.state = 273
+                self.state = 275
                 self.match(ECLParser.NONNEGATIVEINTEGERVALUE)
 
             elif token in [ECLParser.STAR, ECLParser.MANY]:
-                self.state = 274
+                self.state = 276
                 self.many()
 
             else:
                 raise NoViableAltException(self)
 
-            self.state = 277
+            self.state = 279
             self.match(ECLParser.T__12)
         except RecognitionException as re:
             localctx.exception = re
@@ -2228,7 +2233,7 @@ class ECLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 279
+            self.state = 281
             _la = self._input.LA(1)
             if not(_la==ECLParser.STAR or _la==ECLParser.MANY):
                 self._errHandler.recoverInline(self)
@@ -2269,7 +2274,7 @@ class ECLParser ( Parser ):
         self.enterRule(localctx, 70, self.RULE_reverseFlag)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 281
+            self.state = 283
             self.match(ECLParser.REVERSEFLAG)
         except RecognitionException as re:
             localctx.exception = re
@@ -2310,16 +2315,16 @@ class ECLParser ( Parser ):
         localctx = ECLParser.AttributeOperatorContext(self, self._ctx, self.state)
         self.enterRule(localctx, 72, self.RULE_attributeOperator)
         try:
-            self.state = 285
+            self.state = 287
             token = self._input.LA(1)
             if token in [ECLParser.T__5, ECLParser.DESCENDANTORSELFOF]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 283
+                self.state = 285
                 self.descendantOrSelfOf()
 
             elif token in [ECLParser.T__4, ECLParser.DESCENDANTOF]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 284
+                self.state = 286
                 self.descendantOf()
 
             else:
@@ -2364,16 +2369,16 @@ class ECLParser ( Parser ):
         localctx = ECLParser.AttributeNameContext(self, self._ctx, self.state)
         self.enterRule(localctx, 74, self.RULE_attributeName)
         try:
-            self.state = 289
+            self.state = 291
             token = self._input.LA(1)
             if token in [ECLParser.SCTID]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 287
+                self.state = 289
                 self.conceptReference()
 
             elif token in [ECLParser.STAR, ECLParser.ANY]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 288
+                self.state = 290
                 self.wildCard()
 
             else:
@@ -2422,31 +2427,31 @@ class ECLParser ( Parser ):
         localctx = ECLParser.ExpressionConstraintValueContext(self, self._ctx, self.state)
         self.enterRule(localctx, 76, self.RULE_expressionConstraintValue)
         try:
-            self.state = 299
+            self.state = 301
             token = self._input.LA(1)
             if token in [ECLParser.T__3, ECLParser.T__4, ECLParser.T__5, ECLParser.T__6, ECLParser.T__7, ECLParser.MEMBEROF, ECLParser.SCTID, ECLParser.STAR, ECLParser.ANY, ECLParser.DESCENDANTOF, ECLParser.DESCENDANTORSELFOF, ECLParser.ANCESTOROF, ECLParser.ANCESTORORSELFOF]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 291
+                self.state = 293
                 self.simpleExpressionConstraint()
 
             elif token in [ECLParser.T__0]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 292
+                self.state = 294
                 self.match(ECLParser.T__0)
-                self.state = 295
+                self.state = 297
                 la_ = self._interp.adaptivePredict(self._input,29,self._ctx)
                 if la_ == 1:
-                    self.state = 293
+                    self.state = 295
                     self.refinedExpressionConstraint()
                     pass
 
                 elif la_ == 2:
-                    self.state = 294
+                    self.state = 296
                     self.compoundExpressionConstraint()
                     pass
 
 
-                self.state = 297
+                self.state = 299
                 self.match(ECLParser.T__1)
 
             else:
@@ -2488,7 +2493,7 @@ class ECLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 301
+            self.state = 303
             _la = self._input.LA(1)
             if not(_la==ECLParser.T__13 or _la==ECLParser.NEQ):
                 self._errHandler.recoverInline(self)
@@ -2529,38 +2534,38 @@ class ECLParser ( Parser ):
         self.enterRule(localctx, 80, self.RULE_numericComparisonOperator)
         self._la = 0 # Token type
         try:
-            self.state = 313
+            self.state = 315
             token = self._input.LA(1)
             if token in [ECLParser.T__13]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 303
+                self.state = 305
                 self.match(ECLParser.T__13)
 
             elif token in [ECLParser.NEQ]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 304
+                self.state = 306
                 self.match(ECLParser.NEQ)
 
             elif token in [ECLParser.T__4]:
                 self.enterOuterAlt(localctx, 3)
-                self.state = 305
-                self.match(ECLParser.T__4)
                 self.state = 307
+                self.match(ECLParser.T__4)
+                self.state = 309
                 _la = self._input.LA(1)
                 if _la==ECLParser.T__13:
-                    self.state = 306
+                    self.state = 308
                     self.match(ECLParser.T__13)
 
 
 
             elif token in [ECLParser.T__6]:
                 self.enterOuterAlt(localctx, 4)
-                self.state = 309
-                self.match(ECLParser.T__6)
                 self.state = 311
+                self.match(ECLParser.T__6)
+                self.state = 313
                 _la = self._input.LA(1)
                 if _la==ECLParser.T__13:
-                    self.state = 310
+                    self.state = 312
                     self.match(ECLParser.T__13)
 
 
@@ -2604,7 +2609,7 @@ class ECLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 315
+            self.state = 317
             _la = self._input.LA(1)
             if not(_la==ECLParser.T__13 or _la==ECLParser.NEQ):
                 self._errHandler.recoverInline(self)
@@ -2645,7 +2650,7 @@ class ECLParser ( Parser ):
         self.enterRule(localctx, 84, self.RULE_numericValue)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 317
+            self.state = 319
             self.match(ECLParser.NUMERICVALUE)
         except RecognitionException as re:
             localctx.exception = re
@@ -2682,7 +2687,7 @@ class ECLParser ( Parser ):
         self.enterRule(localctx, 86, self.RULE_stringValue)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 319
+            self.state = 321
             self.match(ECLParser.STRINGVALUE)
         except RecognitionException as re:
             localctx.exception = re
