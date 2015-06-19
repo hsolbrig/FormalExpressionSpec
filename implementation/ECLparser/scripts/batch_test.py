@@ -106,14 +106,14 @@ def main(argv: list):
                     print("FAILED")
                     nfailed += 1
                 elif opts.interp:
-                    try:
+                    # try:
                         print_results(opts, dirpath, fn, i_expressionConstraint(ss, result))
                         print("SUCCESS")
                         nsuccess += 1
-                    except Exception as e:
-                        print_results(opts, dirpath, fn, None, e)
-                        print("EXCEPTION")
-                        nexceptions += 1
+                    # except Exception as e:
+                    #     print_results(opts, dirpath, fn, None, e)
+                    #     print("EXCEPTION")
+                    #     nexceptions += 1
     print("Parsed %s files:" % nviewed)
     print("\tSuccess: %s" % nsuccess)
     print("\tParse Failure: %s" % nfailed)

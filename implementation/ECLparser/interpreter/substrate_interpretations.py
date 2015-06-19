@@ -81,13 +81,14 @@ def i_expressionComparisonOperator(ss: Substrate, rf: Optional(reverseFlag), att
 def i_numericComparsionOperator(ss: Substrate, rf: Optional(reverseFlag), atts: Set(sctId),
                                 ncv: CrossProduct()) -> Quads_or_Error:
     if not rf.is_empty:
-        v = []
+        v = Quads.empty_quads()
         dir_ = targets_direction
     else:
-        v = [q for q in ss.relationships if q.a in atts and q.t.inran('t_concrete') and
-             numericComparison(q.t.t_concrete, ncv.first, ncv.second)]
+        # v = [q for q in ss.relationships if q.a in atts and q.t.inran('t_concrete') and
+        #      numericComparison(q.t.t_concrete, ncv.first, ncv.second)]
+        v = Quads.empty_quads()          # We don't know how to do concrete
         dir_ = source_direction
-    return Quads_or_Error(v, dir_)
+    return Quads_or_Error(quad_value=CrossProduct(Set(Quad), direction)(v, dir_))
 
 
 # return is the numericValue
@@ -114,9 +115,16 @@ def numericComparison(cv: concreteValue, nco: numericComparisonOperator, nv: num
 
 def i_stringComparisonOperator(ss: Substrate, rf: Optional(reverseFlag), atts:  Set(sctId),
                                scv: CrossProduct(stringComparisonOperator, stringValue)) -> Quads_or_Error:
-    return Quads_or_Error(quad_value=([], targets_direction)) if rf.is_empty else \
-           Quads_or_Error(quad_value=([q for q in ss.relationships if q.a in atts and q.t.inran('t_concrete') and
-                                       stringComparison(q.t.t_concrete, scv.first, scv.second)], source_direction))
+    if not rf.is_empty:
+        v = Quads.empty_quads()
+        dir_ = targets_direction
+    else:
+        # v = [q for q in ss.relationships if q.a in atts and q.t.inran('t_concrete') and
+        #                                stringComparison(q.t.t_concrete, scv.first, scv.second)]
+        dir_ = source_direction
+        v = Quads.empty_quads()          # We don't know how to do concrete
+        dir_ = source_direction
+    return Quads_or_Error(quad_value=CrossProduct(Set(Quad), direction)(v, dir_))
 
 
 def stringComparison(cv: concreteValue, sco: stringComparisonOperator, sv: stringValue) -> stringValue:

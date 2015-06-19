@@ -79,7 +79,7 @@ class Quads(RF2_Substrate_Common, _Instance, Set):
     _minusSTMT = "SELECT DISTINCT t_minus.id FROM (%s) AS t_minus WHERE t_minus.id NOT IN (%s)"
     _data_type = RF2_Quad
 
-    def __init__(self, rf: bool=False, atts: Sctids=None, eq: bool=True, ecv: Sctids=None, query=None):
+    def __init__(self, rf: bool=False, atts: Sctids=None, eq: bool=True, ecv: Sctids=None, query=None, _mt_instance=None):
         """
         Construct a set of quads from
         :param rf: reverse flag.  If true ecv applies to source.  If false, destination
@@ -94,21 +94,30 @@ class Quads(RF2_Substrate_Common, _Instance, Set):
         RF2_Substrate_Common.__init__(self)
         self._val = self
         self._type = Quads
-
-        self._len = None                # number of elements
-        if query:
-            self._query = query
-        else:
+        if _mt_instance:
+            self._len = None
             self._query = "SELECT id, sourceId, typeId, destinationId, gid FROM %s" % RelationshipDB.fname() + '_ext'
-            self._query += " WHERE "
-            if atts is not None:
-                self._query += (("typeId IN (%s)" % atts.as_sql()) if eq else
-                                ("typeId NOT IN (%s)" % atts.as_sql())) + " AND "
-            if ecv is not None:
-                self._query += (("sourceId IN (%s)" % ecv.as_sql()) if rf else
-                                ("destinationId IN (%s)" % ecv.as_sql())) + " AND "
-            self._query += "active=1 AND locked=0"
-        self.rf = rf
+            self._query += " WHERE 0"
+            self.rf = False
+        else:
+            self._len = None                # number of elements
+            if query:
+                self._query = query
+            else:
+                self._query = "SELECT id, sourceId, typeId, destinationId, gid FROM %s" % RelationshipDB.fname() + '_ext'
+                self._query += " WHERE "
+                if atts is not None:
+                    self._query += (("typeId IN (%s)" % atts.as_sql()) if eq else
+                                    ("typeId NOT IN (%s)" % atts.as_sql())) + " AND "
+                if ecv is not None:
+                    self._query += (("sourceId IN (%s)" % ecv.as_sql()) if rf else
+                                    ("destinationId IN (%s)" % ecv.as_sql())) + " AND "
+                self._query += "active=1 AND locked=0"
+            self.rf = rf
+
+    @staticmethod
+    def empty_quads():
+        return Quads(_mt_instance=True)
 
     def to_sctids(self):
         return Sctids(filtr=("id IN (SELECT DISTINCT r_sctid.destinationId as id FROM (%s) AS r_sctid) "
