@@ -1,8 +1,8 @@
 grammar ECL;
 
 // expressionConstraint = ws ( refinedExpressionConstraint / unrefinedExpressionConstraint ) ws
-expressionConstraint : refinedExpressionConstraint
-					 | unrefinedExpressionConstraint
+expressionConstraint : (refinedExpressionConstraint
+					 | unrefinedExpressionConstraint) EOF
 					 ;
 
 // unrefinedExpressionConstraint = compoundExpressionConstraint / simpleExpressionConstraint
