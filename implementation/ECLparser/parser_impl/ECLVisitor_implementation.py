@@ -297,10 +297,16 @@ class ECLVisitor_implementation(ECLVisitor):
     def visitAttributeSet(self, ctx):
         # attributeSet == subAttributeSet × conjunctionOrDisjunctionAttributeSet [0 . . 1]
         subAttSet = self.visit(ctx.getChild(0))
-        cont = self.visit(ctx.getChild(1)) if ctx.getChildCount() > 1 else None
-        cOrDAttSet = conjunctionOrDisjunctionAttributeSet(attset_conjattset=cont) if conjunctionAttributeSet.has_member(cont) else \
-                     conjunctionOrDisjunctionAttributeSet(attset_disjattset=cont) if disjunctionAttributeSet.has_member(cont) else \
-                     None
+        if ctx.getChildCount() > 1:
+            cont_ctx = ctx.getChild(1)
+            cont = self.visit(cont_ctx)
+            from ECLParser import ECLParser
+            if isinstance(cont_ctx, ECLParser.ConjunctionAttributeSetContext):
+                cOrDAttSet = conjunctionOrDisjunctionAttributeSet(attset_conjattset=cont)
+            else:
+                cOrDAttSet = conjunctionOrDisjunctionAttributeSet(attset_disjattset=cont)
+        else:
+            cOrDAttSet = None
         return attributeSet(subAttSet, Optional(conjunctionOrDisjunctionAttributeSet)(cOrDAttSet))
 
     # Visit a parse tree produced by ECLParser#conjunctionAttributeSet.

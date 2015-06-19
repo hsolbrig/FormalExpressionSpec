@@ -95,20 +95,29 @@ def main(argv: list):
     parser_args.add_argument("-o", "--outdir", help="Output directory for recording expected results")
     parser_args.add_argument("-s", "--sql", help="Output SQL", action="store_true")
     opts = parse_args(parser_args, argv)
+    nviewed = nfailed = nsuccess = nexceptions = 0
     for (dirpath, _, filenames) in os.walk(opts.dir):
         for fn in filenames:
             if not fn.startswith('.') and not fn.endswith('.output') and (not opts.file or fn.startswith(opts.file)):
                 print("PARSING: " + fn)
                 result = do_parse(opts, FileStream(os.path.join(dirpath, fn)))
+                nviewed += 1
                 if not result:
                     print("FAILED")
+                    nfailed += 1
                 elif opts.interp:
                     try:
                         print_results(opts, dirpath, fn, i_expressionConstraint(ss, result))
                         print("SUCCESS")
+                        nsuccess += 1
                     except Exception as e:
                         print_results(opts, dirpath, fn, None, e)
                         print("EXCEPTION")
+                        nexceptions += 1
+    print("Parsed %s files:" % nviewed)
+    print("\tSuccess: %s" % nsuccess)
+    print("\tParse Failure: %s" % nfailed)
+    print("\tEvaluation Failure: %s" % nexceptions)
 
 
 if __name__ == '__main__':

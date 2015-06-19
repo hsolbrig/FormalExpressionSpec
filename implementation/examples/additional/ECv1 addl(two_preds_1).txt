@@ -1,0 +1,3 @@
+< 111115 |amoxicillin tablet|: 
+{ 127489000 |has active ingredient| = 372687004 |amoxicillin|,
+  111115 |has reference basis of strength| = 372687004 |amoxicillin|}

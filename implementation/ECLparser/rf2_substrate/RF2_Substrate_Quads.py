@@ -135,10 +135,10 @@ class Quads(RF2_Substrate_Common, _Instance, Set):
             query += "(%s) AS rc_1" % sql
         else:
             query += "(SELECT rc_2.%s, count(rc_2.id) AS cnt FROM (%s) AS rc_2 " % (src, sql)
-            query += "GROUP BY rc_2.%s) AS rc_3 WHERE " % src
-            query += "rc_3.cnt >= %s" % min_ if min_ > 1 else "1"
+            query += "GROUP BY rc_2.%s) AS rc_1 WHERE " % src
+            query += "rc_1.cnt >= %s" % min_ if min_ > 1 else "1"
             query += " AND "
-            query += "rc_3.cnt <= %s" % max_ if max_ and max_.inran('num') else "1"
+            query += "rc_1.cnt <= %s" % max_ if max_ and max_.inran('num') else "1"
         return Sctids(query=query)
 
     # Convert quads to Sctids

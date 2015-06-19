@@ -106,6 +106,7 @@ def i_subExpressionConstraint(ss: Substrate, sec: subExpressionConstraint) -> Sc
 def i_refinement(ss: Substrate, rfnment: refinement) -> Sctids_or_Error:
     lhs = i_subRefinement(ss, rfnment.first)
     rhs = rfnment.second
+    # TODO - the "or" below is a change to page 17 of the spec
     if rhs.is_empty or lhs.inran('error'):
         return lhs
     if rhs.head.inran('refine_conjset'):
@@ -152,7 +153,7 @@ def i_attributeSet(ss: Substrate, attset: attributeSet) -> Sctids_or_Error:
     elif rhs.head.inran('attset_conjattset'):
         return intersect(lhs, i_conjunctionAttributeSet(ss, rhs.head.attset_conjattset))
     else:
-        return union(lhs, i_disjunctionAttributeSet(ss, rhs.head.attset.disjattset))
+        return union(lhs, i_disjunctionAttributeSet(ss, rhs.head.attset_disjattset))
 
 
 # 3.4.1 conjunctionAttributeSet
