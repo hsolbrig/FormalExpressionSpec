@@ -101,7 +101,8 @@ class ECLVisitor_implementation(ECLVisitor):
 
     # Visit a parse tree produced by ECLParser#expressionConstraint.
     def visitExpressionConstraint(self, ctx):
-        return self._simple_choice(expressionConstraint, ctx)
+        rval = self.visit(ctx.getChild(0))
+        return expressionConstraint.assign(rval)
 
     # Visit a parse tree produced by ECLParser#unrefinedExpressionConstraint.
     def visitUnrefinedExpressionConstraint(self, ctx):
