@@ -91,14 +91,18 @@ def i_disjunctionExpressionConstraint(ss: Substrate, decr: disjunctionExpression
 def i_exclusionExpressionConstraint(ss: Substrate, ecr: exclusionExpressionConstraint) -> Sctids_or_Error:
     first_sec = i_subExpressionConstraint(ss, ecr.first)
     second_sec = i_subExpressionConstraint(ss, ecr.second)
-    return first_sec.minus(second_sec)
+    return Sctids_or_Error(ok=first_sec.ok.minus(second_sec.ok))
 
 
 # 3.2.8 subExpressionConstraint
 def i_subExpressionConstraint(ss: Substrate, sec: subExpressionConstraint) -> Sctids_or_Error:
-    return i_simpleExpressionConstraint(ss, sec.subExpr_simple) if sec.inran('subExpr_simple') else \
-           i_compoundExpressionConstraint(ss, sec.subExpr_compound) if sec.inran('subExpr_compound') else \
-           i_refinedExpressionConstraint(ss, sec.subExpr_refined)
+    if sec.inran('subExpr_simple'):
+        rval = i_simpleExpressionConstraint(ss, sec.subExpr_simple)
+    elif sec.inran('subExpr_compound'):
+        rval = i_compoundExpressionConstraint(ss, sec.subExpr_compound)
+    else:
+        rval = i_refinedExpressionConstraint(ss, sec.subExpr_refined)
+    return rval
 
 
 # 3.3 refinement

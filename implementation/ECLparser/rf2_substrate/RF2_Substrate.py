@@ -82,8 +82,8 @@ class RF2_Substrate(Substrate):
             if permissive or an.ancr.first in self.descendants(attribute_concept) else \
             Sctids_or_Error(error=unknownAttributeId)
 
-    def i_refsetId(self, rsid: conceptReference) -> Sctids_or_Error:
-        if permissive or rsid.first in self.descendants(refset_concept):
-            return Sctids_or_Error(ok=self.equivalent_concepts(rsid.first))
+    def i_refsetId(self, rsid: sctId) -> Sctids_or_Error:
+        if permissive or rsid in self.descendants(refset_concept):
+            return Sctids_or_Error(ok=self.equivalent_concepts(rsid))
         else:
             return Sctids_or_Error(error=unknownRefsetId)

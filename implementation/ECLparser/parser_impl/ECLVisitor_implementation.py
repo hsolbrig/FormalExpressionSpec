@@ -127,9 +127,12 @@ class ECLVisitor_implementation(ECLVisitor):
         if self._is_opren(ctx):
             return compoundExpressionConstraint(compound_nested=self.visit(ctx.getChild(1)))
         rval = self.visitChildren((ctx))
-        if conjunctionExpressionConstraint.has_member(rval):
+        child_type = ctx.getChild(0)
+        # TODO: Should really implement this as a visit vs just a test
+        from ECLParser import ECLParser
+        if isinstance(child_type, ECLParser.ConjunctionExpressionConstraintContext):
             return compoundExpressionConstraint(compound_conj=rval)
-        elif disjunctionExpressionConstraint.has_member(rval):
+        elif isinstance(child_type, ECLParser.DisjunctionExpressionConstraintContext):
             return compoundExpressionConstraint(compound_disj=rval)
         else:
             return compoundExpressionConstraint(compound_excl=rval)

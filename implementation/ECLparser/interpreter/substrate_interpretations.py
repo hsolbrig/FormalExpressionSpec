@@ -141,10 +141,10 @@ def i_memberOf(ss: Substrate, crorwc: crOrWildCard) -> Sctids_or_Error:
         return refsetids
     refsets = result_sctids(refsetids)
     refset_members = [ss.i_refsetId(sctid) for sctid in refsets]
-    rval = refset_members[0] if refset_members else ss.equivalent_concepts(None)
+    rval = refset_members[0] if refset_members else Sctids_or_Error(ok=ss.equivalent_concepts(None))
     for m in refset_members[1:]:
         rval = rval.union(m)
-    return Sctids_or_Error(ok=rval)
+    return rval
     # refsetids = ss.i_conceptReference(crorwc.cr) if crorwc.inran('cr') else \
     #     Sctids_or_Error(ok=ss.descendants(refset_concept))
     # return refsetids if refsetids.inran('error') else \

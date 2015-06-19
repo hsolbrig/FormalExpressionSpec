@@ -1,5 +1,16 @@
 // Substrate: 20150131
 // Timestamp: 
-// Result: Exception
+// Result: Pass
 
 ^ 700043003 |example problem list subset|
+// Result: {700043003}
+//
+// Length=1
+
+// ============================================================
+//SELECT id
+// FROM concept_ss
+// WHERE active=1
+//   AND locked = 0
+//   AND (id IN (700043003))
+// ============================================================
