@@ -27,7 +27,7 @@ memberOf 450976002|disorders and diseases reference set for GP/FP reason for enc
 //             FROM concept_ss
 //             WHERE active=1
 //               AND locked = 0
-//               AND (False))) as or_sctid) AS minus_sctid
+//               AND (False))) AS or_sctid) AS minus_sctid
 // WHERE minus_sctid.id NOT IN
 //     (SELECT id
 //      FROM concept_ss

@@ -43,7 +43,6 @@ class RF2_Quad(Quad.SchemaInstance):
         Quad.SchemaInstance.__init__(self, Quad, s=sctId(e[1]), a=sctId(e[2]), t=target(t_sctid=sctId(e[3])), g=groupId(e[4]))
         self.id = e[0]
 
-
     def __str__(self):
         return "[id:%s, s:%s, a:%s, t:%s, g:%s]" % (self.id, self.s, self.a, self.t, self.g)
 
@@ -75,8 +74,9 @@ class Set_Quad(Set):
 class Quads(RF2_Substrate_Common, _Instance, Set):
     _db = RelationshipDB()
     _andSTMT = "SELECT DISTINCT t1_and.id FROM (%s) AS t1_and JOIN (%s) AS t2_and ON t1_and.id = t2_and.id"
-    _orSTMT = "SELECT DISTINCT t_or.id FROM ((%s) UNION (%s)) as t_or"
+    _orSTMT = "SELECT DISTINCT t_or.id FROM ((%s) UNION (%s)) AS t_or"
     _minusSTMT = "SELECT DISTINCT t_minus.id FROM (%s) AS t_minus WHERE t_minus.id NOT IN (%s)"
+    _countSTMT = "SELECT COUNT(t_cnt.rid) FROM (%s) AS t_cnt"
     _data_type = RF2_Quad
 
     def __init__(self, rf: bool=False, atts: Sctids=None, eq: bool=True, ecv: Sctids=None, query=None, _mt_instance=None):
@@ -95,16 +95,18 @@ class Quads(RF2_Substrate_Common, _Instance, Set):
         self._val = self
         self._type = Quads
         if _mt_instance:
-            self._len = None
-            self._query = "SELECT id, sourceId, typeId, destinationId, gid FROM %s" % RelationshipDB.fname() + '_ext'
-            self._query += " WHERE 0"
+            self._query = "SELECT id AS rid, sourceId AS id, typeId, destinationId, gid FROM %s WHERE 0" % \
+                          (RelationshipDB.fname() + "_ext")
             self.rf = False
+            self._len = 0
         else:
             self._len = None                # number of elements
             if query:
                 self._query = query
             else:
-                self._query = "SELECT id, sourceId, typeId, destinationId, gid FROM %s" % RelationshipDB.fname() + '_ext'
+                self._query = "SELECT id AS rid, sourceId" + (" AS id," if not rf else ",")
+                self._query += " typeId, destinationId" + (" AS id," if rf else ",")
+                self._query += " gid FROM %s" % RelationshipDB.fname() + '_ext'
                 self._query += " WHERE "
                 if atts is not None:
                     self._query += (("typeId IN (%s)" % atts.as_sql()) if eq else
@@ -120,9 +122,7 @@ class Quads(RF2_Substrate_Common, _Instance, Set):
         return Quads(_mt_instance=True)
 
     def to_sctids(self):
-        return Sctids(filtr=("id IN (SELECT DISTINCT r_sctid.destinationId as id FROM (%s) AS r_sctid) "
-                             % self.as_sql()) if self.rf else
-                            ("id IN (SELECT DISTINCT r_sctid.sourceId as id FROM (%s) AS r_sctid)" % self.as_sql()))
+        return Sctids(filtr=("id IN (SELECT DISTINCT r_sctid.id FROM (%s) AS r_sctid) " % self.as_sql()))
 
     def to_SctidGroups(self, rf):
         return SctidGroups(query=self.as_sql(), rf=rf)
@@ -132,22 +132,21 @@ class Quads(RF2_Substrate_Common, _Instance, Set):
         query += " WHERE " + \
                  "t_contains.sourceId = %s AND t_contains.destinationId = %s AND t_contains.typeId = %s and t_contains.gid = %s" % \
                  (item.s, item.t, item.a, item.g)
-        query += " FROM (%s) as t_contains" % self.as_sql()
+        query += " FROM (%s) AS t_contains" % self.as_sql()
         return int(list(self._execute_query(self._countSTMT % query))[0]) > 0
 
     # Convert Quads to Sctids
     def i_required_cardinality(self, min_, max_, rf):
-        src = 'destinationId' if rf else 'sourceId'
         sql = self.as_sql()
-        query = "SELECT DISTINCT rc_1.%s AS id FROM  " % src
+        query = "SELECT DISTINCT rc_1.id FROM "
         if min_ <= 1 and (not max_ or max_.inran('many')):
             query += "(%s) AS rc_1" % sql
         else:
-            query += "(SELECT rc_2.%s, count(rc_2.id) AS cnt FROM (%s) AS rc_2 " % (src, sql)
-            query += "GROUP BY rc_2.%s) AS rc_1 WHERE " % src
+            query += "(SELECT rc_2.id, count(rc_2.rid) AS cnt FROM (%s) AS rc_2 " % sql
+            query += "GROUP BY rc_2.id) AS rc_1 WHERE "
             query += "rc_1.cnt >= %s" % min_ if min_ > 1 else "1"
             query += " AND "
-            query += "rc_1.cnt <= %s" % max_ if max_ and max_.inran('num') else "1"
+            query += "rc_1.cnt <= %s" % max_.num if max_ and max_.inran('num') else "1"
         return Sctids(query=query)
 
     # Convert quads to Sctids
@@ -156,15 +155,14 @@ class Quads(RF2_Substrate_Common, _Instance, Set):
 
     # Convert Quads to SctidGroups
     def i_required_att_group_cardinality(self, min_, max_, rf):
-        src = 'destinationId' if rf else 'sourceId'
         if min_ <= 1 and (not max_ or max_.inran('many')):        # no further
             query = self.as_sql()
         else:
-            query = "SELECT DISTINCT rac_1.%s AS id, rac_1.gid FROM " % src
-            query += "(SELECT %s, gid, count(id) as cnt FROM (%s) AS rac_2" % (src, self.as_sql())
-            query += " GROUP BY %s, gid) AS rac_1 WHERE " % src
+            query = "SELECT DISTINCT rac_1.id, rac_1.gid FROM "
+            query += "(SELECT id, gid, count(rid) AS cnt FROM (%s) AS rac_2" % self.as_sql()
+            query += " GROUP BY id, gid) AS rac_1 WHERE "
             query += " rac_1.cnt >= %s " % min_ if min_ > 1 else "1"
-            query += " AND rac_1.cnt <= %s " % max_ if max_ and max_.inran('num') else ''
+            query += " AND rac_1.cnt <= %s " % max_.num if max_ and max_.inran('num') else ''
         return SctidGroups(query=query, rf=rf)
 
     # Convert Quads to SctidGroups

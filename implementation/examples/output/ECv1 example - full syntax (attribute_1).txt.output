@@ -23,10 +23,10 @@ descendantOf 19829001 |disorder of lung| :
 //         AND (id IN (19829001))) AS tt2 ON tt1.parent = tt2.id
 //    WHERE tt1.locked = 0) AS and_sctid1
 // JOIN
-//   (SELECT DISTINCT rc_1.sourceId AS id
+//   (SELECT DISTINCT rc_1.id
 //    FROM
-//      (SELECT id,
-//              sourceId,
+//      (SELECT id AS rid,
+//              sourceId AS id,
 //              typeId,
 //              destinationId,
 //              gid

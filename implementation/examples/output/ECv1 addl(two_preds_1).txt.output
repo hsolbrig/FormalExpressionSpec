@@ -33,8 +33,8 @@
 //            (SELECT DISTINCT idg.id,
 //                             idg.gid
 //             FROM
-//               (SELECT id,
-//                       sourceId,
+//               (SELECT id AS rid,
+//                       sourceId AS id,
 //                       typeId,
 //                       destinationId,
 //                       gid
@@ -57,8 +57,8 @@
 //            (SELECT DISTINCT idg.id,
 //                             idg.gid
 //             FROM
-//               (SELECT id,
-//                       sourceId,
+//               (SELECT id AS rid,
+//                       sourceId AS id,
 //                       typeId,
 //                       destinationId,
 //                       gid

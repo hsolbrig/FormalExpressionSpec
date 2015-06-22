@@ -37,8 +37,8 @@ descendantOf 111115 |amoxicillin tablet|:
 //            (SELECT DISTINCT idg.id,
 //                             idg.gid
 //             FROM
-//               (SELECT id,
-//                       sourceId,
+//               (SELECT id AS rid,
+//                       sourceId AS id,
 //                       typeId,
 //                       destinationId,
 //                       gid
@@ -67,8 +67,8 @@ descendantOf 111115 |amoxicillin tablet|:
 //                  (SELECT DISTINCT idg.id,
 //                                   idg.gid
 //                   FROM
-//                     (SELECT id,
-//                             sourceId,
+//                     (SELECT id AS rid,
+//                             sourceId AS id,
 //                             typeId,
 //                             destinationId,
 //                             gid
@@ -97,8 +97,8 @@ descendantOf 111115 |amoxicillin tablet|:
 //                        (SELECT DISTINCT idg.id,
 //                                         idg.gid
 //                         FROM
-//                           (SELECT id,
-//                                   sourceId,
+//                           (SELECT id AS rid,
+//                                   sourceId AS id,
 //                                   typeId,
 //                                   destinationId,
 //                                   gid
@@ -114,8 +114,8 @@ descendantOf 111115 |amoxicillin tablet|:
 //                              (SELECT DISTINCT idg.id,
 //                                               idg.gid
 //                               FROM
-//                                 (SELECT id,
-//                                         sourceId,
+//                                 (SELECT id AS rid,
+//                                         sourceId AS id,
 //                                         typeId,
 //                                         destinationId,
 //                                         gid
@@ -125,8 +125,8 @@ descendantOf 111115 |amoxicillin tablet|:
 //                              (SELECT DISTINCT idg.id,
 //                                               idg.gid
 //                               FROM
-//                                 (SELECT id,
-//                                         sourceId,
+//                                 (SELECT id AS rid,
+//                                         sourceId AS id,
 //                                         typeId,
 //                                         destinationId,
 //                                         gid

@@ -33,5 +33,5 @@ memberOf 450976002|disorders and diseases reference set for GP/FP reason for enc
 //                   FROM concept_ss
 //                   WHERE active=1
 //                     AND locked = 0
-//                     AND (id IN (450976002)))) as or_sctid)) as or_sctid
+//                     AND (id IN (450976002)))) AS or_sctid)) AS or_sctid
 // ============================================================

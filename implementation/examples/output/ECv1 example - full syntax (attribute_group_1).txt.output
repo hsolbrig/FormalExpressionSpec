@@ -8,9 +8,10 @@ descendantOrSelfOf 404684003 |clinical finding|:
 { 363698007 |finding site| = descendantOrSelfOf 53085002 |right ventricular structure|, 
   116676008 |associated morphology| = descendantOrSelfOf 56246009 |hypertrophy|}
 
-// Result: set()
+// Result: {253512000, 399228007, 253513005, 253514004, 204306007, 253515003, 86299006,
+// 204351007}
 //
-// Length=0
+// Length=8
 
 // ============================================================
 //SELECT DISTINCT and_sctid1.id
@@ -31,7 +32,7 @@ descendantOrSelfOf 404684003 |clinical finding|:
 //                WHERE active=1
 //                  AND locked = 0
 //                  AND (id IN (404684003))) AS tt2 ON tt1.parent = tt2.id
-//             WHERE tt1.locked = 0)) as or_sctid) AS and_sctid1
+//             WHERE tt1.locked = 0)) AS or_sctid) AS and_sctid1
 // JOIN
 //   (SELECT DISTINCT and_sctid1.id
 //    FROM
@@ -46,8 +47,8 @@ descendantOrSelfOf 404684003 |clinical finding|:
 //               (SELECT DISTINCT idg.id,
 //                                idg.gid
 //                FROM
-//                  (SELECT id,
-//                          sourceId,
+//                  (SELECT id AS rid,
+//                          sourceId AS id,
 //                          typeId,
 //                          destinationId,
 //                          gid
@@ -75,15 +76,15 @@ descendantOrSelfOf 404684003 |clinical finding|:
 //                                    WHERE active=1
 //                                      AND locked = 0
 //                                      AND (id IN (39057004))) AS tt2 ON tt1.parent = tt2.id
-//                                 WHERE tt1.locked = 0)) as or_sctid)
+//                                 WHERE tt1.locked = 0)) AS or_sctid)
 //                     AND active=1
 //                     AND locked=0) AS idg) AS sg_and1
 //             JOIN
 //               (SELECT DISTINCT idg.id,
 //                                idg.gid
 //                FROM
-//                  (SELECT id,
-//                          sourceId,
+//                  (SELECT id AS rid,
+//                          sourceId AS id,
 //                          typeId,
 //                          destinationId,
 //                          gid
@@ -111,7 +112,7 @@ descendantOrSelfOf 404684003 |clinical finding|:
 //                                    WHERE active=1
 //                                      AND locked = 0
 //                                      AND (id IN (415582006))) AS tt2 ON tt1.parent = tt2.id
-//                                 WHERE tt1.locked = 0)) as or_sctid)
+//                                 WHERE tt1.locked = 0)) AS or_sctid)
 //                     AND active=1
 //                     AND locked=0) AS idg) AS sg_and2 ON sg_and1.id = sg_and2.id
 //             AND sg_and1.gid = sg_and2.gid) AS idg) AS rg_card) AS and_sctid1
@@ -127,8 +128,8 @@ descendantOrSelfOf 404684003 |clinical finding|:
 //               (SELECT DISTINCT idg.id,
 //                                idg.gid
 //                FROM
-//                  (SELECT id,
-//                          sourceId,
+//                  (SELECT id AS rid,
+//                          sourceId AS id,
 //                          typeId,
 //                          destinationId,
 //                          gid
@@ -156,15 +157,15 @@ descendantOrSelfOf 404684003 |clinical finding|:
 //                                    WHERE active=1
 //                                      AND locked = 0
 //                                      AND (id IN (53085002))) AS tt2 ON tt1.parent = tt2.id
-//                                 WHERE tt1.locked = 0)) as or_sctid)
+//                                 WHERE tt1.locked = 0)) AS or_sctid)
 //                     AND active=1
 //                     AND locked=0) AS idg) AS sg_and1
 //             JOIN
 //               (SELECT DISTINCT idg.id,
 //                                idg.gid
 //                FROM
-//                  (SELECT id,
-//                          sourceId,
+//                  (SELECT id AS rid,
+//                          sourceId AS id,
 //                          typeId,
 //                          destinationId,
 //                          gid
@@ -192,7 +193,7 @@ descendantOrSelfOf 404684003 |clinical finding|:
 //                                    WHERE active=1
 //                                      AND locked = 0
 //                                      AND (id IN (56246009))) AS tt2 ON tt1.parent = tt2.id
-//                                 WHERE tt1.locked = 0)) as or_sctid)
+//                                 WHERE tt1.locked = 0)) AS or_sctid)
 //                     AND active=1
 //                     AND locked=0) AS idg) AS sg_and2 ON sg_and1.id = sg_and2.id
 //             AND sg_and1.gid = sg_and2.gid) AS idg) AS rg_card) AS and_sctid2 ON and_sctid1.id = and_sctid2.id) AS and_sctid2 ON and_sctid1.id = and_sctid2.id

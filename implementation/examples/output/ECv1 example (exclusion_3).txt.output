@@ -36,12 +36,12 @@
 //                WHERE active=1
 //                  AND locked = 0
 //                  AND (id IN (404684003))) AS tt2 ON tt1.parent = tt2.id
-//             WHERE tt1.locked = 0)) as or_sctid) AS and_sctid1
+//             WHERE tt1.locked = 0)) AS or_sctid) AS and_sctid1
 // JOIN
-//   (SELECT DISTINCT rc_1.sourceId AS id
+//   (SELECT DISTINCT rc_1.id
 //    FROM
-//      (SELECT id,
-//              sourceId,
+//      (SELECT id AS rid,
+//              sourceId AS id,
 //              typeId,
 //              destinationId,
 //              gid

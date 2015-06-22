@@ -17,10 +17,10 @@ memberOf 1111000000132 |allergy event reference set|: 246075003 |causative agent
 //      AND locked = 0
 //      AND (False)) AS and_sctid1
 // JOIN
-//   (SELECT DISTINCT rc_1.sourceId AS id
+//   (SELECT DISTINCT rc_1.id
 //    FROM
-//      (SELECT id,
-//              sourceId,
+//      (SELECT id AS rid,
+//              sourceId AS id,
 //              typeId,
 //              destinationId,
 //              gid
@@ -52,7 +52,7 @@ memberOf 1111000000132 |allergy event reference set|: 246075003 |causative agent
 //                        WHERE active=1
 //                          AND locked = 0
 //                          AND (id IN (105590001))) AS tt2 ON tt1.parent = tt2.id
-//                     WHERE tt1.locked = 0)) as or_sctid)
+//                     WHERE tt1.locked = 0)) AS or_sctid)
 //         AND active=1
 //         AND locked=0) AS rc_1) AS and_sctid2 ON and_sctid1.id = and_sctid2.id
 // ============================================================

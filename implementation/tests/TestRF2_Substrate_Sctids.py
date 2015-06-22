@@ -44,14 +44,21 @@ class RF2_SubstrateTestCase(unittest.TestCase):
         self.c = Sctids()
 
     def test_constructors(self):
-        print(self.c.as_sql())
-        print(Sctids(7440008).as_sql())
-        print(Sctids({74400008, 56}).as_sql())
-        print(Sctids([74400008, 56]).as_sql())
-        print(Sctids(Sctids(74400008)).as_sql())
-        print(Sctids(Sctids(74400008)).as_sql())
-        print(Sctids('id < 10000').as_sql())
-        print(Sctids(['id < 1000', 'id > 10']).as_sql())
+        self.assertEqual("SELECT id FROM concept_ss WHERE active=1  AND locked = 0", self.c.as_sql())
+        self.assertEqual("SELECT id FROM concept_ss WHERE active=1  AND locked = 0 AND (id IN (7440008))",
+                         Sctids(7440008).as_sql())
+        self.assertEqual("SELECT id FROM concept_ss WHERE active=1  AND locked = 0 AND (id IN (56,74400008))",
+                         Sctids({74400008, 56}).as_sql())
+        self.assertEqual("SELECT id FROM concept_ss WHERE active=1  AND locked = 0 AND (id IN (74400008,56))",
+                         Sctids([74400008, 56]).as_sql())
+        self.assertEqual("SELECT id FROM concept_ss WHERE active=1  AND locked = 0 AND (id IN (74400008))",
+                         Sctids(Sctids(74400008)).as_sql())
+        self.assertEqual("SELECT id FROM concept_ss WHERE active=1  AND locked = 0 AND (id IN (74400008))",
+                         Sctids(Sctids(74400008)).as_sql())
+        self.assertEqual("SELECT id FROM concept_ss WHERE active=1  AND locked = 0 AND (id < 10000)",
+                         Sctids('id < 10000').as_sql())
+        self.assertEqual("SELECT id FROM concept_ss WHERE active=1  AND locked = 0 AND (id IN (id < 1000,id > 10))",
+                         Sctids(['id < 1000', 'id > 10']).as_sql())
 
     def test_len(self):
         cl = len(self.c)
@@ -62,7 +69,9 @@ class RF2_SubstrateTestCase(unittest.TestCase):
         self.assertEqual(1, len(Sctids({74400008, 74400008})))
         self.assertEqual(1, len(Sctids([74400008, 74400008])))
         self.assertEqual(2, len(Sctids({74400008, 101009})))
-        print('{' + ', '.join(str(v) for _, v in zip(range(20), self.c)) + '}')
+        self.assertEqual({101009, 102002, 103007, 104001, 106004, 107008, 108003, 109006, 110001, 111002, 112009,
+                          113004, 114005, 115006, 116007, 117003, 118008, 119000, 120006, 121005},
+                         {v for _, v in zip(range(20), self.c)})
 
     def test_subsumption(self):
         self.assertTrue(self.c > Sctids({74400008}))
@@ -83,7 +92,9 @@ class RF2_SubstrateTestCase(unittest.TestCase):
 
     def test_and(self):
         x = self.c & Sctids({74400008, 56, 101009})
-        print(x.as_sql())
+        self.assertEqual("SELECT DISTINCT and_sctid1.id FROM (SELECT id FROM concept_ss WHERE active=1  AND locked = 0)"
+                         " AS and_sctid1 JOIN (SELECT id FROM concept_ss WHERE active=1  AND locked = 0 AND "
+                         "(id IN (56,101009,74400008))) AS and_sctid2 ON and_sctid1.id = and_sctid2.id", x.as_sql())
         self.assertEqual(2, len(x))
         self.assertEqual({74400008, 101009}, set(x))
 

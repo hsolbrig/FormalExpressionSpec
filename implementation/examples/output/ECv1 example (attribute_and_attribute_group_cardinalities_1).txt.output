@@ -40,15 +40,15 @@
 //                        (SELECT DISTINCT idg.id,
 //                                         idg.gid
 //                         FROM
-//                           (SELECT DISTINCT rac_1.sourceId AS id,
+//                           (SELECT DISTINCT rac_1.id,
 //                                            rac_1.gid
 //                            FROM
-//                              (SELECT sourceId,
+//                              (SELECT id,
 //                                      gid,
-//                                      count(id) as cnt
+//                                      count(rid) AS cnt
 //                               FROM
-//                                 (SELECT id,
-//                                         sourceId,
+//                                 (SELECT id AS rid,
+//                                         sourceId AS id,
 //                                         typeId,
 //                                         destinationId,
 //                                         gid
@@ -71,24 +71,24 @@
 //                                       WHERE tt1.locked = 0)
 //                                    AND active=1
 //                                    AND locked=0) AS rac_2
-//                               GROUP BY sourceId,
+//                               GROUP BY id,
 //                                        gid) AS rac_1
-//                            WHERE rac_1.cnt >= 2) AS idg) as to_sctid))) AS minus_sctid
+//                            WHERE rac_1.cnt >= 2) AS idg) AS to_sctid))) AS minus_sctid
 //         WHERE minus_sctid.id NOT IN
 //             (SELECT DISTINCT rg_card.id
 //              FROM
 //                (SELECT DISTINCT idg.id,
 //                                 idg.gid
 //                 FROM
-//                   (SELECT DISTINCT rac_1.sourceId AS id,
+//                   (SELECT DISTINCT rac_1.id,
 //                                    rac_1.gid
 //                    FROM
-//                      (SELECT sourceId,
+//                      (SELECT id,
 //                              gid,
-//                              count(id) as cnt
+//                              count(rid) AS cnt
 //                       FROM
-//                         (SELECT id,
-//                                 sourceId,
+//                         (SELECT id AS rid,
+//                                 sourceId AS id,
 //                                 typeId,
 //                                 destinationId,
 //                                 gid
@@ -111,7 +111,7 @@
 //                               WHERE tt1.locked = 0)
 //                            AND active=1
 //                            AND locked=0) AS rac_2
-//                       GROUP BY sourceId,
+//                       GROUP BY id,
 //                                gid) AS rac_1
 //                    WHERE rac_1.cnt >= 2) AS idg) AS rg_card))) AS and_sctid2 ON and_sctid1.id = and_sctid2.id
 // ============================================================

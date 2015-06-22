@@ -29,7 +29,7 @@
 
 import unittest
 import re
-from ECLparser.datatypes import many
+from ECLparser.datatypes import many, unlimitedNat
 from ECLparser.rf2_substrate.RF2_Substrate_ConstraintOperators import descendants_of
 
 from rf2db.db.RF2FileCommon import rf2_values
@@ -38,8 +38,10 @@ import argparse
 from ECLparser.rf2_substrate.RF2_Substrate_Quads import *
 from ECLparser.rf2_substrate.RF2_Substrate_Sctids import Sctids
 
+
 def clean_sql(txt):
-    return re.sub(r'(\s)\s*', r'\1', re.sub(r'\n',' ', txt.as_sql())).strip()
+    return re.sub(r'(\s)\s*', r'\1', re.sub(r'\n', ' ', txt.as_sql())).strip()
+
 
 class RF2_SubstrateTestCase(unittest.TestCase):
     def setUp(self):
@@ -69,12 +71,20 @@ class RF2_SubstrateTestCase(unittest.TestCase):
         t1 = Quads(rf=False, atts=Sctids(116680003), eq=False, ecv=Sctids({116154003, 32712000}))
         self._test_result(t1, 64)
         c1 = t1.to_sctids()
-        self.assertEqual(
-            "SELECT id FROM concept_ss WHERE active=1 AND locked = 0 AND (id IN (SELECT DISTINCT r.sourceId FROM "
-            "( SELECT id, sourceId, typeId, destinationId, gid FROM relationship_ss_ext WHERE typeId NOT IN "
-            "( SELECT id FROM concept_ss WHERE active=1 AND locked = 0 AND (id IN (116680003)) ) AND destinationId IN "
-            "( SELECT id FROM concept_ss WHERE active=1 AND locked = 0 AND (id IN (32712000,116154003)) ) AND "
-            "active=1 AND locked=0 ) AS r))", clean_sql(c1))
+        self.assertEqual("SELECT id FROM concept_ss WHERE active=1 AND locked = 0 AND (id IN (SELECT DISTINCT"
+                         " r_sctid.id FROM (SELECT id AS rid, sourceId AS id, typeId, destinationId, gid FROM "
+                         "relationship_ss_ext WHERE typeId NOT IN (SELECT id FROM concept_ss WHERE active=1 AND "
+                         "locked = 0 AND (id IN (116680003))) AND destinationId IN (SELECT id FROM concept_ss WHERE "
+                         "active=1 AND locked = 0 AND (id IN (32712000,116154003))) AND active=1 AND locked=0)"
+                         " AS r_sctid) )", clean_sql(c1))
+
+        self.assertEqual("SELECT id FROM concept_ss WHERE active=1 AND locked = 0 AND (id IN (SELECT DISTINCT "
+                         "r_sctid.id FROM (SELECT id AS rid, sourceId AS id, typeId, destinationId, gid FROM "
+                         "relationship_ss_ext WHERE typeId NOT IN (SELECT id FROM concept_ss WHERE active=1 AND "
+                         "locked = 0 AND (id IN (116680003))) AND destinationId IN (SELECT id FROM concept_ss WHERE "
+                         "active=1 AND locked = 0 AND (id IN (32712000,116154003))) AND active=1 AND locked=0) AS "
+                         "r_sctid) )", clean_sql(c1))
+
         self.assertEqual({119306004, 258647001, 39668000, 225115005, 241026003, 241027007, 241029005, 427219009,
                           427479001, 315028004, 47956003, 241030000, 241028002, 433043005, 241031001, 44267002,
                           287727009, 179005009, 179006005, 432875004, 304846008, 50686003, 406155005, 431842009,
@@ -91,16 +101,24 @@ class RF2_SubstrateTestCase(unittest.TestCase):
     def test_opt_cardinality(self):
         #
         # [0..1] 127489000 |has active ingredient| = < 105590001 |substance|
-        ai = Sctids(127489000)
-        dos = descendants_of(Sctids(105590001))
-        b = Quads(rf=False, atts=ai, eq=True, ecv=dos)
-        universe = Sctids()
-        universe_minus_b = universe - b.to_sctids()
-        self.assertEqual(297596, len(universe_minus_b))
-        b_minus_passing = b.to_sctids() - b.i_required_cardinality(0, 1, False)
-        bi_should_be = universe - b_minus_passing
-        bi = b.i_optional_cardinality(None, 1, False)
-        print(len(bi))
+        att_i = Sctids(127489000)               # active ingredient
+        desc_of_subst = descendants_of(Sctids(105590001))   # substance
+        ais_i = Quads(rf=False, atts=att_i, eq=True, ecv=desc_of_subst)     # has active ingredient desc substance
+
+        universe = Sctids()                                         # all active concepts
+        self.assertEqual(313015, len(universe))                     # as of 20150131
+        self.assertEqual(15419, len(ais_i.to_sctids()))
+        universe_minus_ais_i = universe - ais_i.to_sctids()         # all concepts w/o active ingredient of substance
+        self.assertEqual(313015 - 15419, len(universe_minus_ais_i))
+
+        all_ais_i_minus_passing = ais_i.to_sctids() - ais_i.i_required_cardinality(0, unlimitedNat(num=1), False)
+        self.assertEqual(2302, len(ais_i.i_required_cardinality(2, many, False)))  # Concepts with 2 or more
+        self.assertEqual(2302, len(all_ais_i_minus_passing))        # all concepts minus at most one
+
+        bi_should_be = universe - all_ais_i_minus_passing           # everything except those with at most 1
+        self.assertEqual(313015 - 2302, len(bi_should_be))
+        bi = ais_i.i_optional_cardinality(None, unlimitedNat(num=1), False)
+        self.assertEqual(313015 - 2302, len(bi))
 
 
 class ParseTestCase(unittest.TestCase):
@@ -117,5 +135,11 @@ class ParseTestCase(unittest.TestCase):
         dos = descendants_of(Sctids(91723000))
         b = Quads(rf=False, atts=ai, eq=True, ecv=dos)
         bic = b.i_required_att_group_cardinality(2, many, False)
-        print(bic.as_sql())
-
+        self.assertEqual("SELECT DISTINCT idg.id, idg.gid FROM (SELECT DISTINCT rac_1.sourceId AS id, rac_1.gid FROM"
+                         " (SELECT sourceId, gid, count(rid) AS cnt FROM (SELECT id AS rid, sourceId AS id, typeId, "
+                         "destinationId, gid FROM relationship_ss_ext WHERE typeId IN (SELECT id FROM concept_ss WHERE"
+                         " active=1  AND locked = 0 AND (id IN (363698007))) AND destinationId IN (SELECT DISTINCT "
+                         "tt1.child AS id FROM transitive_ss AS tt1 JOIN (SELECT id FROM concept_ss WHERE active=1  AND"
+                         " locked = 0 AND (id IN (91723000))) AS tt2 ON tt1.parent = tt2.id WHERE tt1.locked = 0) AND "
+                         "active=1 AND locked=0) AS rac_2 GROUP BY sourceId, gid) AS rac_1 WHERE  rac_1.cnt >= 2 ) "
+                         "AS idg", bic.as_sql())

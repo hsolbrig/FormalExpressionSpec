@@ -21,12 +21,12 @@ R 127489000 |has active ingredient| = 111115 |TRIPHASIL tablet|
 //         AND (id IN (105590001))) AS tt2 ON tt1.parent = tt2.id
 //    WHERE tt1.locked = 0) AS and_sctid1
 // JOIN
-//   (SELECT DISTINCT rc_1.destinationId AS id
+//   (SELECT DISTINCT rc_1.id
 //    FROM
-//      (SELECT id,
+//      (SELECT id AS rid,
 //              sourceId,
 //              typeId,
-//              destinationId,
+//              destinationId AS id,
 //              gid
 //       FROM relationship_ss_ext
 //       WHERE typeId IN
