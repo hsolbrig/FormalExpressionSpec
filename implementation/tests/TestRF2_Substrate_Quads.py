@@ -48,7 +48,7 @@ class RF2_SubstrateTestCase(unittest.TestCase):
         parser = argparse.ArgumentParser(description="Set up RF2 DB parameters and optionally create a database")
         parser.add_argument('configfile', help="Configuration file location")
         opts = parser.parse_args(['settings.conf'])
-        rf2_values.set_configfile(opts.configfile)
+        rf2_values.set_configfile(opts.configfile, override=True)
 
     def _test_result(self, t1, ngroups):
         # print(t1.as_sql())
@@ -126,7 +126,7 @@ class ParseTestCase(unittest.TestCase):
         parser = argparse.ArgumentParser(description="Set up RF2 DB parameters and optionally create a database")
         parser.add_argument('configfile', help="Configuration file location")
         opts = parser.parse_args(['settings.conf'])
-        rf2_values.set_configfile(opts.configfile)
+        rf2_values.set_configfile(opts.configfile, override=True)
 
     def test_attribute_and_attribute_group_cardinalities_1(self):
         # < 404684003 |clinical finding|:
@@ -135,11 +135,11 @@ class ParseTestCase(unittest.TestCase):
         dos = descendants_of(Sctids(91723000))
         b = Quads(rf=False, atts=ai, eq=True, ecv=dos)
         bic = b.i_required_att_group_cardinality(2, many, False)
-        self.assertEqual("SELECT DISTINCT idg.id, idg.gid FROM (SELECT DISTINCT rac_1.sourceId AS id, rac_1.gid FROM"
-                         " (SELECT sourceId, gid, count(rid) AS cnt FROM (SELECT id AS rid, sourceId AS id, typeId, "
+        self.assertEqual("SELECT DISTINCT idg.id, idg.gid FROM (SELECT DISTINCT rac_1.id, rac_1.gid FROM"
+                         " (SELECT id, gid, count(rid) AS cnt FROM (SELECT id AS rid, sourceId AS id, typeId, "
                          "destinationId, gid FROM relationship_ss_ext WHERE typeId IN (SELECT id FROM concept_ss WHERE"
                          " active=1  AND locked = 0 AND (id IN (363698007))) AND destinationId IN (SELECT DISTINCT "
                          "tt1.child AS id FROM transitive_ss AS tt1 JOIN (SELECT id FROM concept_ss WHERE active=1  AND"
                          " locked = 0 AND (id IN (91723000))) AS tt2 ON tt1.parent = tt2.id WHERE tt1.locked = 0) AND "
-                         "active=1 AND locked=0) AS rac_2 GROUP BY sourceId, gid) AS rac_1 WHERE  rac_1.cnt >= 2 ) "
+                         "active=1 AND locked=0) AS rac_2 GROUP BY id, gid) AS rac_1 WHERE  rac_1.cnt >= 2 ) "
                          "AS idg", bic.as_sql())

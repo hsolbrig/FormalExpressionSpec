@@ -41,7 +41,7 @@ class RF2_SubstrateSctidGroupTestCase(unittest.TestCase):
         parser = argparse.ArgumentParser(description="Set up RF2 DB parameters and optionally create a database")
         parser.add_argument('configfile', help="Configuration file location")
         opts = parser.parse_args(['settings.conf'])
-        rf2_values.set_configfile(opts.configfile)
+        rf2_values.set_configfile(opts.configfile, override=True)
 
     def _test_result(self, t1, nentries):
         # print(t1.as_sql())

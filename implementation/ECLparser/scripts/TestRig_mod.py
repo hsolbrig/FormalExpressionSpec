@@ -156,7 +156,6 @@ def do_parse(opts: argparse.Namespace, infile: InputStream):
 
 
 def main(argv: list):
-    _curdir = os.path.join(os.getcwd(), os.path.dirname(__file__))
     sys.path.append(os.path.join(_curdir, '..'))
     sys.path.append(os.path.join(_curdir, '../parser/parser'))
 

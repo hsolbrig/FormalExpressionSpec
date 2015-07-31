@@ -19,7 +19,7 @@
 //       FROM concept_ss
 //       WHERE active=1
 //         AND locked = 0
-//         AND (id IN (111115))) AS tt2 ON tt1.parent = tt2.id
+//         AND (False)) AS tt2 ON tt1.parent = tt2.id
 //    WHERE tt1.locked = 0) AS and_sctid1
 // JOIN
 //   (SELECT DISTINCT rg_card.id

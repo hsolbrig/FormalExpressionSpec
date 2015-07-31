@@ -43,7 +43,7 @@ class RF2_Substrate(Substrate):
         if not configfile:
             _curdir = os.path.join(os.getcwd(), os.path.dirname(__file__))
             configfile = os.path.join(_curdir, 'settings.conf')
-        rf2_values.set_configfile(configfile)
+        rf2_values.set_configfile(configfile, override=True)
         self._concepts = RF2_Substrate_Sctids.Sctids()
         self._relationships = RF2_Substrate_Quads.Quads()
 

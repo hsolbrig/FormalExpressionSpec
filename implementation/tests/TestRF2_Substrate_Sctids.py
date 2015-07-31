@@ -40,7 +40,7 @@ class RF2_SubstrateTestCase(unittest.TestCase):
         parser = argparse.ArgumentParser(description="Set up RF2 DB parameters and optionally create a database")
         parser.add_argument('configfile', help="Configuration file location")
         opts = parser.parse_args(['settings.conf'])
-        rf2_values.set_configfile(opts.configfile)
+        rf2_values.set_configfile(opts.configfile, override=True)
         self.c = Sctids()
 
     def test_constructors(self):

@@ -7,7 +7,7 @@ ischild = len(package)>0 if package is not None else False
 if ischild:
     from .ECLVisitor import ECLVisitor
 else:
-    from ECLparser.parser.ECLVisitor import ECLVisitor
+    from ECLVisitor import ECLVisitor
 
 def serializedATN():
     with StringIO() as buf:

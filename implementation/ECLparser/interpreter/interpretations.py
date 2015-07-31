@@ -215,13 +215,13 @@ def i_att_cardinality(ss: Substrate, ocard: Optional(cardinality), qore: Quads_o
 
 def i_required_cardinality(min_: N, max_: unlimitedNat, qore: Quads_or_Error) -> Set(sctId):
     return quads_for(qore).i_required_cardinality(int(min_),
-                                                  None if max_.inran('many') else int(max_.num),
+                                                  None if max_.inran('many') else max_,
                                                   quad_direction(qore) == source_direction)
 
 
 def i_optional_cardinality(ss: Substrate, max_: unlimitedNat, qore: Quads_or_Error) -> Set(sctId):
     return quads_for(qore).i_optional_cardinality(ss,
-                                                  None if max_.inran('many') else int(max_.num),
+                                                  None if max_.inran('many') else max_,
                                                   quad_direction(qore) == source_direction)
 
 

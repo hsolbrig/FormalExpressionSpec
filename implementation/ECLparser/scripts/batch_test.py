@@ -98,7 +98,7 @@ def main(argv: list):
     nviewed = nfailed = nsuccess = nexceptions = 0
     for (dirpath, _, filenames) in os.walk(opts.dir):
         for fn in filenames:
-            if not fn.startswith('.') and not fn.endswith('.output') and (not opts.file or fn.startswith(opts.file)):
+            if not fn.startswith('.') and fn.endswith('.txt') and (not opts.file or fn.startswith(opts.file)):
                 print("PARSING: " + fn)
                 result = do_parse(opts, FileStream(os.path.join(dirpath, fn)))
                 nviewed += 1
