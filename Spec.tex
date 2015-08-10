@@ -117,7 +117,6 @@ A substrate consists of:
 \item{\textbf{relationships}} A set of relationship quads (source, attribute, target, group)
 \item{\textbf{parentsOf}}  A function from an sctId to its asserted and inferred parents
 \item{\textbf{equivalent\_concepts}} A function from an sctId to the set of sctId's that have been determined to be equivalent to it. 
- \item{\textbf{refsets}} The reference sets within the context of the substrate whose members are members are concept identifiers (i.e. are in $concepts$).  While not formally spelled out in this specification, it is assumed that the typical reference set function would be returning a subset of the $refsetId$ / $referencedComponentId$ tuples represented in one or more RF2 Refset Distribution tables.
 \end{itemize}
 \paragraph{}
 
@@ -150,11 +149,10 @@ The formal definition of substrate follows. The expressions below assert that:
 \begin{itemize}[noitemsep,nolistsep]
 \item Have the same parents
 \item Appear the subject, attribute and object of the same set of relationships
-\item Appear in the domain of the same set of refsets
-\item Both appear in the range of any refset that one appears in
+\item If one is a concept $refset$ the other is as well
 \end{itemize}
-\item Every refset is a substrate $concept$
-\item Every member of a refset is a substrate $concept$
+\item Every concept $refset$ is a substrate $concept$
+\item Every concept $refset$ is mappable via (i.e. is in the domain of)  $i\_refsetId$ 
 \item $childrenOf$ is the inverse of $parentsOf$, where any concept that doesn't appear a parent has no (the emptyset) children.
 \item $descendants$ is the transitive closure of the $childrenOf$ function
 \item $ancestors$ is the transitive closure of the $parentsOf$ function
@@ -169,7 +167,6 @@ The formal definition of substrate follows. The expressions below assert that:
    relationships : \power Quad  \\
    parentsOf : sctId \pfun \power sctId \\
    equivalent\_concepts : sctId \pfun \power sctId \\
-   refsets : sctId \pfun \power sctId 
 \also
    childrenOf : sctId \pfun \power sctId \\
    descendants : sctId \pfun \power sctId \\
@@ -194,13 +191,7 @@ The formal definition of substrate follows. The expressions below assert that:
 \t2 parentsOf ~ c1 = parentsOf ~ c2 \land \\
 \t2 \{r : relationships | r.s = c1\} = \{r : relationships | r.s = c2\} \land \\
 \t2 \{r : relationships | r.a = c1\} = \{r : relationships | r.a = c2\} \land \\
-\t2 \{r : relationships | t\_sctid \inv r.t = c1\} = \{r : relationships | t\_sctid \inv r.t = c2\} \land \\
-\t2 c1 \in \dom refsets \iff c2 \in \dom refsets \land \\
-\t2 c1 \in \dom refsets \implies refsets~c1 = refsets~c2 \land \\
-\t2 (\forall rsd : \ran refsets @ c1 \in rsd \iff c2 \in rsd)
-\also
-   \dom refsets \subseteq concepts \\
-   \bigcup (\ran refsets) \subseteq concepts
+\t2 \{r : relationships | t\_sctid \inv r.t = c1\} = \{r : relationships | t\_sctid \inv r.t = c2\} 
 \also
     \dom childrenOf = concepts \\
     \forall s, t : concepts @ t \in parentsOf~s \iff s \in childrenOf~t  \\
