@@ -46,9 +46,6 @@ class Substrate:
     def equivalent_concepts(self, s: sctId) -> Set(sctId):
         assert False, "Must be implemented"
 
-    def refsets(self, s: sctId) -> Set(sctId):
-        assert False, "Must be implemented"
-
     def descendants(self, s: sctId) -> Set(sctId):
         assert False, "Must be implemented"
 

@@ -200,9 +200,9 @@ conjunctionExpressionConstraint = CrossProduct(subExpressionConstraint,
 
 # 3.2.4 compoundExpressionConstraint
 compoundExpressionConstraint << FreeType(compound_conj=conjunctionExpressionConstraint,
-                                           compound_disj=disjunctionExpressionConstraint,
-                                           compound_excl=exclusionExpressionConstraint,
-                                           compound_nested=compoundExpressionConstraint)
+                                         compound_disj=disjunctionExpressionConstraint,
+                                         compound_excl=exclusionExpressionConstraint,
+                                         compound_nested=compoundExpressionConstraint)
 
 
 # 3.2.3 simpleExpressionConstraint
@@ -210,15 +210,15 @@ simpleExpressionConstraint << CrossProduct(Optional(constraintOperator), focusCo
 
 # 3.2.1 unrefinedExpressionConstraint
 unrefinedExpressionConstraint = FreeType(unrefined_compound=compoundExpressionConstraint,
-                                           unrefined_simple=simpleExpressionConstraint)
+                                         unrefined_simple=simpleExpressionConstraint)
 
 # 3.2.2 refinedExpressionConstraint
-refinedExpressionConstraint << CrossProduct(unrefinedExpressionConstraint,
-                                              refinement)
+refinedExpressionConstraint << CrossProduct(simpleExpressionConstraint, refinement)
 
 # 3.2 ExpressionConstraint
 expressionConstraint = FreeType(expcons_refined=refinedExpressionConstraint,
-                                  expcons_unrefined=unrefinedExpressionConstraint)
+                                expcons_compound=compoundExpressionConstraint,
+                                expcons_simple=simpleExpressionConstraint)
 
 
 class direction(BasicType): pass

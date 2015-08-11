@@ -27,4 +27,4 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 __all__ = ['RF2_Substrate_Common', 'RF2_Substrate_ConstraintOperators', 'RF2_Substrate_Quads',
-           'RF2_Substrate_Quads', 'RF2_Substrate_Sctids', 'RF2_Substrate']
+           'RF2_Substrate_Quads', 'RF2_Substrate_Sctids', 'RF2_Substrate', 'RF2_Substrate_Refsets']

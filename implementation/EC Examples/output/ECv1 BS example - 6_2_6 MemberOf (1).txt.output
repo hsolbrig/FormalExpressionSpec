@@ -1,0 +1,16 @@
+// Substrate: 20150131
+// Timestamp: 
+// Result: Pass
+
+^ 700043003 |example problem list concepts reference set |
+// Result: set()
+//
+// Length=0
+
+// ============================================================
+//SELECT DISTINCT rs1.referencedComponentId AS id
+// FROM simplerefset_ss AS rs1
+// WHERE rs1.refsetId = 700043003
+//   AND rs1.locked = 0
+//   AND rs1.active = 1
+// ============================================================

@@ -1,0 +1,53 @@
+// Substrate: 20150131
+// Timestamp: 
+// Result: Pass
+
+(< 19829001|disorder of lung| OR ^ 700043003 |example problem list concepts reference set|) 
+MINUS ^ 450976002|disorders and diseases reference set for GP/FP reason for encounter|
+// Result: 
+//
+// Length=945
+
+// ============================================================
+//SELECT DISTINCT minus_sctid.id
+// FROM
+//   (SELECT DISTINCT or_sctid.id
+//    FROM (
+//            (SELECT DISTINCT tt1.child AS id
+//             FROM transitive_ss AS tt1
+//             JOIN
+//               (SELECT id
+//                FROM concept_ss
+//                WHERE active=1
+//                  AND locked = 0
+//                  AND (id IN (19829001))) AS tt2 ON tt1.parent = tt2.id
+//             WHERE tt1.locked = 0)
+//          UNION
+//            (SELECT DISTINCT or_sctid.id
+//             FROM (
+//                     (SELECT id
+//                      FROM concept_ss
+//                      WHERE active=1
+//                        AND locked = 0
+//                        AND (id IN (700043003)))
+//                   UNION
+//                     (SELECT id
+//                      FROM concept_ss
+//                      WHERE active=1
+//                        AND locked = 0
+//                        AND (id IN (700043003)))) AS or_sctid)) AS or_sctid) AS minus_sctid
+// WHERE minus_sctid.id NOT IN
+//     (SELECT DISTINCT or_sctid.id
+//      FROM (
+//              (SELECT id
+//               FROM concept_ss
+//               WHERE active=1
+//                 AND locked = 0
+//                 AND (id IN (450976002)))
+//            UNION
+//              (SELECT id
+//               FROM concept_ss
+//               WHERE active=1
+//                 AND locked = 0
+//                 AND (id IN (450976002)))) AS or_sctid)
+// ============================================================

@@ -34,11 +34,11 @@ from ECLparser.datatypes import sctId, Sctids_or_Error
 from ECLparser.rf2_substrate.RF2_Substrate import RF2_Substrate
 
 
-
 class InterpTestCase(unittest.TestCase):
     def test_empty_seq(self):
-        x = Sctids_or_Error(ok=RF2_Substrate().refsets(16))
-        print(union(x, x))
+        # TODO: refsets no longer exists -- do we have another empty set source?
+        x = RF2_Substrate().i_refsetId(16)
+        self.assertEqual([], (list(union(x, x).ok)))
 
 
 if __name__ == '__main__':

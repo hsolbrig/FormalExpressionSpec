@@ -28,17 +28,17 @@
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 from ECLparser.rf2_substrate.RF2_Substrate_ConstraintOperators import descendants_of, ancestors_of
 from ECLparser.rf2_substrate.RF2_Substrate_Quads import Quads
-from ECLparser.z.z import Set, CrossProduct, Seq
+from ECLparser.z.z import Set, CrossProduct
 
 from ECLparser.datatypes import Optional, concreteValue, stringValue, refset_concept, \
     reverseFlag, source_direction, targets_direction, Quads_or_Error, constraintOperator, descendantOf, \
     descendantOrSelfOf, ancestorOrSelfOf, Sctids_or_Error, sctId, numericComparisonOperator, stringComparisonOperator, \
     eco_eq, focusConcept, crOrWildCard, direction, Quad, numericValue, nco_eq, nco_neq, nco_gt, nco_ge, nco_lt, sco_eq
 from ECLparser.test_substrate.substrate import Substrate
-from ECLparser.interpreter.base_types import result_sctids, bigunion
+from ECLparser.interpreter.base_types import result_sctids
 
 
-def i_constraintOperator(ss: Substrate, oco: Optional(constraintOperator), input_: Sctids_or_Error) -> Sctids_or_Error:
+def i_constraintOperator(_: Substrate, oco: Optional(constraintOperator), input_: Sctids_or_Error) -> Sctids_or_Error:
     if input_.inran('error') or oco.is_empty:
         return input_
     input_ = input_.ok
@@ -149,10 +149,11 @@ def i_memberOf(ss: Substrate, crorwc: crOrWildCard) -> Sctids_or_Error:
         return refsetids
     refsets = result_sctids(refsetids)
     refset_members = [ss.i_refsetId(sctid) for sctid in refsets]
-    rval = refset_members[0] if refset_members else Sctids_or_Error(ok=ss.equivalent_concepts(None))
-    for m in refset_members[1:]:
-        rval = rval.union(m)
-    return rval
+    rset = refset_members[0].ok if refset_members else ss.equivalent_concepts(None)
+    if len(refset_members) > 1:
+        for m in refset_members:
+            rset = rset.union(m.ok)
+    return Sctids_or_Error(ok=rset)
     # refsetids = ss.i_conceptReference(crorwc.cr) if crorwc.inran('cr') else \
     #     Sctids_or_Error(ok=ss.descendants(refset_concept))
     # return refsetids if refsetids.inran('error') else \

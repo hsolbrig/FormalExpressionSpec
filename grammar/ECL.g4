@@ -1,8 +1,9 @@
 grammar ECL;
 
-// expressionConstraint = ws ( refinedExpressionConstraint / unrefinedExpressionConstraint ) ws
+// expressionConstraint = ws ( refinedExpressionConstraint / compoundExpressionConstraint / simpleExpressionConstraint ) ws
 expressionConstraint : (refinedExpressionConstraint
-					 | unrefinedExpressionConstraint) EOF
+                     | compoundExpressionConstraint
+					 | simpleExpressionConstraint) EOF
 					 ;
 
 // unrefinedExpressionConstraint = compoundExpressionConstraint / simpleExpressionConstraint
@@ -38,10 +39,8 @@ subExpressionConstraint : simpleExpressionConstraint
 					    | '(' (compoundExpressionConstraint | refinedExpressionConstraint) ')'
 					    ;
 
-// refinedExpressionConstraint = unrefinedExpressionConstraint ws ":" ws refinement / "(" ws refinedExpressionConstraint ws ")"
-refinedExpressionConstraint : unrefinedExpressionConstraint ':' refinement
-						    | '(' refinedExpressionConstraint ')'
-						    ;
+// refinedExpressionConstraint = simpleExpressionConstraint ws ":" ws refinement
+refinedExpressionConstraint : simpleExpressionConstraint ':' refinement ;
 
 // focusConcept = [ memberOf ws] (conceptReference / wildCard)
 focusConcept : memberOf? (conceptReference | wildCard) ;

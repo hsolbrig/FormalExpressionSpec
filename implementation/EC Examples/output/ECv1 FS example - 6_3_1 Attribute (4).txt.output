@@ -1,0 +1,42 @@
+// Substrate: 20150131
+// Timestamp: 
+// Result: Pass
+
+ANY : 246075003 |causative agent| = 387517004 |paracetamol|
+// Result: {290136000, 242824002, 293584003, 295128007, 290140009, 295124009, 70273001,
+// 295129004, 295125005, 297938000, 290137009, 290134002, 290138004, 295126006,
+// 292042007, 295130009, 295127002, 290135001, 290139007}
+//
+// Length=19
+
+// ============================================================
+//SELECT DISTINCT and_sctid1.id
+// FROM
+//   (SELECT id
+//    FROM concept_ss
+//    WHERE active=1
+//      AND locked = 0) AS and_sctid1
+// JOIN
+//   (SELECT DISTINCT rc_1.id
+//    FROM
+//      (SELECT id AS rid,
+//              sourceId AS id,
+//              typeId,
+//              destinationId,
+//              gid
+//       FROM relationship_ss_ext
+//       WHERE typeId IN
+//           (SELECT id
+//            FROM concept_ss
+//            WHERE active=1
+//              AND locked = 0
+//              AND (id IN (246075003)))
+//         AND destinationId IN
+//           (SELECT id
+//            FROM concept_ss
+//            WHERE active=1
+//              AND locked = 0
+//              AND (id IN (387517004)))
+//         AND active=1
+//         AND locked=0) AS rc_1) AS and_sctid2 ON and_sctid1.id = and_sctid2.id
+// ============================================================

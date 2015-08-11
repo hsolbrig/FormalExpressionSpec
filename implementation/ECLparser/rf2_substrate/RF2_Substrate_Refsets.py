@@ -26,3 +26,13 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
+from ECLparser.datatypes import sctId
+
+from ECLparser.rf2_substrate.RF2_Substrate_Sctids import Sctids
+
+_refset_query = "SELECT DISTINCT rs1.referencedComponentId AS id FROM simplerefset_ss AS rs1 " \
+                " WHERE rs1.refsetId = %s AND rs1.locked = 0 AND rs1.active = 1"
+
+
+def members_of(refsetid: sctId) -> Sctids:
+    return Sctids(query=_refset_query % refsetid)

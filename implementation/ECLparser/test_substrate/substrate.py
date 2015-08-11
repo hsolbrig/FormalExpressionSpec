@@ -90,6 +90,7 @@ class Substrate(ss):
                Sctids_or_Error(error=unknownAttributeId)
 
     def i_refsetId(self, rsid: conceptReference) -> Sctids_or_Error:
-         return Sctids_or_Error(ok=self.equivalents(rsid.first)) \
+        print("HERE")
+        return Sctids_or_Error(ok=self.equivalents(rsid.first)) \
              if rsid.first in self._descendants(refset_concept) else \
                 Sctids_or_Error(error=unknownRefsetId)

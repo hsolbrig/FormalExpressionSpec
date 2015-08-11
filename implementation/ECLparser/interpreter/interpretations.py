@@ -48,7 +48,8 @@ from ECLparser.interpreter.substrate_interpretations import i_attributeOperator,
 
 def i_expressionConstraint(ss: Substrate, ec: expressionConstraint) -> Sctids_or_Error:
     return i_refinedExpressionConstraint(ss, ec.expcons_refined) if ec.inran('expcons_refined') else \
-        i_unrefinedExpressionConstraint(ss, ec.expcons_unrefined)
+        i_compoundExpressionConstraint(ss, ec.expcons_compound) if ec.inran('expcons_compound') else \
+        i_simpleExpressionConstraint(ss, ec.expcons_simple)
 
 
 # 3.2.1 unrefinedExpressionConstraint
@@ -59,9 +60,9 @@ def i_unrefinedExpressionConstraint(ss: Substrate, uec: unrefinedExpressionConst
 
 # 3.2.2 refinedExpressionConstraint
 def i_refinedExpressionConstraint(ss: Substrate, rec: refinedExpressionConstraint) -> Sctids_or_Error:
-    unref_interp = i_unrefinedExpressionConstraint(ss, rec.first)
+    simple_interp = i_simpleExpressionConstraint(ss, rec.first)
     rhs = i_refinement(ss, rec.second)
-    return intersect(unref_interp, rhs)
+    return intersect(simple_interp, rhs)
 
 
 # 3.2.3 simpleExpressionConstraint
@@ -177,7 +178,7 @@ def i_subAttributeSet(ss: Substrate, subaset: subAttributeSet) -> Sctids_or_Erro
     if subaset.inran('subaset_attribute'):
         return i_attribute(ss, subaset.subaset_attribute)
     else:
-        return i_attributeSet(ss, subaset.subast_attset)
+        return i_attributeSet(ss, subaset.subaset_attset)
 
 
 # 3.5 attribute

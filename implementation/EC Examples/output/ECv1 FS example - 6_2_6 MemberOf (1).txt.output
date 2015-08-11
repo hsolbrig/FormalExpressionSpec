@@ -1,0 +1,24 @@
+// Substrate: 20150131
+// Timestamp: 
+// Result: Pass
+
+memberOf 700043003 |example problem list concepts reference set |
+// Result: {700043003}
+//
+// Length=1
+
+// ============================================================
+//SELECT DISTINCT or_sctid.id
+// FROM (
+//         (SELECT id
+//          FROM concept_ss
+//          WHERE active=1
+//            AND locked = 0
+//            AND (id IN (700043003)))
+//       UNION
+//         (SELECT id
+//          FROM concept_ss
+//          WHERE active=1
+//            AND locked = 0
+//            AND (id IN (700043003)))) AS or_sctid
+// ============================================================

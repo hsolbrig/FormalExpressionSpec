@@ -59,9 +59,15 @@ exclusion = BasicType()
 
 class ECLVisitor_implementation(ECLVisitor):
 
-    def visitExpressionConstraint(self, ctx: ECLParser.ExpressionConstraintContext):
-        # expressionConstraint : (refinedExpressionConstraint | unrefinedExpressionConstraint) EOF
-        return expressionConstraint.assign(self.visit(ctx.getChild(0)))
+    def visitExpressionConstraint(self, ctx: ECLParser.ExpressionConstraintContext) -> expressionConstraint:
+        # expressionConstraint = ws ( refinedExpressionConstraint / compoundExpressionConstraint
+        #  / simpleExpressionConstraint ) ws
+        if ctx.refinedExpressionConstraint():
+            return expressionConstraint(expcons_refined=self.visit(ctx.refinedExpressionConstraint()))
+        elif ctx.compoundExpressionConstraint():
+            return expressionConstraint(expcons_compound=self.visit(ctx.compoundExpressionConstraint()))
+        else:
+            return expressionConstraint(expcons_simple=self.visit(ctx.simpleExpressionConstraint()))
 
     # Returns
     def visitUnrefinedExpressionConstraint(self, ctx: ECLParser.UnrefinedExpressionConstraintContext) \
@@ -140,16 +146,11 @@ class ECLVisitor_implementation(ECLVisitor):
 
     def visitRefinedExpressionConstraint(self, ctx: ECLParser.RefinedExpressionConstraintContext) \
             -> refinedExpressionConstraint:
-        # refinedExpressionConstraint : unrefinedExpressionConstraint ':' refinement
-        # 			    | '(' refinedExpressionConstraint ')'
-        # 			    ;
+        # refinedExpressionConstraint : simpleExpressionConstraint ':' refinement ;
         #
-        # refinedExpressionConstraint == unrefinedExpressionConstraint × refinement
-        if ctx.refinedExpressionConstraint():
-            return self.visit(ctx.refinedExpressionConstraint())
-        else:
-            return refinedExpressionConstraint(self.visit(ctx.unrefinedExpressionConstraint()),
-                                               self.visit(ctx.refinement()))
+        # refinedExpressionConstraint == simpleExpressionConstraint × refinement
+        return refinedExpressionConstraint(self.visit(ctx.simpleExpressionConstraint()),
+                                           self.visit(ctx.refinement()))
 
     def visitFocusConcept(self, ctx: ECLParser.FocusConceptContext) -> focusConcept:
         # focusConcept : memberOf? (conceptReference | wildCard) ;
@@ -157,7 +158,7 @@ class ECLVisitor_implementation(ECLVisitor):
         if ctx.memberOf():
             return focusConcept(focusConcept_m=crorwc)
         else:
-            return focusConcept(focusConcept_m=crorwc)
+            return focusConcept(focusConcept_c=crorwc)
 
     def visitMemberOf(self, ctx: ECLParser.MemberOfContext) -> memberOf:
         # memberOf : '^' | MEMBEROF ;

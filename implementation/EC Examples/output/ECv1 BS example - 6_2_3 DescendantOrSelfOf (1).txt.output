@@ -1,0 +1,28 @@
+// Substrate: 20150131
+// Timestamp: 
+// Result: Pass
+
+<< 73211009 |diabetes mellitus|
+// Result: 
+//
+// Length=112
+
+// ============================================================
+//SELECT DISTINCT or_sctid.id
+// FROM (
+//         (SELECT id
+//          FROM concept_ss
+//          WHERE active=1
+//            AND locked = 0
+//            AND (id IN (73211009)))
+//       UNION
+//         (SELECT DISTINCT tt1.child AS id
+//          FROM transitive_ss AS tt1
+//          JOIN
+//            (SELECT id
+//             FROM concept_ss
+//             WHERE active=1
+//               AND locked = 0
+//               AND (id IN (73211009))) AS tt2 ON tt1.parent = tt2.id
+//          WHERE tt1.locked = 0)) AS or_sctid
+// ============================================================

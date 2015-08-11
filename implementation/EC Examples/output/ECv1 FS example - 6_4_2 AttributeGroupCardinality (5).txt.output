@@ -1,0 +1,59 @@
+// Substrate: 20150131
+// Timestamp: 
+// Result: Pass
+
+descendantOf 404684003 |clinical finding|:
+[1 to 1] { 363698007 |finding site| = descendantOf 91723000 |anatomical structure|}
+// Result: 
+//
+// Length=50454
+
+// ============================================================
+//SELECT DISTINCT and_sctid1.id
+// FROM
+//   (SELECT DISTINCT tt1.child AS id
+//    FROM transitive_ss AS tt1
+//    JOIN
+//      (SELECT id
+//       FROM concept_ss
+//       WHERE active=1
+//         AND locked = 0
+//         AND (id IN (404684003))) AS tt2 ON tt1.parent = tt2.id
+//    WHERE tt1.locked = 0) AS and_sctid1
+// JOIN
+//   (SELECT DISTINCT rg_card1.id
+//    FROM
+//      (SELECT id,
+//              count(gid) AS cnt
+//       FROM
+//         (SELECT DISTINCT idg.id,
+//                          idg.gid
+//          FROM
+//            (SELECT id AS rid,
+//                    sourceId AS id,
+//                    typeId,
+//                    destinationId,
+//                    gid
+//             FROM relationship_ss_ext
+//             WHERE typeId IN
+//                 (SELECT id
+//                  FROM concept_ss
+//                  WHERE active=1
+//                    AND locked = 0
+//                    AND (id IN (363698007)))
+//               AND destinationId IN
+//                 (SELECT DISTINCT tt1.child AS id
+//                  FROM transitive_ss AS tt1
+//                  JOIN
+//                    (SELECT id
+//                     FROM concept_ss
+//                     WHERE active=1
+//                       AND locked = 0
+//                       AND (id IN (91723000))) AS tt2 ON tt1.parent = tt2.id
+//                  WHERE tt1.locked = 0)
+//               AND active=1
+//               AND locked=0) AS idg) AS rg_card2
+//       GROUP BY id) AS rg_card1
+//    WHERE 1
+//      AND rg_card1.cnt <= 1) AS and_sctid2 ON and_sctid1.id = and_sctid2.id
+// ============================================================

@@ -1,0 +1,49 @@
+// Substrate: 20150131
+// Timestamp: 
+// Result: Pass
+
+< 404684003 |clinical finding|: * = 79654002 |edema|
+// Result: 
+//
+// Length=198
+
+// ============================================================
+//SELECT DISTINCT and_sctid1.id
+// FROM
+//   (SELECT DISTINCT tt1.child AS id
+//    FROM transitive_ss AS tt1
+//    JOIN
+//      (SELECT id
+//       FROM concept_ss
+//       WHERE active=1
+//         AND locked = 0
+//         AND (id IN (404684003))) AS tt2 ON tt1.parent = tt2.id
+//    WHERE tt1.locked = 0) AS and_sctid1
+// JOIN
+//   (SELECT DISTINCT rc_1.id
+//    FROM
+//      (SELECT id AS rid,
+//              sourceId AS id,
+//              typeId,
+//              destinationId,
+//              gid
+//       FROM relationship_ss_ext
+//       WHERE typeId IN
+//           (SELECT DISTINCT tt1.child AS id
+//            FROM transitive_ss AS tt1
+//            JOIN
+//              (SELECT id
+//               FROM concept_ss
+//               WHERE active=1
+//                 AND locked = 0
+//                 AND (id IN (106237007))) AS tt2 ON tt1.parent = tt2.id
+//            WHERE tt1.locked = 0)
+//         AND destinationId IN
+//           (SELECT id
+//            FROM concept_ss
+//            WHERE active=1
+//              AND locked = 0
+//              AND (id IN (79654002)))
+//         AND active=1
+//         AND locked=0) AS rc_1) AS and_sctid2 ON and_sctid1.id = and_sctid2.id
+// ============================================================

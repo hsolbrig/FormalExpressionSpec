@@ -30,13 +30,14 @@ import os
 
 from ECLparser.datatypes import sctId, Sctids_or_Error, conceptReference, unknownConceptReference, attributeName,\
     attribute_concept, unknownAttributeId, refset_concept, unknownRefsetId
-from ECLparser.rf2_substrate import RF2_Substrate_Sctids, RF2_Substrate_Quads, RF2_Substrate_ConstraintOperators,\
-    RF2_Substrate_SctidGroups
+from ECLparser.rf2_substrate import RF2_Substrate_Sctids, RF2_Substrate_Quads, RF2_Substrate_ConstraintOperators, \
+    RF2_Substrate_Refsets
 from rf2db.db.RF2FileCommon import rf2_values
 from ECLparser.interpreter.substrate import Substrate
 
 # If True, missing concepts are ignored.  If false, they are validated
 permissive = True
+
 
 class RF2_Substrate(Substrate):
     def __init__(self, configfile=None):
@@ -63,27 +64,24 @@ class RF2_Substrate(Substrate):
         """
         return RF2_Substrate_Sctids.Sctids({} if s is None else s if permissive else RF2_Substrate_Sctids.Sctids(s))
 
-    def refsets(self, s: sctId) -> RF2_Substrate_Sctids.Sctids:
-        # TODO: Implement this
-        return RF2_Substrate_Sctids.Sctids({})
-
     def descendants(self, s: sctId) -> RF2_Substrate_Sctids.Sctids:
-        return RF2_Substrate_ConstraintOperators.descendants(RF2_Substrate_Sctids.Sctids(s))
+        return RF2_Substrate_ConstraintOperators.descendants_of(RF2_Substrate_Sctids.Sctids(s))
 
     def ancestors(self, s: sctId) -> RF2_Substrate_Sctids.Sctids:
-        return RF2_Substrate_ConstraintOperators.ancestors(RF2_Substrate_Sctids.Sctids(s))
+        return RF2_Substrate_ConstraintOperators.ancestors_of(RF2_Substrate_Sctids.Sctids(s))
 
     def i_conceptReference(self, cr: conceptReference) -> Sctids_or_Error:
         return Sctids_or_Error(ok=self.equivalent_concepts(cr.first)) if permissive or cr.first in self._concepts else \
                Sctids_or_Error(error=unknownConceptReference)
 
     def i_attributeName(self, an: attributeName) -> Sctids_or_Error:
-        return Sctids_or_Error(ok=self.equivalent_concepts(an.ancr.first)) \
-            if permissive or an.ancr.first in self.descendants(attribute_concept) else \
-            Sctids_or_Error(error=unknownAttributeId)
+        return Sctids_or_Error(ok=self.descendants(attribute_concept)) if an.inran('anwc') else \
+            Sctids_or_Error(ok=self.equivalent_concepts(an.ancr.first))\
+                if permissive or an.ancr.first in self.descendants(attribute_concept) else \
+                Sctids_or_Error(error=unknownAttributeId)
 
     def i_refsetId(self, rsid: sctId) -> Sctids_or_Error:
         if permissive or rsid in self.descendants(refset_concept):
-            return Sctids_or_Error(ok=self.equivalent_concepts(rsid))
+            return Sctids_or_Error(ok=RF2_Substrate_Refsets.members_of(rsid))
         else:
             return Sctids_or_Error(error=unknownRefsetId)
