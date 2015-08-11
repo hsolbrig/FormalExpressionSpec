@@ -1,2 +1,0 @@
-descendantOrSelfOf 404684003 |clinical finding|: 116676008 |associated morphology| =
-((descendantOf 56208002 |ulcer| AND descendantOf 50960005 |haemorrhage|) MINUS descendantOf 26036001 |obstruction|)
