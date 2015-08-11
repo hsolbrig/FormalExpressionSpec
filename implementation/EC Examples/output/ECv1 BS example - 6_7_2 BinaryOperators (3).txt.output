@@ -6,7 +6,7 @@
 ^ 450976002|disorders and diseases reference set for GP/FP reason for encounter|
 // Result: 
 //
-// Length=946
+// Length=944
 
 // ============================================================
 //SELECT DISTINCT or_sctid.id
@@ -23,31 +23,15 @@
 //       UNION
 //         (SELECT DISTINCT or_sctid.id
 //          FROM (
-//                  (SELECT DISTINCT or_sctid.id
-//                   FROM (
-//                           (SELECT id
-//                            FROM concept_ss
-//                            WHERE active=1
-//                              AND locked = 0
-//                              AND (id IN (700043003)))
-//                         UNION
-//                           (SELECT id
-//                            FROM concept_ss
-//                            WHERE active=1
-//                              AND locked = 0
-//                              AND (id IN (700043003)))) AS or_sctid)
+//                  (SELECT DISTINCT rs1.referencedComponentId AS id
+//                   FROM simplerefset_ss AS rs1
+//                   WHERE rs1.refsetId = 700043003
+//                     AND rs1.locked = 0
+//                     AND rs1.active = 1)
 //                UNION
-//                  (SELECT DISTINCT or_sctid.id
-//                   FROM (
-//                           (SELECT id
-//                            FROM concept_ss
-//                            WHERE active=1
-//                              AND locked = 0
-//                              AND (id IN (450976002)))
-//                         UNION
-//                           (SELECT id
-//                            FROM concept_ss
-//                            WHERE active=1
-//                              AND locked = 0
-//                              AND (id IN (450976002)))) AS or_sctid)) AS or_sctid)) AS or_sctid
+//                  (SELECT DISTINCT rs1.referencedComponentId AS id
+//                   FROM simplerefset_ss AS rs1
+//                   WHERE rs1.refsetId = 450976002
+//                     AND rs1.locked = 0
+//                     AND rs1.active = 1)) AS or_sctid)) AS or_sctid
 // ============================================================

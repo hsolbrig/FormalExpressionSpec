@@ -11,19 +11,11 @@ memberOf 450990004 |adverse drug reactions reference set for GP/FP health issue|
 // ============================================================
 //SELECT DISTINCT and_sctid1.id
 // FROM
-//   (SELECT DISTINCT or_sctid.id
-//    FROM (
-//            (SELECT id
-//             FROM concept_ss
-//             WHERE active=1
-//               AND locked = 0
-//               AND (id IN (450990004)))
-//          UNION
-//            (SELECT id
-//             FROM concept_ss
-//             WHERE active=1
-//               AND locked = 0
-//               AND (id IN (450990004)))) AS or_sctid) AS and_sctid1
+//   (SELECT DISTINCT rs1.referencedComponentId AS id
+//    FROM simplerefset_ss AS rs1
+//    WHERE rs1.refsetId = 450990004
+//      AND rs1.locked = 0
+//      AND rs1.active = 1) AS and_sctid1
 // JOIN
 //   (SELECT DISTINCT rc_1.id
 //    FROM

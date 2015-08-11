@@ -20,17 +20,9 @@
 //         AND (id IN (19829001))) AS tt2 ON tt1.parent = tt2.id
 //    WHERE tt1.locked = 0) AS and_sctid1
 // JOIN
-//   (SELECT DISTINCT or_sctid.id
-//    FROM (
-//            (SELECT id
-//             FROM concept_ss
-//             WHERE active=1
-//               AND locked = 0
-//               AND (id IN (700043003)))
-//          UNION
-//            (SELECT id
-//             FROM concept_ss
-//             WHERE active=1
-//               AND locked = 0
-//               AND (id IN (700043003)))) AS or_sctid) AS and_sctid2 ON and_sctid1.id = and_sctid2.id
+//   (SELECT DISTINCT rs1.referencedComponentId AS id
+//    FROM simplerefset_ss AS rs1
+//    WHERE rs1.refsetId = 700043003
+//      AND rs1.locked = 0
+//      AND rs1.active = 1) AS and_sctid2 ON and_sctid1.id = and_sctid2.id
 // ============================================================

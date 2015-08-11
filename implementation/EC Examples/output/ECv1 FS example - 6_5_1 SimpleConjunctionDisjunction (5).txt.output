@@ -7,9 +7,9 @@ memberOf 700043003 |example problem list concepts reference set|
 // Result: {233707008, 698640000, 233712009, 162970000, 700458001, 233706004, 19242006,
 // 46847001, 233711002, 233705000, 196153002, 233710001, 698638005, 360371003,
 // 196152007, 40541001, 95437004, 233709006, 276637009, 196151000, 89687005,
-// 10519008, 405276000, 233708003, 11468004, 61233003, 67782005, 700043003}
+// 10519008, 405276000, 233708003, 11468004, 61233003, 67782005}
 //
-// Length=28
+// Length=27
 
 // ============================================================
 //SELECT DISTINCT or_sctid.id
@@ -36,17 +36,9 @@ memberOf 700043003 |example problem list concepts reference set|
 //                  AND (id IN (301867009))) AS tt2 ON tt1.parent = tt2.id
 //             WHERE tt1.locked = 0) AS and_sctid2 ON and_sctid1.id = and_sctid2.id)
 //       UNION
-//         (SELECT DISTINCT or_sctid.id
-//          FROM (
-//                  (SELECT id
-//                   FROM concept_ss
-//                   WHERE active=1
-//                     AND locked = 0
-//                     AND (id IN (700043003)))
-//                UNION
-//                  (SELECT id
-//                   FROM concept_ss
-//                   WHERE active=1
-//                     AND locked = 0
-//                     AND (id IN (700043003)))) AS or_sctid)) AS or_sctid
+//         (SELECT DISTINCT rs1.referencedComponentId AS id
+//          FROM simplerefset_ss AS rs1
+//          WHERE rs1.refsetId = 700043003
+//            AND rs1.locked = 0
+//            AND rs1.active = 1)) AS or_sctid
 // ============================================================
